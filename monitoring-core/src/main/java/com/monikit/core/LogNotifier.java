@@ -1,32 +1,16 @@
 package com.monikit.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ * 로그를 출력하는 인터페이스.
+ * <p>
+ * 구현체는 Spring Starter에서 제공하며, 코어 모듈은 의존성을 갖지 않는다.
+ * </p>
+ *
+ * @author ryu-qqq
+ * @since 1.0
+ */
 
-public class LogNotifier {
+public interface LogNotifier {
 
-    private static final Logger logger = LoggerFactory.getLogger(LogNotifier.class);
-
-    private LogNotifier() {
-    }
-
-    public static void notify(LogLevel logLevel, String message) {
-        switch (logLevel) {
-            case ERROR:
-                logger.error(message);
-                break;
-            case WARN:
-                logger.warn(message);
-                break;
-            case DEBUG:
-                logger.debug(message);
-                break;
-            case TRACE:
-                logger.trace(message);
-                break;
-            default:
-                logger.info(message);
-                break;
-        }
-    }
+    void notify(LogLevel logLevel, String message);
 }
