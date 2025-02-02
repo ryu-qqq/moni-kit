@@ -134,5 +134,5 @@ new Thread(childTask).start();
 ✅ `LogContextScope`는 try-with-resources를 활용하여 자동으로 로그를 관리합니다.  
 ✅ **모든 로그는 `LogEntry` 인터페이스를 구현하여 생성됩니다.**
 
-🚀 **이제 `monitoring-starter`에서 이를 기반으로 실제 서비스에서 쉽게 사용할 수 있도록 지원합니다!**
+🚀 **이제 `monitoring-starter`에서 이를 기반으로 실제 서비스에서 쉽게 로그 포맷을 맞출수 있습니다.!**
 
