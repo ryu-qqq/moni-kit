@@ -3,11 +3,11 @@ package com.monikit.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LogbackLogNotifier {
+public class LogNotifier {
 
-    private static final Logger logger = LoggerFactory.getLogger(LogbackLogNotifier.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogNotifier.class);
 
-    private LogbackLogNotifier() {
+    private LogNotifier() {
     }
 
     public static void notify(LogLevel logLevel, String message) {

@@ -20,7 +20,7 @@ public class LogEntryContextManager {
      */
     public static void addLog(LogEntry logEntry) {
         if (LogEntryContext.getLogs().size() >= MAX_LOG_SIZE) {
-            LogbackLogNotifier.notify(LogLevel.WARN, "LogEntryContext cleared due to size limit");
+            LogNotifier.notify(LogLevel.WARN, "LogEntryContext cleared due to size limit");
             flush();
             LogEntryContext.clear();
         }
@@ -33,7 +33,7 @@ public class LogEntryContextManager {
      */
     public static void flush() {
         for (LogEntry log : LogEntryContext.getLogs()) {
-            LogbackLogNotifier.notify(LogLevel.INFO, log.toJson());
+            LogNotifier.notify(LogLevel.INFO, log.toJson());
         }
         LogEntryContext.clear();
     }
