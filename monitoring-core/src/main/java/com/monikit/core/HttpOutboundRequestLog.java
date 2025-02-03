@@ -1,6 +1,7 @@
 package com.monikit.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 내 서버에서 외부 API로 요청을 보낼 때 실행된 HTTP 요청을 기록하는 로그 클래스.
@@ -46,5 +47,53 @@ public class HttpOutboundRequestLog extends AbstractLogEntry {
     public static HttpOutboundRequestLog create(String traceId, String httpMethod, String targetUrl, String headers,
                                                 String requestBody, long executionTime, LogLevel logLevel) {
         return new HttpOutboundRequestLog(traceId, httpMethod, targetUrl, headers, requestBody, executionTime, logLevel);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        HttpOutboundRequestLog that = (HttpOutboundRequestLog) object;
+        return executionTime
+            == that.executionTime
+            && Objects.equals(httpMethod, that.httpMethod)
+            && Objects.equals(targetUrl, that.targetUrl)
+            && Objects.equals(headers, that.headers)
+            && Objects.equals(requestBody, that.requestBody);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpMethod, targetUrl, headers, requestBody, executionTime);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpOutboundRequestLog{"
+            +
+            "httpMethod='"
+            + httpMethod
+            + '\''
+            +
+            ", targetUrl='"
+            + targetUrl
+            + '\''
+            +
+            ", headers='"
+            + headers
+            + '\''
+            +
+            ", requestBody='"
+            + requestBody
+            + '\''
+            +
+            ", executionTime="
+            + executionTime
+            +
+            '}';
     }
 }

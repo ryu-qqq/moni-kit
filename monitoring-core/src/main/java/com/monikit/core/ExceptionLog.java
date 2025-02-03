@@ -1,6 +1,7 @@
 package com.monikit.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 예외 발생 시 스택 트레이스를 기록하는 로그 클래스.
@@ -15,10 +16,11 @@ public class ExceptionLog extends AbstractLogEntry {
     private final String exceptionMessage;
     private final String stackTrace;
 
-    protected ExceptionLog(String traceId, Exception exception) {
+    protected ExceptionLog(String traceId, Throwable exception) {
         super(traceId, LogLevel.ERROR);
-        this.exceptionMessage = exception.getMessage();
-        this.stackTrace = getStackTraceAsString(exception);
+        Throwable rootCause = getRootCause(exception);
+        this.exceptionMessage = rootCause.getMessage();
+        this.stackTrace = getStackTraceAsString(rootCause);
     }
 
     @Override
@@ -32,7 +34,15 @@ public class ExceptionLog extends AbstractLogEntry {
         logMap.put("stackTrace", stackTrace);
     }
 
-    private String getStackTraceAsString(Exception e) {
+    private static Throwable getRootCause(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause;
+    }
+
+    private String getStackTraceAsString(Throwable e) {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement element : e.getStackTrace()) {
             sb.append(element.toString()).append("\n");
@@ -40,7 +50,29 @@ public class ExceptionLog extends AbstractLogEntry {
         return sb.toString();
     }
 
-    public static ExceptionLog create(String traceId, Exception exception) {
+    public static ExceptionLog create(String traceId, Throwable exception) {
         return new ExceptionLog(traceId, exception);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        ExceptionLog that = (ExceptionLog) object;
+        return Objects.equals(exceptionMessage, that.exceptionMessage)
+            && Objects.equals(stackTrace, that.stackTrace);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(exceptionMessage, stackTrace);
+    }
+
+    @Override
+    public String toString() {
+        return "ExceptionLog{" +
+            "exceptionMessage='" + exceptionMessage + '\'' +
+            ", stackTrace='" + stackTrace + '\'' +
+            '}';
     }
 }

@@ -11,6 +11,7 @@ package com.monikit.core;
  */
 
 public interface LogNotifier {
-
     void notify(LogLevel logLevel, String message);
+    void notify(LogEntry logEntry);
+
 }

@@ -15,4 +15,9 @@ public class DefaultLogNotifier implements LogNotifier {
     public void notify(LogLevel logLevel, String message) {
         System.out.println(message);
     }
+
+    @Override
+    public void notify(LogEntry logEntry) {
+        System.out.println(logEntry.toString());
+    }
 }

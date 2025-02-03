@@ -1,8 +1,6 @@
 package com.monikit.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -16,6 +14,7 @@ import java.util.Map;
  * @since 1.0
  */
 public abstract class AbstractLogEntry implements LogEntry {
+
     private final Instant timestamp;
     private final String traceId;
     private final LogLevel logLevel;
@@ -54,33 +53,10 @@ public abstract class AbstractLogEntry implements LogEntry {
     }
 
     /**
-     * JSON 변환 메서드 (하위 클래스에서 추가 필드 포함 가능).
-     *
-     * @return JSON 포맷의 로그 문자열
-     */
-    @Override
-    public String toJson() {
-        Map<String, Object> logMap = new HashMap<>();
-        logMap.put("timestamp", timestamp.toString());
-        logMap.put("traceId", traceId);
-        logMap.put("logType", getLogType().name());
-        logMap.put("logLevel", logLevel.name());
-        logMap.put("threadName", threadName);
-        logMap.put("threadId", threadId);
-
-        addExtraFields(logMap);
-
-        try {
-            return new ObjectMapper().writeValueAsString(logMap);
-        } catch (Exception e) {
-            return "{}";
-        }
-    }
-
-    /**
      * 하위 클래스에서 추가 필드를 JSON에 포함할 수 있도록 메서드 제공.
      *
      * @param logMap JSON 변환을 위한 Map
      */
     protected abstract void addExtraFields(Map<String, Object> logMap);
+
 }

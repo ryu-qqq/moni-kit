@@ -1,6 +1,7 @@
 package com.monikit.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * SQL 쿼리 실행 정보를 기록하는 로그 클래스.
@@ -52,5 +53,63 @@ public class DatabaseQueryLog extends AbstractLogEntry {
     public static DatabaseQueryLog create(String traceId, String query, long executionTime, String dataSource,
                                           String tableNames, String parameters, int rowsAffected, int resultSize, LogLevel logLevel) {
         return new DatabaseQueryLog(traceId, query, executionTime, dataSource, tableNames, parameters, rowsAffected, resultSize, logLevel);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        DatabaseQueryLog that = (DatabaseQueryLog) object;
+        return executionTime
+            == that.executionTime
+            && rowsAffected
+            == that.rowsAffected
+            && resultSize
+            == that.resultSize
+            && Objects.equals(query, that.query)
+            && Objects.equals(dataSource, that.dataSource)
+            && Objects.equals(tableNames, that.tableNames)
+            && Objects.equals(parameters, that.parameters);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(query, executionTime, dataSource, tableNames, parameters, rowsAffected, resultSize);
+    }
+
+    @Override
+    public String toString() {
+        return "DatabaseQueryLog{"
+            +
+            "query='"
+            + query
+            + '\''
+            +
+            ", executionTime="
+            + executionTime
+            +
+            ", dataSource='"
+            + dataSource
+            + '\''
+            +
+            ", tableNames='"
+            + tableNames
+            + '\''
+            +
+            ", parameters='"
+            + parameters
+            + '\''
+            +
+            ", rowsAffected="
+            + rowsAffected
+            +
+            ", resultSize="
+            + resultSize
+            +
+            '}';
     }
 }

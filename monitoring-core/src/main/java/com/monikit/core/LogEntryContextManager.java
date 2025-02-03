@@ -1,5 +1,7 @@
 package com.monikit.core;
 
+import java.util.concurrent.Callable;
+
 /**
  * LogEntryContext를 관리하는 매니저 클래스.
  * <p>
@@ -12,7 +14,7 @@ package com.monikit.core;
 public class LogEntryContextManager {
 
     private static final int MAX_LOG_SIZE = 1000;
-    private static LogNotifier logNotifier = new DefaultLogNotifier(); // 기본 노티파이어 설정
+    private static LogNotifier logNotifier = new DefaultLogNotifier();
 
     /**
      * LogNotifier를 설정한다 (monitoring-starter에서 주입 가능).
@@ -29,7 +31,7 @@ public class LogEntryContextManager {
      * @param logEntry 저장할 로그 객체
      */
     public static void addLog(LogEntry logEntry) {
-        if (LogEntryContext.getLogs().size() >= MAX_LOG_SIZE) {
+        if (LogEntryContext.size() >= MAX_LOG_SIZE) {
             logNotifier.notify(LogLevel.WARN, "LogEntryContext cleared due to size limit");
             flush();
             LogEntryContext.clear();
@@ -43,9 +45,10 @@ public class LogEntryContextManager {
      */
     public static void flush() {
         for (LogEntry log : LogEntryContext.getLogs()) {
-            logNotifier.notify(LogLevel.INFO, log.toJson());
+            logNotifier.notify(log);
         }
         LogEntryContext.clear();
+        LogEntryContext.setErrorOccurred(false);
     }
 
     /**
@@ -57,5 +60,33 @@ public class LogEntryContextManager {
     public static Runnable propagateToChildThread(Runnable task) {
         return LogEntryContext.propagateToChildThread(task);
     }
+
+
+    /**
+     * 부모 스레드의 컨텍스트를 자식 스레드로 전달하는 Callable을 생성한다.
+     * @param task 실행할 Callable
+     * @return 부모 스레드의 컨텍스트가 복사된 새로운 Callable
+     * @param <T>
+     */
+
+    public static <T> Callable<T> propagateToChildThread(Callable<T> task) {
+        return LogEntryContext.propagateToChildThread(task);
+    }
+
+    /**
+     * 예외를 로깅하는 메서드 (AOP에서 처리하지 않고 이곳에서 예외를 기록하도록 변경)
+     *
+     * @param traceId 트레이스 ID
+     * @param exception 발생한 예외
+     */
+    public static void logException(String traceId, Throwable exception) {
+        if (LogEntryContext.hasError()) {
+            return;
+        }
+
+        LogEntryContext.addLog(ExceptionLog.create(traceId, exception));
+        LogEntryContext.setErrorOccurred(true);
+    }
+
 
 }

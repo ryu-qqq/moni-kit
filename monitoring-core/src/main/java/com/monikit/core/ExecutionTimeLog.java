@@ -1,6 +1,7 @@
 package com.monikit.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 메서드 실행 시간을 기록하는 로그 클래스.
@@ -38,5 +39,43 @@ public class ExecutionTimeLog extends AbstractLogEntry {
 
     public static ExecutionTimeLog create(String traceId, LogLevel logLevel, String className, String methodName, long executionTime) {
         return new ExecutionTimeLog(traceId, logLevel, className, methodName, executionTime);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        ExecutionTimeLog that = (ExecutionTimeLog) object;
+        return executionTime
+            == that.executionTime
+            && Objects.equals(className, that.className)
+            && Objects.equals(methodName, that.methodName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(className, methodName, executionTime);
+    }
+
+    @Override
+    public String toString() {
+        return "ExecutionTimeLog{"
+            +
+            "className='"
+            + className
+            + '\''
+            +
+            ", methodName='"
+            + methodName
+            + '\''
+            +
+            ", executionTime="
+            + executionTime
+            +
+            '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.monikit.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 내 서버가 클라이언트에게 반환하는 HTTP 응답을 기록하는 로그 클래스.
@@ -48,5 +49,82 @@ public class HttpInboundResponseLog extends AbstractLogEntry {
     public static HttpInboundResponseLog create(String traceId, String httpMethod, String requestUri, int statusCode,
                                                 String headers, String responseBody, long executionTime, LogLevel logLevel) {
         return new HttpInboundResponseLog(traceId, httpMethod, requestUri, statusCode, headers, responseBody, executionTime, logLevel);
+    }
+
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public String getRequestUri() {
+        return requestUri;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public String getHeaders() {
+        return headers;
+    }
+
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        HttpInboundResponseLog that = (HttpInboundResponseLog) object;
+        return statusCode
+            == that.statusCode
+            && executionTime
+            == that.executionTime
+            && Objects.equals(httpMethod, that.httpMethod)
+            && Objects.equals(requestUri, that.requestUri)
+            && Objects.equals(headers, that.headers)
+            && Objects.equals(responseBody, that.responseBody);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpMethod, requestUri, statusCode, headers, responseBody, executionTime);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpInboundResponseLog{"
+            +
+            "httpMethod='"
+            + httpMethod
+            + '\''
+            +
+            ", requestUri='"
+            + requestUri
+            + '\''
+            +
+            ", statusCode="
+            + statusCode
+            +
+            ", headers='"
+            + headers
+            + '\''
+            +
+            ", responseBody='"
+            + responseBody
+            + '\''
+            +
+            ", executionTime="
+            + executionTime
+            +
+            '}';
     }
 }

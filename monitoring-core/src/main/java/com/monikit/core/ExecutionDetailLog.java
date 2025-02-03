@@ -1,6 +1,7 @@
 package com.monikit.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 메서드 실행 시간과 함께 입력값 및 출력값을 기록하는 로그 클래스.
@@ -46,5 +47,53 @@ public class ExecutionDetailLog extends AbstractLogEntry {
     public static ExecutionDetailLog create(String traceId, String className, String methodName,
                                             long executionTime, String inputParams, String outputValue, LogLevel logLevel) {
         return new ExecutionDetailLog(traceId, className, methodName, executionTime, inputParams, outputValue, logLevel);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        ExecutionDetailLog that = (ExecutionDetailLog) object;
+        return executionTime
+            == that.executionTime
+            && Objects.equals(className, that.className)
+            && Objects.equals(methodName, that.methodName)
+            && Objects.equals(inputParams, that.inputParams)
+            && Objects.equals(outputValue, that.outputValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(className, methodName, executionTime, inputParams, outputValue);
+    }
+
+    @Override
+    public String toString() {
+        return "ExecutionDetailLog{"
+            +
+            "className='"
+            + className
+            + '\''
+            +
+            ", methodName='"
+            + methodName
+            + '\''
+            +
+            ", executionTime="
+            + executionTime
+            +
+            ", inputParams='"
+            + inputParams
+            + '\''
+            +
+            ", outputValue='"
+            + outputValue
+            + '\''
+            +
+            '}';
     }
 }

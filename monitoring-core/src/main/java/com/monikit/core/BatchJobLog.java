@@ -2,6 +2,7 @@ package com.monikit.core;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 배치 작업 실행 정보를 기록하는 로그 클래스.
@@ -50,5 +51,56 @@ public class BatchJobLog extends AbstractLogEntry {
     public static BatchJobLog create(String traceId, String batchJobName, Instant startTime, Instant endTime,
                                      long executionTime, String status, String errorMessage, LogLevel logLevel) {
         return new BatchJobLog(traceId, batchJobName, startTime, endTime, executionTime, status, errorMessage, logLevel);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        BatchJobLog that = (BatchJobLog) object;
+        return executionTime
+            == that.executionTime
+            && Objects.equals(batchJobName, that.batchJobName)
+            && Objects.equals(startTime, that.startTime)
+            && Objects.equals(endTime, that.endTime)
+            && Objects.equals(status, that.status)
+            && Objects.equals(errorMessage, that.errorMessage);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(batchJobName, startTime, endTime, executionTime, status, errorMessage);
+    }
+
+    @Override
+    public String toString() {
+        return "BatchJobLog{"
+            +
+            "batchJobName='"
+            + batchJobName
+            + '\''
+            +
+            ", startTime="
+            + startTime
+            +
+            ", endTime="
+            + endTime
+            +
+            ", executionTime="
+            + executionTime
+            +
+            ", status='"
+            + status
+            + '\''
+            +
+            ", errorMessage='"
+            + errorMessage
+            + '\''
+            +
+            '}';
     }
 }

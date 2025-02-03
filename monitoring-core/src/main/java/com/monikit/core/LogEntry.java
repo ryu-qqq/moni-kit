@@ -58,14 +58,6 @@ public interface LogEntry {
      */
     LogLevel getLogLevel();
 
-    /**
-     * 로그 데이터를 JSON 문자열로 변환하여 반환합니다.
-     * <p>
-     * JSON 형식의 로그는 Logstash 및 Elasticsearch에서 파싱이 용이하며,
-     * Kibana에서 시각적으로 분석할 때 활용됩니다.
-     * </p>
-     *
-     * @return JSON 포맷의 로그 문자열
-     */
-    String toJson();
+    String toString();
+
 }
