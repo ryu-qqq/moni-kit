@@ -4,6 +4,25 @@ plugins {
 }
 
 dependencies {
-    api project(':monitoring-core')
+    implementation project(':monitoring-core')
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation "org.springframework.boot:spring-boot-starter-aop"
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
+
+    implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+    implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}"
+    implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
+
+    implementation 'org.springframework:spring-webmvc'
+    implementation "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
+
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+    runtimeOnly "com.zaxxer:HikariCP:${hikariCPVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
 }

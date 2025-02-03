@@ -1,0 +1,44 @@
+package com.monikit.starter.filter;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+
+import com.monikit.core.LogContextScope;
+
+/**
+ * HTTP 요청 단위로 LogContextScope를 관리하는 필터.
+ * <p>
+ * - 요청이 시작될 때 LogContextScope를 생성하여 자동으로 컨텍스트를 초기화함.
+ * - 요청이 끝날 때 자동으로 LogContextScope를 종료하여 컨텍스트를 정리함.
+ * - try-with-resources 구문을 활용하여 안전하게 관리됨.
+ * </p>
+ *
+ * @author ryu-qqq
+ * @since 1.0
+ */
+@Component
+public class LogContextScopeFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        try (LogContextScope scope = new LogContextScope()) {
+            RequestWrapper requestWrapper = new RequestWrapper(request);
+            ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
+            filterChain.doFilter(requestWrapper, wrappedResponse);
+        }
+    }
+
+}

@@ -1,6 +1,7 @@
 package com.monikit.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 외부 API에서 받은 응답을 기록하는 로그 클래스.
@@ -45,5 +46,53 @@ public class HttpOutboundResponseLog extends AbstractLogEntry {
     public static HttpOutboundResponseLog create(String traceId, String targetUrl, int statusCode, String headers,
                                                  String responseBody, long executionTime, LogLevel logLevel) {
         return new HttpOutboundResponseLog(traceId, targetUrl, statusCode, headers, responseBody, executionTime, logLevel);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        HttpOutboundResponseLog that = (HttpOutboundResponseLog) object;
+        return statusCode
+            == that.statusCode
+            && executionTime
+            == that.executionTime
+            && Objects.equals(targetUrl, that.targetUrl)
+            && Objects.equals(headers, that.headers)
+            && Objects.equals(responseBody, that.responseBody);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(targetUrl, statusCode, headers, responseBody, executionTime);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpOutboundResponseLog{"
+            +
+            "targetUrl='"
+            + targetUrl
+            + '\''
+            +
+            ", statusCode="
+            + statusCode
+            +
+            ", headers='"
+            + headers
+            + '\''
+            +
+            ", responseBody='"
+            + responseBody
+            + '\''
+            +
+            ", executionTime="
+            + executionTime
+            +
+            '}';
     }
 }

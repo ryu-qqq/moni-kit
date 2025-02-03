@@ -1,6 +1,7 @@
 package com.monikit.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 외부에서 내 서버로 들어오는 HTTP 요청을 기록하는 로그 클래스.
@@ -52,5 +53,91 @@ public class HttpInboundRequestLog extends AbstractLogEntry {
     public static HttpInboundRequestLog create(String traceId, String httpMethod, String uri, String queryParams,
                                                String headers, String requestBody, String clientIp, String userAgent, LogLevel logLevel) {
         return new HttpInboundRequestLog(traceId, httpMethod, uri, queryParams, headers, requestBody, clientIp, userAgent, logLevel);
+    }
+
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public String getRequestUri() {
+        return requestUri;
+    }
+
+    public String getQueryParams() {
+        return queryParams;
+    }
+
+    public String getHeaders() {
+        return headers;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
+    }
+
+    public String getClientIp() {
+        return clientIp;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        HttpInboundRequestLog that = (HttpInboundRequestLog) object;
+        return Objects.equals(httpMethod, that.httpMethod)
+            && Objects.equals(requestUri, that.requestUri)
+            && Objects.equals(queryParams, that.queryParams)
+            && Objects.equals(headers, that.headers)
+            && Objects.equals(requestBody, that.requestBody)
+            && Objects.equals(clientIp, that.clientIp)
+            && Objects.equals(userAgent, that.userAgent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpMethod, requestUri, queryParams, headers, requestBody, clientIp, userAgent);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpInboundRequestLog{"
+            +
+            "httpMethod='"
+            + httpMethod
+            + '\''
+            +
+            ", requestUri='"
+            + requestUri
+            + '\''
+            +
+            ", queryParams='"
+            + queryParams
+            + '\''
+            +
+            ", headers='"
+            + headers
+            + '\''
+            +
+            ", requestBody='"
+            + requestBody
+            + '\''
+            +
+            ", clientIp='"
+            + clientIp
+            + '\''
+            +
+            ", userAgent='"
+            + userAgent
+            + '\''
+            +
+            '}';
     }
 }

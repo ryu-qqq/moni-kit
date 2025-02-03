@@ -1,5 +1,7 @@
 package com.monikit.starter;
 
+import org.slf4j.MDC;
+
 /**
  * 요청 단위로 Trace ID를 관리하는 클래스 (MDC 기반).
  * <p>
@@ -20,7 +22,11 @@ public class TraceIdHolder {
      * @return 현재 Trace ID (없으면 null)
      */
     public static String getTraceId() {
-        return MDC.get(TRACE_ID_KEY);
+        String traceId = MDC.get(TRACE_ID_KEY);
+        if (traceId == null) {
+            traceId = "N/A";
+        }
+        return traceId;
     }
 
     /**
