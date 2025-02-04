@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.monikit.core.LoggingPreparedStatement;
 
 /**
@@ -32,7 +35,7 @@ import com.monikit.core.LoggingPreparedStatement;
  */
 
 public class LoggingConnection implements Connection {
-
+    private static final Logger logger = LoggerFactory.getLogger(LoggingConnection.class);
     private final Connection delegate;
 
 
@@ -143,7 +146,9 @@ public class LoggingConnection implements Connection {
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws
         SQLException {
-        return delegate.prepareStatement(sql, resultSetType, resultSetConcurrency);
+        PreparedStatement statement = delegate.prepareStatement(sql);
+        logger.info("Executing SQL: {}", sql);
+        return new LoggingPreparedStatement(statement, sql);
     }
 
     @Override

@@ -43,8 +43,6 @@ class HttpLoggingInterceptorTest {
         TraceIdProvider.setInstance(new MdcTraceIdProvider());
         LogEntryContextManager.setLogNotifier(new DefaultLogNotifier());
 
-
-
     }
 
     @Test
