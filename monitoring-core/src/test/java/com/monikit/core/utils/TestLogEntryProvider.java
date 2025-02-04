@@ -49,7 +49,7 @@ public class TestLogEntryProvider {
     }
 
     public static DatabaseQueryLog databaseQueryLog() {
-        return DatabaseQueryLog.create(TRACE_ID, QUERY, EXECUTION_TIME, DATA_SOURCE, TABLE_NAME, PARAMETERS, ROWS_AFFECTED, RESULT_SIZE, LOG_LEVEL);
+        return DatabaseQueryLog.create(TRACE_ID, QUERY, EXECUTION_TIME, DATA_SOURCE, TABLE_NAME, ROWS_AFFECTED, RESULT_SIZE, LOG_LEVEL);
     }
 
     public static ExceptionLog exceptionLog() {

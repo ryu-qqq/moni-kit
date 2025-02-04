@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 public class LogEntryContextManager {
 
     private static final int MAX_LOG_SIZE = 1000;
-    private static LogNotifier logNotifier = new DefaultLogNotifier();
+    private static LogNotifier logNotifier;
 
     /**
      * LogNotifier를 설정한다 (monitoring-starter에서 주입 가능).

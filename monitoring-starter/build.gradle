@@ -1,5 +1,6 @@
 plugins {
-    id 'org.springframework.boot'
+    id 'maven-publish'
+    id 'org.springframework.boot' apply false
     id 'io.spring.dependency-management'
 }
 
@@ -9,6 +10,10 @@ dependencies {
     // 로깅 관련 의존성 (Logback + Logstash)
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}"
+
+    // 메트릭 수집 의존성 prometheus
+    implementation "io.micrometer:micrometer-registry-prometheus"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
 
     // Spring Boot 기본 의존성
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -21,6 +26,8 @@ dependencies {
     // `OncePerRequestFilter` 사용을 위한 Spring Web 모듈
     implementation "org.springframework:spring-web"
 
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+
     compileOnly "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
 
     runtimeOnly "com.zaxxer:HikariCP:${hikariCPVersion}"
@@ -28,4 +35,22 @@ dependencies {
     // 테스트 의존성
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
+    testImplementation "org.springframework:spring-web"
+
+
+}
+
+jar {
+    enabled = true
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'com.monikit'
+            artifactId = 'monikit-starter'
+            version = '1.0.0'
+        }
+    }
 }

@@ -44,6 +44,26 @@ public class HttpOutboundRequestLog extends AbstractLogEntry {
         logMap.put("executionTime", executionTime + "ms");
     }
 
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public String getTargetUrl() {
+        return targetUrl;
+    }
+
+    public String getHeaders() {
+        return headers;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
     public static HttpOutboundRequestLog create(String traceId, String httpMethod, String targetUrl, String headers,
                                                 String requestBody, long executionTime, LogLevel logLevel) {
         return new HttpOutboundRequestLog(traceId, httpMethod, targetUrl, headers, requestBody, executionTime, logLevel);

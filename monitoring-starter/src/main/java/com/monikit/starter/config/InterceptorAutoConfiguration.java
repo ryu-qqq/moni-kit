@@ -1,7 +1,7 @@
 package com.monikit.starter.config;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -16,7 +16,7 @@ import com.monikit.starter.interceptor.HttpLoggingInterceptor;
  * @author ryu-qqq
  * @since 1.0
  */
-@AutoConfiguration
+@Configuration
 public class InterceptorAutoConfiguration implements WebMvcConfigurer {
 
     @Bean

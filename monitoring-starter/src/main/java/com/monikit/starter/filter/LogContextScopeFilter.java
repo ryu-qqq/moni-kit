@@ -2,7 +2,6 @@ package com.monikit.starter.filter;
 
 import java.io.IOException;
 
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -24,7 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author ryu-qqq
  * @since 1.0
  */
-@Component
+
 public class LogContextScopeFilter extends OncePerRequestFilter {
 
     @Override

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -24,7 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author ryu-qqq
  * @since 1.0
  */
-@Component
+
 public class TraceIdFilter extends OncePerRequestFilter {
 
     private static final String TRACE_ID_HEADER = "X-Trace-Id";

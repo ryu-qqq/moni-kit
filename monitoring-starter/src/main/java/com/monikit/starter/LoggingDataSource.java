@@ -2,6 +2,7 @@ package com.monikit.starter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.DelegatingDataSource;
@@ -17,6 +18,7 @@ import org.springframework.jdbc.datasource.DelegatingDataSource;
  */
 public class LoggingDataSource extends DelegatingDataSource {
 
+
     public LoggingDataSource(DataSource targetDataSource) {
         super(targetDataSource);
     }
@@ -30,4 +32,5 @@ public class LoggingDataSource extends DelegatingDataSource {
     public Connection getConnection(String username, String password) throws SQLException {
         return new LoggingConnection(super.getConnection(username, password));
     }
+
 }

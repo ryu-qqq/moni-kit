@@ -1,5 +1,7 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
+    id 'io.spring.dependency-management'
 }
 
 allprojects {
@@ -9,15 +11,27 @@ allprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 }
 
 subprojects {
     apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'io.spring.dependency-management'
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+        }
+    }
 
     dependencies {
         testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     }
+
+
+
 
     tasks.named('test') {
         useJUnitPlatform()

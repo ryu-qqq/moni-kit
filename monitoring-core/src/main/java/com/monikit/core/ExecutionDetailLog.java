@@ -44,6 +44,26 @@ public class ExecutionDetailLog extends AbstractLogEntry {
         logMap.put("outputValue", outputValue);
     }
 
+    public String getClassName() {
+        return className;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
+    public String getInputParams() {
+        return inputParams;
+    }
+
+    public String getOutputValue() {
+        return outputValue;
+    }
+
     public static ExecutionDetailLog create(String traceId, String className, String methodName,
                                             long executionTime, String inputParams, String outputValue, LogLevel logLevel) {
         return new ExecutionDetailLog(traceId, className, methodName, executionTime, inputParams, outputValue, logLevel);

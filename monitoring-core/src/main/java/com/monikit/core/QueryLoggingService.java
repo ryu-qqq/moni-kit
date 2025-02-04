@@ -1,10 +1,10 @@
 package com.monikit.core;
 
 /**
- * SQL 실행 로그를 기록하는 서비스.
+ * SQL 실행 로그를 기록하고, 메트릭을 수집하는 서비스.
  * <p>
- * PreparedStatement의 실행 결과를 받아서 로그 컨텍스트에 저장.
- * 추후 로깅 방식이 변경될 경우 이 클래스만 수정하면 됨.
+ * - PreparedStatement 실행 정보를 받아 `LogEntryContextManager`에 저장
+ * - SQL 실행 관련 메트릭을 수집
  * </p>
  *
  * @author ryu-qqq
@@ -12,8 +12,7 @@ package com.monikit.core;
  */
 public class QueryLoggingService {
 
-    private QueryLoggingService() {
-    }
+
 
     /**
      * SQL 실행 정보를 받아서 로그 컨텍스트에 저장.
@@ -39,5 +38,6 @@ public class QueryLoggingService {
         );
 
         LogEntryContextManager.addLog(logEntry);
+        MetricCollectorProvider.getMetricCollector().recordQueryMetrics(sql, executionTime, dataSourceName);
     }
 }
