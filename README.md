@@ -82,10 +82,7 @@ monikit:
    - true로 설정하면, 애플리케이션의 메트릭 데이터를 Prometheus와 같은 모니터링 시스템에 전달하여 성능을 추적할 수 있습니다. 이 설정은 시스템의 건강 상태를 점검하는 데 유용합니다.
 
 
-
-
-
-
+   
 ### 1. `monitoring-core`
 `monitoring-core`는 순수 자바 객체로 구성되어 있으며, 핵심 인터페이스인 `LogEntry`와 `LogNotifier`가 포함됩니다.
 
@@ -675,6 +672,134 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
 }
 
 ```
+
+# 스레드 컨텍스트 유지 및 전파
+
+## 개요
+
+이 코드는 **스레드 컨텍스트**를 유지하고 전파하는 방법을 다룹니다. 
+주로 **스레드로컬(ThreadLocal)** 변수를 사용하면서, 새로 생성된 스레드에서 기존 스레드의 컨텍스트를 유지하려는 경우에 유용합니다. 
+특히 **플랫폼 스레드**나 **버츄얼 스레드**를 사용할 때 기존의 스레드로컬 값들이 제대로 복사되지 않기 때문에, 이를 해결하기 위한 방식입니다.
+
+## 코드 설명
+
+### `ThreadContextPropagator`
+
+`ThreadContextPropagator` 클래스는 주어진 작업을 실행할 때, 필요한 경우 부모 스레드의 컨텍스트(스레드로컬 변수 등)를 자식 스레드로 복사하여 실행할 수 있도록 도와줍니다. 이 클래스는 `runWithContext()` 메서드를 통해 작업을 실행하기 전에 스레드 컨텍스트를 복사하고, 작업을 실행합니다.
+
+```java
+package com.monikit.core;
+
+import java.util.concurrent.Callable;
+
+/**
+ * 스레드 컨텍스트를 유지 및 전파하는 유틸리티 클래스.
+ * - 새로운 스레드가 생성될 경우, 부모 스레드의 컨텍스트를 자동으로 복사함.
+ * - 실행할 로직을 감싸서 실행하는 기능을 제공.
+ */
+public class ThreadContextPropagator {
+
+    /**
+     * 주어진 ThrowingCallable을 실행하면서, 필요한 경우 스레드 컨텍스트를 복사하여 유지한다.
+     *
+     * @param <T> 반환 타입
+     * @param task 실행할 Callable
+     * @return 실행 결과
+     * @throws Exception 예외 발생 가능
+     */
+    public static <T> T runWithContext(ThrowingCallable<T> task) throws Exception {
+        if (LogEntryContext.getLogs().isEmpty()) {
+            Callable<T> wrappedTask = LogEntryContextManager.propagateToChildThread(() -> {
+                try {
+                    return task.call();
+                } catch (Throwable t) {
+                    throw propagateAsException(t);
+                }
+            });
+            return wrappedTask.call();
+        } else {
+            try {
+                return task.call();
+            } catch (Throwable t) {
+                throw propagateAsException(t);
+            }
+        }
+    }
+
+    /**
+     * Throwable을 Exception으로 변환
+     *
+     * @param throwable 발생한 Throwable
+     * @return 변환된 Exception
+     */
+    private static Exception propagateAsException(Throwable throwable) {
+        if (throwable instanceof Exception) {
+            return (Exception) throwable;
+        }
+        return new RuntimeException(throwable);
+    }
+
+    @FunctionalInterface
+    public interface ThrowingCallable<T> {
+        T call() throws Throwable;
+    }
+}
+```
+**동작 설명**
+   * runWithContext() 메서드는 실행할 작업을 감싸고, 새로운 스레드가 생성될 때 부모 스레드의 컨텍스트를 자동으로 복사합니다.
+   * 스레드로컬 값을 자동으로 복사하여 작업을 실행하는 동안 부모 스레드의 상태를 유지합니다.
+
+
+### `ExecutorBeanPostProcessor`
+
+`ExecutorBeanPostProcessor` 클래스는 Spring의 `Executor` 빈을 감싸서 스레드 컨텍스트를 자동으로 적용합니다. Spring에서 관리되는 `Executor` 빈을 감지하고, 이를 실행할 때마다 `ThreadContextPropagator.runWithContext()`를 호출하여 스레드 컨텍스트를 자동으로 복사합니다.
+```java
+package com.monikit.starter;
+
+import java.util.concurrent.Executor;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+import com.monikit.core.ThreadContextPropagator;
+
+/**
+ * 모든 Executor 빈을 감싸서 ThreadContextPropagator를 자동 적용하는 PostProcessor.
+ */
+@Component
+@Order(Ordered.LOWEST_PRECEDENCE)
+public class ExecutorBeanPostProcessor implements BeanPostProcessor {
+
+   @Override
+   public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+      if (bean instanceof Executor executor) {
+         return wrapExecutor(executor);
+      }
+      return bean;
+   }
+
+   private Executor wrapExecutor(Executor executor) {
+      return task -> {
+         try {
+            ThreadContextPropagator.runWithContext(() -> {
+               executor.execute(task);
+               return null;
+            });
+         } catch (Exception e) {
+            throw new RuntimeException(e);
+         }
+      };
+   }
+}
+
+```
+**동작 설명**
+* `ExecutorBeanPostProcessor` 는 Spring에서 등록되는 모든 Executor 빈을 감지하고, 실행될 때마다 **ThreadContextPropagator.runWithContext()**를 호출하여 스레드 컨텍스트를 유지합니다.
+* `Executor` 빈이 실행될 때마다 부모 스레드의 컨텍스트가 자식 스레드로 전파되어 작업이 실행됩니다.
+
 
 ## MoniKit 서버 모니터링 및 로그 관리 시스템
 
