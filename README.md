@@ -47,6 +47,44 @@ root/
 ```
 ---
 
+### 사용법 
+
+**monikit**을 프로젝트에 추가하려면, build.gradle 파일에 아래 의존성을 추가합니다.
+
+```gradle
+	implementation 'com.monikit:monikit-starter:1.0.0'
+```
+
+그 후, **application.yml** 파일에서 **monikit** 설정을 구성합니다. 아래는 설정 예시입니다.
+
+```yml
+monikit:
+   logging:
+      detailedLogging: true  # 상세 로깅 여부 (기본값: false)
+      slowQueryThresholdMs: 1000  # WARN 로그 기준 (1초 이상)
+      criticalQueryThresholdMs: 5000  # ERROR 로그 기준 (5초 이상)
+      datasourceLoggingEnabled: true  # 데이터베이스 로깅 활성화 여부
+   metrics:
+      enabled: true
+```
+
+**상세 설명**
+
+1. **detailedLogging**
+   - true로 설정하면, 애플리케이션 내에서 상세한 로깅을 활성화합니다. 이 값은 디버깅이나 시스템 추적에 유용하지만, 성능에 영향을 줄 수 있으므로 필요에 따라 설정하세요. 기본값은 false입니다.
+2. **slowQueryThresholdMs**
+   - 이 값은 데이터베이스 쿼리 실행 시간이 1초를 초과할 경우 WARN 로그로 기록되도록 설정합니다. 이 임계값을 설정하여 성능 문제를 조기에 감지할 수 있습니다.
+3. **criticalQueryThresholdMs**
+   - 이 값은 데이터베이스 쿼리 실행 시간이 5초 이상인 경우 ERROR 로그로 기록되도록 설정합니다. 이 임계값을 설정하여 심각한 성능 문제를 빠르게 식별할 수 있습니다.
+4. **datasourceLoggingEnabled**
+   - 데이터베이스 로깅을 활성화할지 여부를 결정합니다. true로 설정하면, 데이터베이스와 관련된 쿼리 및 성능 데이터를 로깅할 수 있습니다. 이 설정은 성능 분석 및 장애 감지에 유용합니다.
+5. **metrics.enabled**
+   - true로 설정하면, 애플리케이션의 메트릭 데이터를 Prometheus와 같은 모니터링 시스템에 전달하여 성능을 추적할 수 있습니다. 이 설정은 시스템의 건강 상태를 점검하는 데 유용합니다.
+
+
+
+
+
 
 ### 1. `monitoring-core`
 `monitoring-core`는 순수 자바 객체로 구성되어 있으며, 핵심 인터페이스인 `LogEntry`와 `LogNotifier`가 포함됩니다.
