@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import com.monikit.core.SqlLoggingPropertiesHolder;
+import com.monikit.starter.config.MoniKitLoggingProperties;
 
 /**
  * `SqlLoggingProperties` 값을 `core` 모듈에서 사용할 수 있도록 설정.
@@ -15,9 +16,9 @@ import com.monikit.core.SqlLoggingPropertiesHolder;
 @Component
 public class SqlLoggingPropertiesInitializer {
 
-    private final SqlLoggingProperties sqlLoggingProperties;
+    private final MoniKitLoggingProperties sqlLoggingProperties;
 
-    public SqlLoggingPropertiesInitializer(SqlLoggingProperties sqlLoggingProperties) {
+    public SqlLoggingPropertiesInitializer(MoniKitLoggingProperties sqlLoggingProperties) {
         this.sqlLoggingProperties = sqlLoggingProperties;
     }
 
