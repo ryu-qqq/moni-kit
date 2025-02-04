@@ -9,6 +9,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.monikit.core.QueryLoggingService;
 import com.monikit.starter.config.MoniKitLoggingProperties;
 
 /**
@@ -26,17 +27,20 @@ import com.monikit.starter.config.MoniKitLoggingProperties;
 public class LoggingDataSourcePostProcessor implements BeanPostProcessor {
 
     private final MoniKitLoggingProperties loggingProperties;
+    private final QueryLoggingService queryLoggingService;
 
     @Autowired
-    public LoggingDataSourcePostProcessor(MoniKitLoggingProperties loggingProperties) {
+    public LoggingDataSourcePostProcessor(MoniKitLoggingProperties loggingProperties,
+                                          QueryLoggingService queryLoggingService) {
         this.loggingProperties = loggingProperties;
+        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSource && !(bean instanceof LoggingDataSource)) {
             if (loggingProperties.isDatasourceLoggingEnabled()) {
-                return new LoggingDataSource((DataSource) bean);
+                return new LoggingDataSource((DataSource) bean, queryLoggingService);
             }
         }
         return bean;

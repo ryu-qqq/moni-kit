@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 
 import com.monikit.core.LoggingPreparedStatement;
+import com.monikit.core.QueryLoggingService;
 
 /**
  * SQL 실행을 감시하는 `Connection` 프록시.
@@ -20,14 +21,17 @@ import com.monikit.core.LoggingPreparedStatement;
 public class LoggingConnection implements Connection {
 
     private final Connection delegate;
+    private final QueryLoggingService queryLoggingService;
 
-    public LoggingConnection(Connection delegate) {
+
+    public LoggingConnection(Connection delegate, QueryLoggingService queryLoggingService) {
         this.delegate = delegate;
+        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return new LoggingPreparedStatement(delegate.prepareStatement(sql), sql);
+        return new LoggingPreparedStatement(delegate.prepareStatement(sql), sql, queryLoggingService);
     }
 
     @Override

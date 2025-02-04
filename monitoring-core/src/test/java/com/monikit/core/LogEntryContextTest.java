@@ -26,6 +26,7 @@ class LogEntryContextTest {
     @BeforeEach
     void setup() {
         LogEntryContext.clear();
+        LogEntryContext.setErrorOccurred(false);
     }
 
     @Nested

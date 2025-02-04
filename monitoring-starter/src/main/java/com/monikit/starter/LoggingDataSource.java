@@ -6,6 +6,8 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.DelegatingDataSource;
 
+import com.monikit.core.QueryLoggingService;
+
 /**
  * SQL 실행을 감시하는 `DataSource` 프록시.
  * <p>
@@ -17,17 +19,20 @@ import org.springframework.jdbc.datasource.DelegatingDataSource;
  */
 public class LoggingDataSource extends DelegatingDataSource {
 
-    public LoggingDataSource(DataSource targetDataSource) {
+    private final QueryLoggingService queryLoggingService;
+
+    public LoggingDataSource(DataSource targetDataSource, QueryLoggingService queryLoggingService) {
         super(targetDataSource);
+        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return new LoggingConnection(super.getConnection());
+        return new LoggingConnection(super.getConnection(), queryLoggingService);
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return new LoggingConnection(super.getConnection(username, password));
+        return new LoggingConnection(super.getConnection(username, password), queryLoggingService);
     }
 }

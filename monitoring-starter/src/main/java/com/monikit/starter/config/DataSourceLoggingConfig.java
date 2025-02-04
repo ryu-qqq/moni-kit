@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import com.monikit.core.QueryLoggingService;
 import com.monikit.starter.LoggingDataSource;
 
 /**
@@ -24,8 +25,8 @@ public class DataSourceLoggingConfig {
     @Bean
     @Primary
     @ConditionalOnMissingBean
-    public DataSource loggingDataSource(DataSource originalDataSource) {
-        return new LoggingDataSource(originalDataSource);
+    public DataSource loggingDataSource(DataSource originalDataSource, QueryLoggingService queryLoggingService) {
+        return new LoggingDataSource(originalDataSource, queryLoggingService);
     }
 
 

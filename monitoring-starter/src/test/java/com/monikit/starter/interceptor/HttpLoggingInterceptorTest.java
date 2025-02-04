@@ -15,6 +15,7 @@ import com.monikit.core.HttpInboundResponseLog;
 import com.monikit.core.LogEntryContext;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
+import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.MdcTraceIdProvider;
 import com.monikit.starter.filter.RequestWrapper;
 
@@ -38,6 +39,8 @@ class HttpLoggingInterceptorTest {
         handler = new Object();
 
         LogEntryContextManager.flush();
+        TraceIdProvider.setInstance(new MdcTraceIdProvider());
+
     }
 
     @Test

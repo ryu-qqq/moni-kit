@@ -16,10 +16,13 @@ import java.sql.SQLException;
 public class LoggingPreparedStatement extends PreparedStatementWrapper {
 
     private final String sql;
+    private final QueryLoggingService queryLoggingService;
 
-    public LoggingPreparedStatement(PreparedStatement delegate, String sql) {
+
+    public LoggingPreparedStatement(PreparedStatement delegate, String sql, QueryLoggingService queryLoggingService) {
         super(delegate);
         this.sql = sql;
+        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
@@ -32,7 +35,7 @@ public class LoggingPreparedStatement extends PreparedStatementWrapper {
     public boolean execute() throws SQLException {
         long startTime = System.currentTimeMillis();
         boolean result = super.execute();
-        QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, 0);
+        queryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, 0);
         SqlParameterHolder.clear();
         return result;
     }
@@ -41,7 +44,7 @@ public class LoggingPreparedStatement extends PreparedStatementWrapper {
     public ResultSet executeQuery() throws SQLException {
         long startTime = System.currentTimeMillis();
         ResultSet resultSet = super.executeQuery();
-        QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, -1);
+        queryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, -1);
         SqlParameterHolder.clear();
         return resultSet;
     }
@@ -50,7 +53,7 @@ public class LoggingPreparedStatement extends PreparedStatementWrapper {
     public int executeUpdate() throws SQLException {
         long startTime = System.currentTimeMillis();
         int rowsAffected = super.executeUpdate();
-        QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, rowsAffected);
+        queryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, rowsAffected);
         SqlParameterHolder.clear();
         return rowsAffected;
     }
