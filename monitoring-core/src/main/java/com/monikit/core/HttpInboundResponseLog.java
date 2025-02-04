@@ -46,6 +46,7 @@ public class HttpInboundResponseLog extends AbstractLogEntry {
         logMap.put("executionTime", executionTime + "ms");
     }
 
+
     public static HttpInboundResponseLog create(String traceId, String httpMethod, String requestUri, int statusCode,
                                                 String headers, String responseBody, long executionTime, LogLevel logLevel) {
         return new HttpInboundResponseLog(traceId, httpMethod, requestUri, statusCode, headers, responseBody, executionTime, logLevel);

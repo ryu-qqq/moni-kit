@@ -55,6 +55,7 @@ public class HttpInboundRequestLog extends AbstractLogEntry {
         return new HttpInboundRequestLog(traceId, httpMethod, uri, queryParams, headers, requestBody, clientIp, userAgent, logLevel);
     }
 
+
     public String getHttpMethod() {
         return httpMethod;
     }

@@ -26,6 +26,8 @@ dependencies {
     // `OncePerRequestFilter` 사용을 위한 Spring Web 모듈
     implementation "org.springframework:spring-web"
 
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+
     compileOnly "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
 
     runtimeOnly "com.zaxxer:HikariCP:${hikariCPVersion}"

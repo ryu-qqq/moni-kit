@@ -2,11 +2,10 @@ package com.monikit.starter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.DelegatingDataSource;
-
-import com.monikit.core.QueryLoggingService;
 
 /**
  * SQL 실행을 감시하는 `DataSource` 프록시.
@@ -19,20 +18,19 @@ import com.monikit.core.QueryLoggingService;
  */
 public class LoggingDataSource extends DelegatingDataSource {
 
-    private final QueryLoggingService queryLoggingService;
 
-    public LoggingDataSource(DataSource targetDataSource, QueryLoggingService queryLoggingService) {
+    public LoggingDataSource(DataSource targetDataSource) {
         super(targetDataSource);
-        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return new LoggingConnection(super.getConnection(), queryLoggingService);
+        return new LoggingConnection(super.getConnection());
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return new LoggingConnection(super.getConnection(username, password), queryLoggingService);
+        return new LoggingConnection(super.getConnection(username, password));
     }
+
 }

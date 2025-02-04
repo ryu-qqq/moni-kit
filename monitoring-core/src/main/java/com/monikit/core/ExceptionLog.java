@@ -34,6 +34,14 @@ public class ExceptionLog extends AbstractLogEntry {
         logMap.put("stackTrace", stackTrace);
     }
 
+    public String getExceptionMessage() {
+        return exceptionMessage;
+    }
+
+    public String getStackTrace() {
+        return stackTrace;
+    }
+
     private static Throwable getRootCause(Throwable throwable) {
         Throwable cause = throwable;
         while (cause.getCause() != null) {

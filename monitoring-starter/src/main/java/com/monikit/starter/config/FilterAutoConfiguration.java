@@ -3,6 +3,7 @@ package com.monikit.starter.config;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.monikit.core.MetricCollector;
 import com.monikit.starter.filter.HttpMetricsFilter;
@@ -19,7 +20,7 @@ import com.monikit.starter.filter.TraceIdFilter;
  * @since 1.0
  */
 
-@AutoConfiguration
+@Configuration
 public class FilterAutoConfiguration {
 
     /**

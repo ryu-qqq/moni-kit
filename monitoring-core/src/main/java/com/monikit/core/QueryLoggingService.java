@@ -12,11 +12,7 @@ package com.monikit.core;
  */
 public class QueryLoggingService {
 
-    private final MetricCollector metricCollector; // 메트릭 수집기
 
-    public QueryLoggingService(MetricCollector metricCollector) {
-        this.metricCollector = metricCollector;
-    }
 
     /**
      * SQL 실행 정보를 받아서 로그 컨텍스트에 저장.
@@ -25,7 +21,7 @@ public class QueryLoggingService {
      * @param executionTime 실행 시간 (ms)
      * @param rowsAffected 영향을 받은 행 개수
      */
-    public void logQuery(String sql, long executionTime, int rowsAffected) {
+    static void logQuery(String sql, long executionTime, int rowsAffected) {
         String traceId = TraceIdProvider.currentTraceId();
         String parametersStr = SqlParameterHolder.getCurrentParameters();
         String dataSourceName = DataSourceProvider.currentDataSourceName();
@@ -42,7 +38,6 @@ public class QueryLoggingService {
         );
 
         LogEntryContextManager.addLog(logEntry);
-        metricCollector.recordQueryMetrics(sql, executionTime, dataSourceName);
-
+        MetricCollectorProvider.getMetricCollector().recordQueryMetrics(sql, executionTime, dataSourceName);
     }
 }

@@ -1,23 +1,20 @@
 package com.monikit.starter.filter;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
+import java.io.IOException;
+
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.monikit.core.MetricCollector;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.monikit.core.MetricCollector;
-
 /**
  * HTTP 요청 메트릭을 Prometheus로 전송하는 필터.
  */
-@Component
+
 public class HttpMetricsFilter extends OncePerRequestFilter {
 
     private final MetricCollector metricCollector;

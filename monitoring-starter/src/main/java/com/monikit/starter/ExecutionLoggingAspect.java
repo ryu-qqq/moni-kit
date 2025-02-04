@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.monikit.core.ExecutionDetailLog;
@@ -14,7 +15,6 @@ import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
 import com.monikit.core.ThreadContextPropagator;
 import com.monikit.core.TraceIdProvider;
-import com.monikit.starter.config.MoniKitLoggingProperties;
 
 /**
  * @Service 및 @Component 어노테이션이 붙은 메서드의 실행 시간을 자동으로 로깅하는 AOP.
@@ -30,16 +30,13 @@ import com.monikit.starter.config.MoniKitLoggingProperties;
 @Component
 public class ExecutionLoggingAspect {
 
-    private final MoniKitLoggingProperties loggingProperties;
-
-    public ExecutionLoggingAspect(MoniKitLoggingProperties loggingProperties) {
-        this.loggingProperties = loggingProperties;
-    }
+    @Value("${logging.detailedLogging:false}")
+    private boolean detailedLogging;
 
     /**
      * @Service 또는 @Component가 붙은 클래스의 모든 메서드 타겟
      */
-    @Pointcut("within(@org.springframework.stereotype.Service *) || within(@org.springframework.stereotype.Component *)")
+    @Pointcut("within(@org.springframework.stereotype.Service *)")
     public void serviceAndComponentMethods() {}
 
     /**
@@ -64,7 +61,7 @@ public class ExecutionLoggingAspect {
             long executionTime = System.currentTimeMillis() - startTime;
             String outputValue = result != null ? result.toString() : "null";
 
-            if (loggingProperties.isDetailedLogging()) {
+            if (detailedLogging) {
                 LogEntryContextManager.addLog(ExecutionDetailLog.create(
                     traceId, className, methodName, executionTime, inputParams, outputValue, LogLevel.DEBUG
                 ));

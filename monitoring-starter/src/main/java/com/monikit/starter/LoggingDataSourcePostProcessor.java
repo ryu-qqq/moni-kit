@@ -27,20 +27,17 @@ import com.monikit.starter.config.MoniKitLoggingProperties;
 public class LoggingDataSourcePostProcessor implements BeanPostProcessor {
 
     private final MoniKitLoggingProperties loggingProperties;
-    private final QueryLoggingService queryLoggingService;
 
     @Autowired
-    public LoggingDataSourcePostProcessor(MoniKitLoggingProperties loggingProperties,
-                                          QueryLoggingService queryLoggingService) {
+    public LoggingDataSourcePostProcessor(MoniKitLoggingProperties loggingProperties) {
         this.loggingProperties = loggingProperties;
-        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSource && !(bean instanceof LoggingDataSource)) {
             if (loggingProperties.isDatasourceLoggingEnabled()) {
-                return new LoggingDataSource((DataSource) bean, queryLoggingService);
+                return new LoggingDataSource((DataSource) bean);
             }
         }
         return bean;

@@ -10,6 +10,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+import com.monikit.core.DefaultLogNotifier;
 import com.monikit.core.HttpInboundRequestLog;
 import com.monikit.core.HttpInboundResponseLog;
 import com.monikit.core.LogEntryContext;
@@ -40,6 +41,9 @@ class HttpLoggingInterceptorTest {
 
         LogEntryContextManager.flush();
         TraceIdProvider.setInstance(new MdcTraceIdProvider());
+        LogEntryContextManager.setLogNotifier(new DefaultLogNotifier());
+
+
 
     }
 

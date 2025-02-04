@@ -2,7 +2,6 @@ package com.monikit.starter.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 /**
  * MoniKit 로깅 설정을 관리하는 클래스.

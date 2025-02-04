@@ -47,6 +47,30 @@ public class DatabaseQueryLog extends AbstractLogEntry {
         logMap.put("resultSize", resultSize);
     }
 
+    public String getQuery() {
+        return query;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
+    public String getDataSource() {
+        return dataSource;
+    }
+
+    public String getParameters() {
+        return parameters;
+    }
+
+    public int getRowsAffected() {
+        return rowsAffected;
+    }
+
+    public int getResultSize() {
+        return resultSize;
+    }
+
     public static DatabaseQueryLog create(String traceId, String query, long executionTime, String dataSource,
                                           String parameters, int rowsAffected, int resultSize, LogLevel logLevel) {
         return new DatabaseQueryLog(traceId, query, executionTime, dataSource, parameters, rowsAffected, resultSize, logLevel);

@@ -37,6 +37,18 @@ public class ExecutionTimeLog extends AbstractLogEntry {
         logMap.put("executionTime", executionTime + "ms");
     }
 
+    public String getClassName() {
+        return className;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
     public static ExecutionTimeLog create(String traceId, LogLevel logLevel, String className, String methodName, long executionTime) {
         return new ExecutionTimeLog(traceId, logLevel, className, methodName, executionTime);
     }

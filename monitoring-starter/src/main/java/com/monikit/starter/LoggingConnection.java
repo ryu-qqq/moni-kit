@@ -1,12 +1,25 @@
 package com.monikit.starter;
 
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Savepoint;
+import java.sql.Statement;
+import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
 import com.monikit.core.LoggingPreparedStatement;
-import com.monikit.core.QueryLoggingService;
 
 /**
  * SQL 실행을 감시하는 `Connection` 프록시.
@@ -21,17 +34,15 @@ import com.monikit.core.QueryLoggingService;
 public class LoggingConnection implements Connection {
 
     private final Connection delegate;
-    private final QueryLoggingService queryLoggingService;
 
 
-    public LoggingConnection(Connection delegate, QueryLoggingService queryLoggingService) {
+    public LoggingConnection(Connection delegate) {
         this.delegate = delegate;
-        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return new LoggingPreparedStatement(delegate.prepareStatement(sql), sql, queryLoggingService);
+        return new LoggingPreparedStatement(delegate.prepareStatement(sql), sql);
     }
 
     @Override

@@ -48,6 +48,30 @@ public class BatchJobLog extends AbstractLogEntry {
         logMap.put("errorMessage", errorMessage);
     }
 
+    public String getBatchJobName() {
+        return batchJobName;
+    }
+
+    public Instant getStartTime() {
+        return startTime;
+    }
+
+    public Instant getEndTime() {
+        return endTime;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
     public static BatchJobLog create(String traceId, String batchJobName, Instant startTime, Instant endTime,
                                      long executionTime, String status, String errorMessage, LogLevel logLevel) {
         return new BatchJobLog(traceId, batchJobName, startTime, endTime, executionTime, status, errorMessage, logLevel);
