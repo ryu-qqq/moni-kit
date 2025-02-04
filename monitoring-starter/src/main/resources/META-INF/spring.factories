@@ -1,0 +1,7 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.monikit.starter.config.DataSourceLoggingConfig,\
+com.monikit.starter.config.FilterAutoConfiguration,\
+com.monikit.starter.config.InterceptorAutoConfiguration,\
+com.monikit.starter.config.LogNotifierAutoConfiguration,\
+com.monikit.starter.config.MetricCollectorAutoConfiguration,\
+com.monikit.starter.config.QueryLoggingConfig

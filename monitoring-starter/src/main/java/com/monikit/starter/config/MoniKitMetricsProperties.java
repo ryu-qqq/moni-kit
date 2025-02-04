@@ -1,7 +1,7 @@
 package com.monikit.starter.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * MoniKit 메트릭 수집 설정을 관리하는 클래스.
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * @author ryu-qqq
  * @since 1.0
  */
-@Component
+@Configuration
 @ConfigurationProperties(prefix = "monikit.metrics")
 public class MoniKitMetricsProperties {
 

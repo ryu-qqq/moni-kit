@@ -1,6 +1,7 @@
 package com.monikit.starter.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
  * @author ryu-qqq
  * @since 1.0
  */
-@Component
+@Configuration
 @ConfigurationProperties(prefix = "monikit.logging")
 public class MoniKitLoggingProperties {
 
