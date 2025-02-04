@@ -35,7 +35,6 @@ public class MetricCollectorAutoConfiguration {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(MetricCollector.class)
     public MetricCollector metricCollector(MeterRegistry meterRegistry) {
         MetricCollector metricCollector;
 

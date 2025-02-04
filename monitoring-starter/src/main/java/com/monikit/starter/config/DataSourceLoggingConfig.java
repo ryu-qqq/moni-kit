@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import com.monikit.starter.LoggingDataSource;
@@ -17,7 +18,7 @@ import com.monikit.starter.LoggingDataSource;
  * @author ryu-qqq
  * @since 1.0
  */
-@AutoConfiguration
+@Configuration
 public class DataSourceLoggingConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSourceLoggingConfig.class);
@@ -28,7 +29,6 @@ public class DataSourceLoggingConfig {
      */
     @Bean
     @Primary
-    @ConditionalOnMissingBean
     public DataSource loggingDataSource(DataSource originalDataSource) {
         logger.info("Using DataSource: {}", originalDataSource.getClass().getSimpleName());
         DataSource loggingDataSource = new LoggingDataSource(originalDataSource);

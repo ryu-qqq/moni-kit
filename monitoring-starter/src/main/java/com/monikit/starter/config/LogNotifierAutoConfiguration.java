@@ -75,7 +75,6 @@ public class LogNotifierAutoConfiguration {
     public void init() {
         logger.info("Start Post Construct LogNotifier");
         Map<String, LogNotifier> logNotifiers = applicationContext.getBeansOfType(LogNotifier.class);
-        logger.info("Doing... Post Construct LogNotifier");
 
         if (logNotifiers.size() > 1) {
             logger.warn("⚠️ Multiple LogNotifier beans detected. Please ensure the correct implementation is used.");
