@@ -112,7 +112,7 @@ class LogEntryContextTest {
             boolean hasErrorInChildThread = future.get();
             executor.shutdown();
 
-            assertTrue(hasErrorInChildThread); // 자식 스레드에서도 hasError가 유지되는지 확인
+            assertTrue(hasErrorInChildThread);
         }
 
     }
@@ -146,11 +146,11 @@ class LogEntryContextTest {
         @Test
         @DisplayName("should set error state when an exception occurs")
         void shouldSetErrorStateWhenExceptionOccurs() {
-            assertFalse(LogEntryContext.hasError()); // 초기 상태
+            assertFalse(LogEntryContext.hasError());
 
             LogEntryContext.setErrorOccurred(true);
 
-            assertTrue(LogEntryContext.hasError()); // 예외 발생 상태가 true로 변경됨
+            assertTrue(LogEntryContext.hasError());
         }
 
         @Test
@@ -159,29 +159,29 @@ class LogEntryContextTest {
             LogEntryContext.setErrorOccurred(true);
             LogEntryContext.setErrorOccurred(true);
 
-            assertTrue(LogEntryContext.hasError()); // 중복 호출 후에도 true 유지
+            assertTrue(LogEntryContext.hasError());
         }
 
         @Test
         @DisplayName("should clear error state when log context is cleared")
         void shouldClearErrorStateWhenLogContextIsCleared() {
             LogEntryContext.setErrorOccurred(true);
-            assertTrue(LogEntryContext.hasError()); // 예외 발생 상태 확인
+            assertTrue(LogEntryContext.hasError());
 
             LogEntryContext.clear();
             LogEntryContext.setErrorOccurred(false);
 
             assertEquals(0, LogEntryContext.size());
-            assertFalse(LogEntryContext.hasError()); // clear() 호출 후 초기화 확인
+            assertFalse(LogEntryContext.hasError());
         }
 
         @Test
         @DisplayName("should propagate error state to child thread")
         void shouldPropagateErrorStateToChildThread() throws InterruptedException {
-            LogEntryContext.setErrorOccurred(true); // 부모 스레드에서 에러 발생
+            LogEntryContext.setErrorOccurred(true);
 
             Runnable childTask = LogEntryContext.propagateToChildThread(() -> {
-                assertTrue(LogEntryContext.hasError()); // 자식 스레드에서도 에러 상태 유지
+                assertTrue(LogEntryContext.hasError());
             });
 
             Thread thread = new Thread(childTask);

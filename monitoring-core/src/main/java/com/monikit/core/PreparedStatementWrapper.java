@@ -1,4 +1,4 @@
-package com.monikit.starter;
+package com.monikit.core;
 
 import java.io.InputStream;
 import java.io.Reader;

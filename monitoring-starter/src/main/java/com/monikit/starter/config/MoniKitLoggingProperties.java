@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "monikit.logging")
 public class MoniKitLoggingProperties {
+
     private boolean detailedLogging = false;
 
     public boolean isDetailedLogging() {
@@ -15,4 +16,5 @@ public class MoniKitLoggingProperties {
     public void setDetailedLogging(boolean detailedLogging) {
         this.detailedLogging = detailedLogging;
     }
+
 }

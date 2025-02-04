@@ -17,18 +17,16 @@ public class DatabaseQueryLog extends AbstractLogEntry {
     private final String query;
     private final long executionTime;
     private final String dataSource;
-    private final String tableNames;
     private final String parameters;
     private final int rowsAffected;
     private final int resultSize;
 
     protected DatabaseQueryLog(String traceId, String query, long executionTime, String dataSource,
-                               String tableNames, String parameters, int rowsAffected, int resultSize, LogLevel logLevel) {
+                               String parameters, int rowsAffected, int resultSize, LogLevel logLevel) {
         super(traceId, logLevel);
         this.query = query;
         this.executionTime = executionTime;
         this.dataSource = dataSource;
-        this.tableNames = tableNames;
         this.parameters = parameters;
         this.rowsAffected = rowsAffected;
         this.resultSize = resultSize;
@@ -44,15 +42,14 @@ public class DatabaseQueryLog extends AbstractLogEntry {
         logMap.put("query", query);
         logMap.put("executionTime", executionTime + "ms");
         logMap.put("dataSource", dataSource);
-        logMap.put("tableNames", tableNames);
         logMap.put("parameters", parameters);
         logMap.put("rowsAffected", rowsAffected);
         logMap.put("resultSize", resultSize);
     }
 
     public static DatabaseQueryLog create(String traceId, String query, long executionTime, String dataSource,
-                                          String tableNames, String parameters, int rowsAffected, int resultSize, LogLevel logLevel) {
-        return new DatabaseQueryLog(traceId, query, executionTime, dataSource, tableNames, parameters, rowsAffected, resultSize, logLevel);
+                                          String parameters, int rowsAffected, int resultSize, LogLevel logLevel) {
+        return new DatabaseQueryLog(traceId, query, executionTime, dataSource, parameters, rowsAffected, resultSize, logLevel);
     }
 
     @Override
@@ -72,13 +69,12 @@ public class DatabaseQueryLog extends AbstractLogEntry {
             == that.resultSize
             && Objects.equals(query, that.query)
             && Objects.equals(dataSource, that.dataSource)
-            && Objects.equals(tableNames, that.tableNames)
             && Objects.equals(parameters, that.parameters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(query, executionTime, dataSource, tableNames, parameters, rowsAffected, resultSize);
+        return Objects.hash(query, executionTime, dataSource, parameters, rowsAffected, resultSize);
     }
 
     @Override
@@ -94,10 +90,6 @@ public class DatabaseQueryLog extends AbstractLogEntry {
             +
             ", dataSource='"
             + dataSource
-            + '\''
-            +
-            ", tableNames='"
-            + tableNames
             + '\''
             +
             ", parameters='"

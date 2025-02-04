@@ -16,9 +16,7 @@ subprojects {
     apply plugin: 'java-library'
 
     dependencies {
-        testImplementation "org.junit.platform:junit-platform-suite:${junitPlatFormVersion}"
         testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     }
 
     tasks.named('test') {

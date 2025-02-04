@@ -8,6 +8,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.monikit.core.ThreadContextPropagator;
+
 /**
  * 모든 Executor 빈을 감싸서 ThreadContextPropagator를 자동 적용하는 PostProcessor.
  * <p>
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Component;
  * @since 1.0
  */
 @Component
-@Order(Ordered.LOWEST_PRECEDENCE) // 모든 빈 생성 이후 실행되도록 설정
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class ExecutorBeanPostProcessor implements BeanPostProcessor {
 
     @Override
