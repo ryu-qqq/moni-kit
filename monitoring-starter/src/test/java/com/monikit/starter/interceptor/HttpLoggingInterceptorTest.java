@@ -15,7 +15,7 @@ import com.monikit.core.HttpInboundResponseLog;
 import com.monikit.core.LogEntryContext;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
-import com.monikit.starter.TraceIdHolder;
+import com.monikit.starter.MdcTraceIdProvider;
 import com.monikit.starter.filter.RequestWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,7 +54,7 @@ class HttpLoggingInterceptorTest {
 
         RequestWrapper wrappedRequest = new RequestWrapper(request);
 
-        TraceIdHolder.setTraceId("test-trace-id");
+        MdcTraceIdProvider.setTraceId("test-trace-id");
         boolean result = interceptor.preHandle(wrappedRequest, response, handler);
 
         assertTrue(result, "preHandle should return true");
@@ -91,7 +91,7 @@ class HttpLoggingInterceptorTest {
         wrappedResponse.getOutputStream().write(responseBody.getBytes());
         wrappedResponse.flushBuffer();
 
-        TraceIdHolder.setTraceId("test-trace-id");
+        MdcTraceIdProvider.setTraceId("test-trace-id");
         interceptor.afterCompletion(request, wrappedResponse, handler, null);
 
         List<HttpInboundResponseLog> logs = LogEntryContext.getLogs().stream()

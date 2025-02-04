@@ -12,6 +12,8 @@ import com.monikit.core.ExecutionDetailLog;
 import com.monikit.core.ExecutionTimeLog;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
+import com.monikit.core.ThreadContextPropagator;
+import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.config.MoniKitLoggingProperties;
 
 /**
@@ -46,7 +48,7 @@ public class ExecutionLoggingAspect {
     @Around("serviceAndComponentMethods()")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
-        String traceId = TraceIdHolder.getTraceId();
+        String traceId = TraceIdProvider.currentTraceId();;
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
         String inputParams = Arrays.toString(joinPoint.getArgs());

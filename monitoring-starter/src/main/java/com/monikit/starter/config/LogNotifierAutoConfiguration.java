@@ -1,8 +1,5 @@
 package com.monikit.starter.config;
 
-
-import jakarta.annotation.PostConstruct;
-
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -17,6 +14,8 @@ import org.springframework.context.annotation.Primary;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogNotifier;
 import com.monikit.starter.LogbackLogNotifier;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * LogNotifier의 구현체를 자동으로 주입하는 설정 클래스.
@@ -52,6 +51,7 @@ public class LogNotifierAutoConfiguration {
     public LogNotifier logNotifier() {
         return new LogbackLogNotifier();
     }
+
 
     @PostConstruct
     public void init() {

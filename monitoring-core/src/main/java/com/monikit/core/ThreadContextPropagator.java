@@ -1,9 +1,6 @@
-package com.monikit.starter;
+package com.monikit.core;
 
 import java.util.concurrent.Callable;
-
-import com.monikit.core.LogEntryContext;
-import com.monikit.core.LogEntryContextManager;
 
 /**
  * 스레드 컨텍스트를 유지 및 전파하는 유틸리티 클래스.

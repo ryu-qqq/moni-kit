@@ -12,7 +12,7 @@ import com.monikit.core.HttpInboundRequestLog;
 import com.monikit.core.HttpInboundResponseLog;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
-import com.monikit.starter.TraceIdHolder;
+import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.filter.RequestWrapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +36,7 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String traceId = TraceIdHolder.getTraceId();
+        String traceId = TraceIdProvider.currentTraceId();
         requestStartTime.set(Instant.now());
 
         LogEntryContextManager.addLog(HttpInboundRequestLog.create(
@@ -57,7 +57,7 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws
         IOException {
-        String traceId = TraceIdHolder.getTraceId();
+        String traceId = TraceIdProvider.currentTraceId();
         Instant startTime = requestStartTime.get();
         long executionTime = startTime != null ? Instant.now().toEpochMilli() - startTime.toEpochMilli() : 0;
 

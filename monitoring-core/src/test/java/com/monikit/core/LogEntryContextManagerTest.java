@@ -143,10 +143,10 @@ class LogEntryContextManagerTest {
 
             ExecutorService executor = newSingleThreadExecutor();
             Future<Boolean> future = executor.submit(childTask);
-            boolean result = future.get(); // Callable 실행 결과 가져오기
+            boolean result = future.get();
             executor.shutdown();
 
-            assertTrue(result); // Callable이 정상 실행되었는지 검증
+            assertTrue(result);
         }
 
         @Test

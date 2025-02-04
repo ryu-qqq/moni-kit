@@ -5,24 +5,27 @@ plugins {
 
 dependencies {
     implementation project(':monitoring-core')
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation "org.springframework.boot:spring-boot-starter-aop"
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
 
+    // 로깅 관련 의존성 (Logback + Logstash)
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}"
-    implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
 
-    implementation 'org.springframework:spring-webmvc'
-    implementation "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
-
-    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
-    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-
-    runtimeOnly "com.zaxxer:HikariCP:${hikariCPVersion}"
+    // Spring Boot 기본 의존성
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation "org.springframework.boot:spring-boot-starter-aop"
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
+    // Spring WebMVC (HandlerInterceptor 및 DispatcherServlet 관련 기능을 사용하기 위해 필요)
+    implementation "org.springframework:spring-webmvc"
+
+    // `OncePerRequestFilter` 사용을 위한 Spring Web 모듈
+    implementation "org.springframework:spring-web"
+
+    compileOnly "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
+
+    runtimeOnly "com.zaxxer:HikariCP:${hikariCPVersion}"
+
+    // 테스트 의존성
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
 }

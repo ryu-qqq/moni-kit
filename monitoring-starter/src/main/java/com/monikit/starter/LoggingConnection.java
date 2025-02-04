@@ -4,7 +4,8 @@ import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
-import java.util.logging.Logger;
+
+import com.monikit.core.LoggingPreparedStatement;
 
 /**
  * SQL 실행을 감시하는 `Connection` 프록시.
@@ -18,7 +19,6 @@ import java.util.logging.Logger;
 
 public class LoggingConnection implements Connection {
 
-    private static final Logger LOGGER = Logger.getLogger("SQL_LOGGER");
     private final Connection delegate;
 
     public LoggingConnection(Connection delegate) {
