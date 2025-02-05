@@ -24,6 +24,7 @@ public class HttpMetricsFilter extends OncePerRequestFilter {
         "/actuator/health",
         "/actuator/prometheus",
         "/actuator/metrics",
+        "/actuator/info",
         "/metrics",
         "/health"
     );
