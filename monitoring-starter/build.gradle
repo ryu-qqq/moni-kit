@@ -53,9 +53,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            groupId = 'com.monikit'
             artifactId = 'monikit-starter'
-            version = '1.0.0'
         }
     }
 }
