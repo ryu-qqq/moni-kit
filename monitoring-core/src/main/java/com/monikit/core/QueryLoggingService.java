@@ -12,8 +12,6 @@ package com.monikit.core;
  */
 public class QueryLoggingService {
 
-
-
     /**
      * SQL 실행 정보를 받아서 로그 컨텍스트에 저장.
      *
@@ -40,4 +38,5 @@ public class QueryLoggingService {
         LogEntryContextManager.addLog(logEntry);
         MetricCollectorProvider.getMetricCollector().recordQueryMetrics(sql, executionTime, dataSourceName);
     }
+
 }

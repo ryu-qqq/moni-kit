@@ -23,4 +23,6 @@ public class NoOpMetricCollector implements MetricCollector {
     public void recordQueryMetrics(String sql, long executionTime, String dataSourceName) {
         // Do nothing (메트릭 비활성화 상태)
     }
+
+
 }

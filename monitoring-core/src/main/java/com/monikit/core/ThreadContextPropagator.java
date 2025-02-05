@@ -14,6 +14,29 @@ import java.util.concurrent.Callable;
  */
 public class ThreadContextPropagator {
 
+    public static void runWithContextRunnable(Runnable task) throws Exception{
+        if (LogEntryContext.getLogs().isEmpty()) {
+            Runnable wrappedTask = LogEntryContextManager.propagateToChildThread(() -> {
+                try {
+                    task.run();
+                } catch (Throwable t) {
+                    throw new RuntimeException(t);
+                } finally {
+                    LogEntryContextManager.flush();
+                }
+            });
+            wrappedTask.run();
+        } else {
+            try {
+                task.run();
+            } catch (Throwable t) {
+                throw propagateAsException(t);
+            } finally {
+                LogEntryContextManager.flush();
+            }
+        }
+    }
+
     /**
      * 주어진 ThrowingCallable을 실행하면서, 필요한 경우 스레드 컨텍스트를 복사하여 유지한다.
      *
@@ -22,13 +45,15 @@ public class ThreadContextPropagator {
      * @return 실행 결과
      * @throws Exception 예외 발생 가능
      */
-    public static <T> T runWithContext(ThrowingCallable<T> task) throws Exception {
+    public static <T> T runWithContextCallable(ThrowingCallable<T> task) throws Exception {
         if (LogEntryContext.getLogs().isEmpty()) {
             Callable<T> wrappedTask = LogEntryContextManager.propagateToChildThread(() -> {
                 try {
                     return task.call();
                 } catch (Throwable t) {
                     throw propagateAsException(t);
+                } finally {
+                    LogEntryContextManager.flush();
                 }
             });
             return wrappedTask.call();
@@ -37,6 +62,8 @@ public class ThreadContextPropagator {
                 return task.call();
             } catch (Throwable t) {
                 throw propagateAsException(t);
+            } finally {
+                LogEntryContextManager.flush();
             }
         }
     }

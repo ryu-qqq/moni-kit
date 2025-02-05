@@ -24,6 +24,7 @@ class LogEntryContextManagerTest {
     @BeforeEach
     void setup() {
         LogEntryContext.clear();
+        LogEntryContext.setErrorOccurred(false);
         LogEntryContextManager.setLogNotifier(new DefaultLogNotifier());
     }
 

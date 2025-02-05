@@ -25,4 +25,5 @@ public class QueryPerformanceEvaluator {
             return LogLevel.INFO;
         }
     }
+
 }

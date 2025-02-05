@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
 }
 
 

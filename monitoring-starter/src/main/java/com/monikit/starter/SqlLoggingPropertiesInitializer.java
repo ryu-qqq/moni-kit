@@ -27,4 +27,5 @@ public class SqlLoggingPropertiesInitializer {
         SqlLoggingPropertiesHolder.setSlowQueryThresholdMs(sqlLoggingProperties.getSlowQueryThresholdMs());
         SqlLoggingPropertiesHolder.setCriticalQueryThresholdMs(sqlLoggingProperties.getCriticalQueryThresholdMs());
     }
+
 }

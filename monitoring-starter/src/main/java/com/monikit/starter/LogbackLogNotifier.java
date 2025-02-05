@@ -25,7 +25,6 @@ public class LogbackLogNotifier implements LogNotifier {
 
     private static final Logger logger = LoggerFactory.getLogger(LogbackLogNotifier.class);
 
-
     @Override
     public void notify(LogLevel logLevel, String message) {
         switch (logLevel) {

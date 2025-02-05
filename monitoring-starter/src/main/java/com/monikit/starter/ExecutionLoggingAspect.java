@@ -17,7 +17,7 @@ import com.monikit.core.ThreadContextPropagator;
 import com.monikit.core.TraceIdProvider;
 
 /**
- * @Service 및 @Component 어노테이션이 붙은 메서드의 실행 시간을 자동으로 로깅하는 AOP.
+ * @Service 및 @Repository 어노테이션이 붙은 메서드의 실행 시간을 자동으로 로깅하는 AOP.
  * <p>
  * - 메서드 실행 시간, 입력값, 출력값을 로깅함.
  * - 예외 발생 시에도 실행 시간을 로깅함.
@@ -36,7 +36,7 @@ public class ExecutionLoggingAspect {
     /**
      * @Service 또는 @Component가 붙은 클래스의 모든 메서드 타겟
      */
-    @Pointcut("within(@org.springframework.stereotype.Service *)")
+    @Pointcut("within(@org.springframework.stereotype.Service *) || within(@org.springframework.stereotype.Repository *)")
     public void serviceAndComponentMethods() {}
 
     /**
@@ -52,7 +52,7 @@ public class ExecutionLoggingAspect {
 
         Object result = null;
         try {
-            result = ThreadContextPropagator.runWithContext(joinPoint::proceed);
+            result = ThreadContextPropagator.runWithContextCallable(joinPoint::proceed);
             return result;
         } catch (Exception e) {
             LogEntryContextManager.logException(traceId, e);

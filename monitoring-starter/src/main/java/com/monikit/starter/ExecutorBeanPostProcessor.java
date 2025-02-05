@@ -35,7 +35,7 @@ public class ExecutorBeanPostProcessor implements BeanPostProcessor {
     private Executor wrapExecutor(Executor executor) {
         return task -> {
             try {
-                ThreadContextPropagator.runWithContext(() -> {
+                ThreadContextPropagator.runWithContextCallable(() -> {
                     executor.execute(task);
                     return null;
                 });

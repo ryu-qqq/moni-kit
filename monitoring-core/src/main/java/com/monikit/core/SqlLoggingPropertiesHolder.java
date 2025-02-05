@@ -7,6 +7,7 @@ package com.monikit.core;
  * @since 1.0
  */
 public class SqlLoggingPropertiesHolder {
+
     private static long slowQueryThresholdMs = 1000;
     private static long criticalQueryThresholdMs = 5000;
 

@@ -13,10 +13,8 @@ package com.monikit.core;
 public enum LogType {
     EXECUTION_TIME,
     EXECUTION_DETAIL,
-    BUSINESS_EVENT,
     EXCEPTION,
     DATABASE_QUERY,
-    SYSTEM_EVENT,
     INBOUND_REQUEST,
     INBOUND_RESPONSE,
     OUTBOUND_REQUEST,

@@ -17,7 +17,6 @@ public class LoggingPreparedStatement extends PreparedStatementWrapper {
 
     private final String sql;
 
-
     public LoggingPreparedStatement(PreparedStatement delegate, String sql) {
         super(delegate);
         this.sql = sql;
@@ -55,4 +54,6 @@ public class LoggingPreparedStatement extends PreparedStatementWrapper {
         SqlParameterHolder.clear();
         return rowsAffected;
     }
+
+
 }

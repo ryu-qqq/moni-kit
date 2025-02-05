@@ -13,8 +13,9 @@ import java.util.concurrent.Callable;
  */
 public class LogEntryContextManager {
 
-    private static final int MAX_LOG_SIZE = 1000;
+    private static final int MAX_LOG_SIZE = 300;
     private static LogNotifier logNotifier;
+    private static ErrorLogNotifier errorLogNotifier = logEntry -> {};
 
     /**
      * LogNotifier를 설정한다 (monitoring-starter에서 주입 가능).
@@ -46,7 +47,11 @@ public class LogEntryContextManager {
     public static void flush() {
         for (LogEntry log : LogEntryContext.getLogs()) {
             logNotifier.notify(log);
+            if(log.getLogLevel().isEmergency()){
+                errorLogNotifier.onErrorLogDetected(log);
+            }
         }
+
         LogEntryContext.clear();
         LogEntryContext.setErrorOccurred(false);
     }

@@ -32,6 +32,11 @@ dependencies {
 
     runtimeOnly "com.zaxxer:HikariCP:${hikariCPVersion}"
 
+    // Feign 의존성 (컴파일 시 필요, 실행 시 선택적 적용)
+    compileOnly "org.springframework.cloud:spring-cloud-starter-openfeign"
+    runtimeOnly "org.springframework.cloud:spring-cloud-starter-openfeign"
+
+
     // 테스트 의존성
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"

@@ -30,4 +30,5 @@ public interface MetricCollector {
      * @param dataSourceName 데이터 소스 이름
      */
     void recordQueryMetrics(String sql, long executionTime, String dataSourceName);
+
 }
