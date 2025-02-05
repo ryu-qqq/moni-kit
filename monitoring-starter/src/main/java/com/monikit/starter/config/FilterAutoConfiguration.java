@@ -42,34 +42,34 @@ public class FilterAutoConfiguration {
      *
      * @return FilterRegistrationBean
      */
-    // @Bean
-    // public FilterRegistrationBean<LogContextScopeFilter> logContextScopeFilter() {
-    //     FilterRegistrationBean<LogContextScopeFilter> registrationBean = new FilterRegistrationBean<>();
-    //     registrationBean.setFilter(new LogContextScopeFilter());
-    //     registrationBean.setOrder(2);
-    //     registrationBean.addUrlPatterns("/*");
-    //     return registrationBean;
-    // }
-    //
-    //
-    //
-    // @Bean
-    // public HttpMetricsFilter httpMetricsFilter(MetricCollector metricCollector) {
-    //     return new HttpMetricsFilter(metricCollector);
-    // }
-    //
-    // /**
-    //  * LogContextScopeFilter를 자동으로 등록하는 빈.
-    //  *
-    //  * @return FilterRegistrationBean
-    //  */
-    // @Bean
-    // public FilterRegistrationBean<HttpMetricsFilter> httpMetricsFilterRegistration(HttpMetricsFilter httpMetricsFilter) {
-    //     FilterRegistrationBean<HttpMetricsFilter> registrationBean = new FilterRegistrationBean<>();
-    //     registrationBean.setFilter(httpMetricsFilter);
-    //     registrationBean.setOrder(3);
-    //     registrationBean.addUrlPatterns("/*");
-    //     return registrationBean;
-    // }
+    @Bean
+    public FilterRegistrationBean<LogContextScopeFilter> logContextScopeFilter() {
+        FilterRegistrationBean<LogContextScopeFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new LogContextScopeFilter());
+        registrationBean.setOrder(2);
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
+    }
+
+
+
+    @Bean
+    public HttpMetricsFilter httpMetricsFilter(MetricCollector metricCollector) {
+        return new HttpMetricsFilter(metricCollector);
+    }
+
+    /**
+     * LogContextScopeFilter를 자동으로 등록하는 빈.
+     *
+     * @return FilterRegistrationBean
+     */
+    @Bean
+    public FilterRegistrationBean<HttpMetricsFilter> httpMetricsFilterRegistration(HttpMetricsFilter httpMetricsFilter) {
+        FilterRegistrationBean<HttpMetricsFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(httpMetricsFilter);
+        registrationBean.setOrder(3);
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
+    }
 
 }
