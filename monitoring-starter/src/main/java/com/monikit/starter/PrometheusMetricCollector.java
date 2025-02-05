@@ -53,6 +53,7 @@ public class PrometheusMetricCollector implements MetricCollector {
         Timer register = Timer.builder("sql_query_duration")
             .description("SQL query execution time")
             .tag("query", sql)
+            .publishPercentileHistogram()
             .tag("datasource", dataSourceName)
             .register(meterRegistry);
 
