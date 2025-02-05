@@ -1,6 +1,7 @@
 package com.monikit.starter.filter;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,6 +20,15 @@ public class HttpMetricsFilter extends OncePerRequestFilter {
 
     private final MetricCollector metricCollector;
 
+    private static final Set<String> EXCLUDED_PATHS = Set.of(
+        "/actuator/health",
+        "/actuator/prometheus",
+        "/actuator/metrics",
+        "/metrics",
+        "/health"
+    );
+
+
     public HttpMetricsFilter(MetricCollector metricCollector) {
         this.metricCollector = metricCollector;
     }
@@ -27,13 +37,16 @@ public class HttpMetricsFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
         long startTime = System.currentTimeMillis();
+        String requestUri = request.getRequestURI();
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            long duration = System.currentTimeMillis() - startTime;
-            int status = response.getStatus() > 0 ? response.getStatus() : 500;
-            metricCollector.recordHttpRequest(request.getMethod(), request.getRequestURI(), status, duration);
+            if (!EXCLUDED_PATHS.contains(requestUri)) {
+                long duration = System.currentTimeMillis() - startTime;
+                int status = response.getStatus() > 0 ? response.getStatus() : 500;
+                metricCollector.recordHttpRequest(request.getMethod(), requestUri, status, duration);
+            }
         }
     }
 }
