@@ -33,12 +33,14 @@ public class PrometheusMetricCollector implements MetricCollector {
                 "status", String.valueOf(statusCode))
             .increment();
 
-        Timer.builder("http_request_duration")
+        Timer register = Timer.builder("http_request_duration")
             .description("HTTP request processing time")
             .tag("method", method)
             .tag("uri", uri)
-            .register(meterRegistry)
-            .record(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
+            .register(meterRegistry);
+
+        register.record(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
+
     }
 
     @Override
@@ -48,12 +50,13 @@ public class PrometheusMetricCollector implements MetricCollector {
                 "datasource", dataSourceName)
             .increment();
 
-        Timer.builder("sql_query_duration")
+        Timer register = Timer.builder("sql_query_duration")
             .description("SQL query execution time")
             .tag("query", sql)
             .tag("datasource", dataSourceName)
-            .register(meterRegistry)
-            .record(executionTime, TimeUnit.MILLISECONDS);
+            .register(meterRegistry);
+
+        register.record(executionTime, TimeUnit.MILLISECONDS);
     }
 
 }
