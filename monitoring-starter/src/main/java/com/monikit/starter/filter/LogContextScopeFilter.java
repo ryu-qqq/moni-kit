@@ -29,12 +29,13 @@ public class LogContextScopeFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
         try (LogContextScope scope = new LogContextScope()) {
             RequestWrapper requestWrapper = new RequestWrapper(request);
             ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
+
             filterChain.doFilter(requestWrapper, wrappedResponse);
+
+            wrappedResponse.copyBodyToResponse();
         }
     }
-
 }

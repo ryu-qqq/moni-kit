@@ -27,12 +27,13 @@ public class HttpMetricsFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
         long startTime = System.currentTimeMillis();
+
         try {
             filterChain.doFilter(request, response);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            metricCollector.recordHttpRequest(request.getMethod(), request.getRequestURI(), response.getStatus(), duration);
+            int status = response.getStatus() > 0 ? response.getStatus() : 500;
+            metricCollector.recordHttpRequest(request.getMethod(), request.getRequestURI(), status, duration);
         }
     }
-
 }
