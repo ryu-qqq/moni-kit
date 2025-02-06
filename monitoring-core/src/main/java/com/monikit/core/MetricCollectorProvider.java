@@ -37,4 +37,5 @@ public class MetricCollectorProvider {
         }
         return instance;
     }
+
 }

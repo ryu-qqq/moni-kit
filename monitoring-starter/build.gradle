@@ -4,8 +4,10 @@ plugins {
     id 'io.spring.dependency-management'
 }
 
+
 dependencies {
     implementation project(':monitoring-core')
+    testImplementation project(':monitoring-core')
 
     // 로깅 관련 의존성 (Logback + Logstash)
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
@@ -41,8 +43,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
     testImplementation "org.springframework:spring-web"
-
-
 }
 
 jar {

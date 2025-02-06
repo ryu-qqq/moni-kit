@@ -7,7 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,9 +22,9 @@ class LoggingPreparedStatementTest {
     void setUp() {
         mockDelegate = mock(PreparedStatement.class);
         loggingPreparedStatement = new LoggingPreparedStatement(mockDelegate, "SELECT * FROM users WHERE id = ?");
-        MetricCollectorProvider.setMetricCollector(new TestMetricCollector());
+        MetricCollectorProvider.setMetricCollector(null);
+        MetricCollectorProvider.setMetricCollector(mock(MetricCollector.class));
     }
-
 
 
     @Test
@@ -57,19 +58,6 @@ class LoggingPreparedStatementTest {
         loggingPreparedStatement.execute();
 
         assertEquals("[]", SqlParameterHolder.getCurrentParameters());
-    }
-
-
-
-    static class TestMetricCollector implements MetricCollector {
-
-        @Override
-        public void recordHttpRequest(String method, String uri, int statusCode, long duration) {
-        }
-
-        @Override
-        public void recordQueryMetrics(String sql, long executionTime, String dataSourceName) {
-        }
     }
 
 }

@@ -12,5 +12,5 @@ pluginManagement {
 
 
 rootProject.name = 'moni-kit'
-include 'monitoring-core'
-include 'monitoring-starter'
+include ':monitoring-core'
+include ':monitoring-starter'

@@ -4,45 +4,41 @@ package com.monikit.core;
  * Trace ID를 제공하는 인터페이스 (static 기반).
  * <p>
  * - 기본적으로 `NoOpTraceIdProvider`를 사용하지만, 사용자가 직접 설정 가능.
+ * - 멀티 스레드 환경에서도 안전하게 동작하도록 보장됨.
  * </p>
  *
  * @author ryu-qqq
  * @since 1.0
  */
 public interface TraceIdProvider {
-    String getTraceId();
+    static String currentTraceId() {
+        return InstanceHolder.INSTANCE.getTraceId();
+    }
 
-    /**
-     * 현재 설정된 TraceIdProvider 인스턴스
-     */
-    TraceIdProvider INSTANCE = new NoOpTraceIdProvider();
-
-    /**
-     * TraceIdProvider의 구현체를 설정하는 메서드.
-     *
-     * @param provider 사용자 정의 TraceIdProvider
-     */
     static void setInstance(TraceIdProvider provider) {
         if (provider != null) {
-            INSTANCE_HOLDER.provider = provider;
+            InstanceHolder.setInstance(provider);
         }
     }
 
-    /**
-     * 현재 Trace ID를 반환하는 정적 메서드.
-     *
-     * @return 현재 Trace ID
-     */
-    static String currentTraceId() {
-        return INSTANCE_HOLDER.provider.getTraceId();
-    }
+    String getTraceId();
 
+    class InstanceHolder {
+        private static volatile TraceIdProvider INSTANCE;
 
-    /**
-     * TraceIdProvider 인스턴스를 저장하는 내부 정적 클래스 (Lazy Initialization)
-     */
-    class INSTANCE_HOLDER {
-        private static TraceIdProvider provider = new NoOpTraceIdProvider();
+        static {
+            INSTANCE = new NoOpTraceIdProvider(); // ✅ 명확하게 정적 초기화
+        }
+
+        static TraceIdProvider getInstance() {
+            return INSTANCE;
+        }
+
+        static synchronized void setInstance(TraceIdProvider provider) {
+            if (provider != null) {
+                INSTANCE = provider;
+            }
+        }
     }
 }
 

@@ -33,7 +33,6 @@ public class ErrorCategoryClassifier {
      */
     public static ErrorCategory categorize(Throwable exception) {
 
-        // ✅ 데이터베이스 오류 (먼저 처리)
         if (exception instanceof TransientDataAccessException) {
             return ErrorCategory.DATABASE_TRANSIENT_ERROR;
         }
@@ -41,7 +40,6 @@ public class ErrorCategoryClassifier {
             return ErrorCategory.DATABASE_PERMANENT_ERROR;
         }
 
-        // ✅ INBOUND NETWORK ERROR (우리 서버가 요청을 받을 때)
         else if (exception instanceof SocketTimeoutException ||
             exception instanceof UnknownHostException ||
             exception instanceof ConnectException ||
