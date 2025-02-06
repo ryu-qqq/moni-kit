@@ -1,0 +1,13 @@
+package com.monikit.core;
+
+public enum ErrorCategory {
+
+    APPLICATION_ERROR,
+    DATABASE_PERMANENT_ERROR,
+    DATABASE_TRANSIENT_ERROR,
+    INBOUND_NETWORK_ERROR,
+    OUTBOUND_NETWORK_ERROR,
+    UNKNOWN_ERROR,
+
+
+}

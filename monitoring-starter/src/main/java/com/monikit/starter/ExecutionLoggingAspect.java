@@ -55,7 +55,7 @@ public class ExecutionLoggingAspect {
             result = ThreadContextPropagator.runWithContextCallable(joinPoint::proceed);
             return result;
         } catch (Exception e) {
-            LogEntryContextManager.logException(traceId, e);
+            LogEntryContextManager.logException(traceId, e, ErrorCategoryClassifier.categorize(e));
             throw e;
         } finally {
             long executionTime = System.currentTimeMillis() - startTime;

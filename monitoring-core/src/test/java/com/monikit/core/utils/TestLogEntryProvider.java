@@ -53,7 +53,7 @@ public class TestLogEntryProvider {
     }
 
     public static ExceptionLog exceptionLog() {
-        return ExceptionLog.create(TRACE_ID, new RuntimeException("Test Exception"));
+        return ExceptionLog.create(TRACE_ID, new RuntimeException("Test Exception"), ErrorCategory.APPLICATION_ERROR);
     }
 
     public static HttpInboundRequestLog httpInboundRequestLog() {

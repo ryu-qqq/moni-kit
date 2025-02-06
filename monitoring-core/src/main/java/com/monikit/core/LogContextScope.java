@@ -17,4 +17,5 @@ public class LogContextScope implements AutoCloseable {
     public void close() {
         LogEntryContextManager.flush();
     }
+
 }

@@ -13,12 +13,21 @@ import java.util.Objects;
  * @since 1.0
  */
 public class ExceptionLog extends AbstractLogEntry {
+    private final String sourceClass;
+    private final String sourceMethod;
+    private final ErrorCategory errorCategory;
+
     private final String exceptionMessage;
     private final String stackTrace;
 
-    protected ExceptionLog(String traceId, Throwable exception) {
+    protected ExceptionLog(String traceId, Throwable exception, ErrorCategory errorCategory) {
         super(traceId, LogLevel.ERROR);
         Throwable rootCause = getRootCause(exception);
+
+        StackTraceElement[] stackTraceElements = rootCause.getStackTrace();
+        this.sourceClass = stackTraceElements.length > 0 ? stackTraceElements[0].getClassName() : "Unknown";
+        this.sourceMethod = stackTraceElements.length > 0 ? stackTraceElements[0].getMethodName() : "Unknown";
+        this.errorCategory = errorCategory;
         this.exceptionMessage = rootCause.getMessage();
         this.stackTrace = getStackTraceAsString(rootCause);
     }
@@ -58,29 +67,67 @@ public class ExceptionLog extends AbstractLogEntry {
         return sb.toString();
     }
 
-    public static ExceptionLog create(String traceId, Throwable exception) {
-        return new ExceptionLog(traceId, exception);
+    public String getSourceClass() {
+        return sourceClass;
+    }
+
+    public String getSourceMethod() {
+        return sourceMethod;
+    }
+
+    public ErrorCategory getErrorCategory() {
+        return errorCategory;
+    }
+
+    public static ExceptionLog create(String traceId, Throwable exception, ErrorCategory errorCategory) {
+        return new ExceptionLog(traceId, exception, errorCategory);
     }
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
         ExceptionLog that = (ExceptionLog) object;
-        return Objects.equals(exceptionMessage, that.exceptionMessage)
+        return Objects.equals(sourceClass, that.sourceClass)
+            && Objects.equals(sourceMethod, that.sourceMethod)
+            && errorCategory
+            == that.errorCategory
+            && Objects.equals(exceptionMessage, that.exceptionMessage)
             && Objects.equals(stackTrace, that.stackTrace);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(exceptionMessage, stackTrace);
+        return Objects.hash(sourceClass, sourceMethod, errorCategory, exceptionMessage, stackTrace);
     }
 
     @Override
     public String toString() {
-        return "ExceptionLog{" +
-            "exceptionMessage='" + exceptionMessage + '\'' +
-            ", stackTrace='" + stackTrace + '\'' +
+        return "ExceptionLog{"
+            +
+            "sourceClass='"
+            + sourceClass
+            + '\''
+            +
+            ", sourceMethod='"
+            + sourceMethod
+            + '\''
+            +
+            ", errorCategory="
+            + errorCategory
+            +
+            ", exceptionMessage='"
+            + exceptionMessage
+            + '\''
+            +
+            ", stackTrace='"
+            + stackTrace
+            + '\''
+            +
             '}';
     }
 }

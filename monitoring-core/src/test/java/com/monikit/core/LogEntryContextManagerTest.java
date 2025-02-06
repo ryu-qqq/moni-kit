@@ -68,7 +68,7 @@ class LogEntryContextManagerTest {
         String traceId = "test-trace-id";
         Exception exception = new RuntimeException("Test exception");
 
-        LogEntryContextManager.logException(traceId, exception);
+        LogEntryContextManager.logException(traceId, exception, ErrorCategory.APPLICATION_ERROR);
 
         Queue<LogEntry> logs = LogEntryContext.getLogs();
         assertEquals(1, logs.size());
@@ -83,8 +83,8 @@ class LogEntryContextManagerTest {
         Exception firstException = new RuntimeException("First exception");
         Exception secondException = new RuntimeException("Second exception");
 
-        LogEntryContextManager.logException(traceId, firstException);
-        LogEntryContextManager.logException(traceId, secondException);
+        LogEntryContextManager.logException(traceId, firstException, ErrorCategory.APPLICATION_ERROR);
+        LogEntryContextManager.logException(traceId, secondException, ErrorCategory.APPLICATION_ERROR);
 
         Queue<LogEntry> logs = LogEntryContext.getLogs();
         assertEquals(1, logs.size());
@@ -98,7 +98,7 @@ class LogEntryContextManagerTest {
         String traceId = "test-trace-id";
         Exception exception = new RuntimeException("Test exception");
 
-        LogEntryContextManager.logException(traceId, exception);
+        LogEntryContextManager.logException(traceId, exception, ErrorCategory.APPLICATION_ERROR);
         assertTrue(LogEntryContext.hasError());
 
         LogEntryContextManager.flush();

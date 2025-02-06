@@ -84,12 +84,12 @@ public class LogEntryContextManager {
      * @param traceId 트레이스 ID
      * @param exception 발생한 예외
      */
-    public static void logException(String traceId, Throwable exception) {
+    public static void logException(String traceId, Throwable exception, ErrorCategory errorCategory) {
         if (LogEntryContext.hasError()) {
             return;
         }
 
-        LogEntryContext.addLog(ExceptionLog.create(traceId, exception));
+        LogEntryContext.addLog(ExceptionLog.create(traceId, exception, errorCategory));
         LogEntryContext.setErrorOccurred(true);
     }
 
