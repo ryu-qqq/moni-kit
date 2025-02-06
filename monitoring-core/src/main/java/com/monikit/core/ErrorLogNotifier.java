@@ -5,5 +5,5 @@ package com.monikit.core;
  * - 특정 에러 로그가 감지되었을 때 실행될 콜백을 제공한다.
  */
 public interface ErrorLogNotifier {
-    void onErrorLogDetected(LogEntry logEntry);
+    void onErrorLogDetected(ExceptionLog logEntry);
 }

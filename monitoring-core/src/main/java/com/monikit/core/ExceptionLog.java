@@ -61,11 +61,18 @@ public class ExceptionLog extends AbstractLogEntry {
 
     private String getStackTraceAsString(Throwable e) {
         StringBuilder sb = new StringBuilder();
-        for (StackTraceElement element : e.getStackTrace()) {
-            sb.append(element.toString()).append("\n");
+        StackTraceElement[] stackTraceElements = e.getStackTrace();
+
+        int maxElements = 10;
+        for (int i = 0; i < Math.min(stackTraceElements.length, maxElements); i++) {
+            sb.append(stackTraceElements[i].toString()).append("\n");
+        }
+        if (stackTraceElements.length > maxElements) {
+            sb.append("... 이하 생략 ...\n");
         }
         return sb.toString();
     }
+
 
     public String getSourceClass() {
         return sourceClass;

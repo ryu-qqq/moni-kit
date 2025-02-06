@@ -15,7 +15,7 @@ public class LogEntryContextManager {
 
     private static final int MAX_LOG_SIZE = 300;
     private static LogNotifier logNotifier;
-    private static ErrorLogNotifier errorLogNotifier = logEntry -> {};
+    private static ErrorLogNotifier errorLogNotifier;
 
     /**
      * LogNotifier를 설정한다 (monitoring-starter에서 주입 가능).
@@ -24,6 +24,11 @@ public class LogEntryContextManager {
      */
     public static void setLogNotifier(LogNotifier notifier) {
         logNotifier = notifier;
+    }
+
+
+    public static void setErrorLogNotifier(ErrorLogNotifier notifier) {
+        errorLogNotifier = notifier;
     }
 
     /**
@@ -48,7 +53,9 @@ public class LogEntryContextManager {
         for (LogEntry log : LogEntryContext.getLogs()) {
             logNotifier.notify(log);
             if(log.getLogLevel().isEmergency()){
-                errorLogNotifier.onErrorLogDetected(log);
+                if(log instanceof ExceptionLog exceptionLog){
+                    errorLogNotifier.onErrorLogDetected(exceptionLog);
+                }
             }
         }
 
