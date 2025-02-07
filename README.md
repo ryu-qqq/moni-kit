@@ -55,7 +55,15 @@ root/
 **monikit**을 프로젝트에 추가하려면, build.gradle 파일에 아래 의존성을 추가합니다.
 
 ```gradle
-	implementation 'com.monikit:monikit-starter:1.0.0'
+	repositories {
+		maven { url 'https://jitpack.io' }
+	}
+	
+	implementation "com.github.ryu-qqq.moni-kit:monikit-core:${moniKitVersion}"
+	implementation "com.github.ryu-qqq.moni-kit:monikit-starter:${moniKitVersion}"
+	
+	// moniKitVersion 1.0.0 이 최신 릴리즈 버전
+	
 ```
 
 그 후, **application.yml** 파일에서 **monikit** 설정을 구성합니다. 아래는 설정 예시입니다.
