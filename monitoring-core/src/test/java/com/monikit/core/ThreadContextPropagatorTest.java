@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import com.monikit.core.utils.TestLogEntryProvider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ThreadContextPropagatorTest {
@@ -88,17 +89,16 @@ class ThreadContextPropagatorTest {
             LogEntry log = TestLogEntryProvider.executionTimeLog();
             LogEntryContextManager.addLog(log);
 
-            try {
+            Exception exception = assertThrows(RuntimeException.class, () ->
                 ThreadContextPropagator.runWithContextCallable(() -> {
                     throw new RuntimeException("Test exception");
-                });
-            } catch (RuntimeException e) {
-                assertEquals("Test exception", e.getMessage());
-            }
+                })
+            );
 
-
+            assertTrue(exception.getMessage().contains("Test exception"));
             assertEquals(0, LogEntryContext.size());
         }
+
     }
 
 

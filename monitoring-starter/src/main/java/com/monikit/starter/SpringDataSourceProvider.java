@@ -4,9 +4,12 @@ import jakarta.annotation.PostConstruct;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.monikit.core.DataSourceProvider;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * Spring Boot 환경에서 `DataSourceProvider`를 구현하는 클래스.
@@ -20,6 +23,8 @@ import com.monikit.core.DataSourceProvider;
 @Component
 public class SpringDataSourceProvider implements DataSourceProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(SpringDataSourceProvider.class);
+
     private final DataSource dataSource;
 
     public SpringDataSourceProvider(DataSource dataSource) {
@@ -29,11 +34,12 @@ public class SpringDataSourceProvider implements DataSourceProvider {
     @Override
     public String getDataSourceName() {
         try {
-            if (dataSource.isWrapperFor(com.zaxxer.hikari.HikariDataSource.class)) {
-                return dataSource.unwrap(com.zaxxer.hikari.HikariDataSource.class).getPoolName();
-            }
-        } catch (Exception ignored) {}
-        return "defaultDataSource";
+            HikariDataSource hikariDataSource = dataSource.unwrap(HikariDataSource.class);
+            return hikariDataSource.getPoolName();
+        } catch (Exception e) {
+            logger.warn("Failed to retrieve HikariDataSource name, using default", e);
+            return "defaultDataSource";
+        }
     }
 
     /**
@@ -42,5 +48,7 @@ public class SpringDataSourceProvider implements DataSourceProvider {
     @PostConstruct
     public void init() {
         DataSourceProvider.setInstance(this);
+        logger.info("SpringDataSourceProvider registered as DataSourceProvider instance.");
     }
+
 }
