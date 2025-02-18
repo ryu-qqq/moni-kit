@@ -26,6 +26,7 @@ class LogEntryContextManagerTest {
         LogEntryContext.clear();
         LogEntryContext.setErrorOccurred(false);
         LogEntryContextManager.setLogNotifier(new DefaultLogNotifier());
+        LogEntryContextManager.setErrorLogNotifier(new DefaultErrorLogNotifier());
     }
 
     @Test

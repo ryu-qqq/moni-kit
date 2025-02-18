@@ -10,35 +10,24 @@ import java.util.concurrent.Callable;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.1
  */
 public class ThreadContextPropagator {
 
-    public static void runWithContextRunnable(Runnable task) throws Exception{
-        if (LogEntryContext.getLogs().isEmpty()) {
-            Runnable wrappedTask = LogEntryContextManager.propagateToChildThread(() -> {
-                try {
-                    task.run();
-                } catch (Throwable t) {
-                    throw new RuntimeException(t);
-                } finally {
-                    LogEntryContextManager.flush();
-                }
-            });
-            wrappedTask.run();
-        } else {
-            try {
-                task.run();
-            } catch (Throwable t) {
-                throw propagateAsException(t);
-            } finally {
-                LogEntryContextManager.flush();
-            }
-        }
+    /**
+     * 주어진 Runnable을 실행하면서, 필요한 경우 스레드 컨텍스트를 복사하여 유지한다.
+     *
+     * @param task 실행할 Runnable
+     */
+    public static void runWithContextRunnable(Runnable task) throws Exception  {
+        executeWithContext(() -> {
+            task.run();
+            return null;
+        });
     }
 
     /**
-     * 주어진 ThrowingCallable을 실행하면서, 필요한 경우 스레드 컨텍스트를 복사하여 유지한다.
+     * 주어진 Callable을 실행하면서, 필요한 경우 스레드 컨텍스트를 복사하여 유지한다.
      *
      * @param <T> 반환 타입
      * @param task 실행할 Callable
@@ -46,25 +35,26 @@ public class ThreadContextPropagator {
      * @throws Exception 예외 발생 가능
      */
     public static <T> T runWithContextCallable(ThrowingCallable<T> task) throws Exception {
-        if (LogEntryContext.getLogs().isEmpty()) {
-            Callable<T> wrappedTask = LogEntryContextManager.propagateToChildThread(() -> {
-                try {
-                    return task.call();
-                } catch (Throwable t) {
-                    throw propagateAsException(t);
-                } finally {
-                    LogEntryContextManager.flush();
-                }
-            });
-            return wrappedTask.call();
-        } else {
+        return executeWithContext(() -> {
             try {
                 return task.call();
-            } catch (Throwable t) {
-                throw propagateAsException(t);
-            } finally {
-                LogEntryContextManager.flush();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             }
+        });
+    }
+
+    /**
+     * 공통 실행 로직을 처리하는 메서드
+     */
+    private static <T> T executeWithContext(Callable<T> callable) throws Exception {
+        Callable<T> wrappedTask = LogEntryContextManager.propagateToChildThread(callable);
+        try {
+            return wrappedTask.call();
+        } catch (Throwable t) {
+            throw propagateAsException(t);
+        } finally {
+            LogEntryContextManager.flush();
         }
     }
 
@@ -80,6 +70,7 @@ public class ThreadContextPropagator {
         }
         return new RuntimeException(throwable);
     }
+
 
     @FunctionalInterface
     public interface ThrowingCallable<T> {
