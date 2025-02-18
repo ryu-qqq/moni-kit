@@ -11,7 +11,9 @@ package com.monikit.core;
  */
 public class LogContextScope implements AutoCloseable {
 
-    public LogContextScope() {}
+    public LogContextScope() {
+        LogEntryContextManager.clear();
+    }
 
     @Override
     public void close() {

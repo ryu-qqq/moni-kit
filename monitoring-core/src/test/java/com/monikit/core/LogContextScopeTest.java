@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.monikit.core.utils.TestLogEntryProvider;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class LogContextScopeTest {
@@ -24,6 +26,14 @@ class LogContextScopeTest {
         }
 
         assertEquals(0, LogEntryContext.size());
+    }
+
+    @Test
+    @DisplayName("should clear all logs and reset error state")
+    void shouldClearLogsAutomaticallyWhenStarted() {
+        try (LogContextScope scope = new LogContextScope()) {
+            assertEquals(0, LogEntryContext.size());
+        }
     }
 
 }

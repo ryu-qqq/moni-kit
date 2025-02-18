@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class LogEntryContext {
 
+
     private static final InheritableThreadLocal<Queue<LogEntry>> logThreadLocal =
         new InheritableThreadLocal<>() {
             @Override
