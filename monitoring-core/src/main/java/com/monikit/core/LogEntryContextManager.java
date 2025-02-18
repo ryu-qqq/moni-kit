@@ -59,9 +59,15 @@ public class LogEntryContextManager {
             }
         }
 
+        clear();
+    }
+
+
+    public static void clear() {
         LogEntryContext.clear();
         LogEntryContext.setErrorOccurred(false);
     }
+
 
     /**
      * 부모 스레드의 컨텍스트를 자식 스레드로 전달하는 Runnable을 생성한다.

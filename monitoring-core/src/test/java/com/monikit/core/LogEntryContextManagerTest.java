@@ -53,6 +53,27 @@ class LogEntryContextManagerTest {
         assertEquals(0, LogEntryContext.size());
     }
 
+
+    @Test
+    @DisplayName("should clear all logs and reset error state")
+    void shouldClearAllLogsAndResetErrorState() {
+        LogEntry log1 = TestLogEntryProvider.executionTimeLog();
+        LogEntry log2 = TestLogEntryProvider.databaseQueryLog();
+
+        LogEntryContextManager.addLog(log1);
+        LogEntryContextManager.addLog(log2);
+        LogEntryContext.setErrorOccurred(true);
+
+        assertEquals(2, LogEntryContext.size());
+        assertTrue(LogEntryContext.hasError());
+
+        LogEntryContextManager.clear();
+
+        assertEquals(0, LogEntryContext.size());
+        assertFalse(LogEntryContext.hasError());
+    }
+
+
     @Test
     @DisplayName("should clear logs when MAX_LOG_SIZE is exceeded")
     void shouldClearLogsWhenMaxLogSizeIsExceeded() {
