@@ -35,9 +35,9 @@ import com.monikit.core.LoggingPreparedStatement;
  */
 
 public class LoggingConnection implements Connection {
+
     private static final Logger logger = LoggerFactory.getLogger(LoggingConnection.class);
     private final Connection delegate;
-
 
     public LoggingConnection(Connection delegate) {
         this.delegate = delegate;

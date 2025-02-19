@@ -12,6 +12,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import static com.monikit.starter.filter.ExcludePathConstant.EXCLUDED_PATHS;
+
 /**
  * HTTP 요청 단위로 LogContextScope를 관리하는 필터.
  * <p>
@@ -29,6 +31,14 @@ public class LogContextScopeFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        String requestUri = request.getRequestURI();
+
+        if (EXCLUDED_PATHS.contains(requestUri)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try (LogContextScope scope = new LogContextScope()) {
             RequestWrapper requestWrapper = new RequestWrapper(request);
             ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);

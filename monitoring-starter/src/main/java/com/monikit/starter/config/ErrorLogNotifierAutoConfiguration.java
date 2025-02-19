@@ -50,7 +50,7 @@ public class ErrorLogNotifierAutoConfiguration {
     @Primary
     @ConditionalOnMissingBean(ErrorLogNotifier.class)
     public ErrorLogNotifier defaultErrorLogNotifier() {
-        logger.info("🚀 No custom ErrorLogNotifier found. Using DefaultErrorLogNotifier.");
+        logger.info("No custom ErrorLogNotifier found. Using DefaultErrorLogNotifier.");
         return new DefaultErrorLogNotifier();
     }
 
@@ -64,11 +64,11 @@ public class ErrorLogNotifierAutoConfiguration {
         Map<String, ErrorLogNotifier> notifiers = applicationContext.getBeansOfType(ErrorLogNotifier.class);
 
         if (notifiers.size() > 1) {
-            logger.warn("⚠️ Multiple ErrorLogNotifier beans detected: {}", notifiers.keySet());
+            logger.warn("Multiple ErrorLogNotifier beans detected: {}", notifiers.keySet());
         }
 
         ErrorLogNotifier selectedNotifier = notifiers.values().iterator().next();
-        logger.info("✅ Using ErrorLogNotifier: {}", selectedNotifier.getClass().getSimpleName());
+        logger.info("Using ErrorLogNotifier: {}", selectedNotifier.getClass().getSimpleName());
 
         LogEntryContextManager.setErrorLogNotifier(selectedNotifier);
     }

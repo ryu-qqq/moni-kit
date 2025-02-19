@@ -31,28 +31,36 @@ public class LoggingPreparedStatement extends PreparedStatementWrapper {
     @Override
     public boolean execute() throws SQLException {
         long startTime = System.currentTimeMillis();
-        boolean result = super.execute();
-        QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, 0);
-        SqlParameterHolder.clear();
-        return result;
+        try {
+            return super.execute();
+        } finally {
+            QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, 0);
+            SqlParameterHolder.clear();
+        }
     }
 
     @Override
     public ResultSet executeQuery() throws SQLException {
         long startTime = System.currentTimeMillis();
         ResultSet resultSet = super.executeQuery();
-        QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, -1);
-        SqlParameterHolder.clear();
-        return resultSet;
+
+        return new LoggingResultSet(resultSet, sql, startTime);
     }
 
     @Override
     public int executeUpdate() throws SQLException {
         long startTime = System.currentTimeMillis();
-        int rowsAffected = super.executeUpdate();
-        QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, rowsAffected);
-        SqlParameterHolder.clear();
-        return rowsAffected;
+        int rowsAffected = 0;
+        try {
+            rowsAffected = super.executeUpdate();
+            return rowsAffected;
+        } catch (SQLException e) {
+            rowsAffected = -1;
+            throw e;
+        } finally {
+            QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, rowsAffected);
+            SqlParameterHolder.clear();
+        }
     }
 
 

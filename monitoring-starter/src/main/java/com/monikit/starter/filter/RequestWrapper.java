@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 
 public class RequestWrapper extends HttpServletRequestWrapper {
 
-    private byte[] cachedInputStream;
+    private final byte[] cachedInputStream;
 
     public RequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
