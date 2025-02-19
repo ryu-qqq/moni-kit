@@ -45,6 +45,6 @@ public class SqlParameterHolder {
      * SQL 실행이 끝나면 `ThreadLocal`을 정리.
      */
     static void clear() {
-        parametersHolder.remove();
+        parametersHolder.get().clear();
     }
 }

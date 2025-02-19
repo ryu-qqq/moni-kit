@@ -12,6 +12,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import static com.monikit.starter.filter.ExcludePathConstant.EXCLUDED_PATHS;
+
 /**
  * HTTP 요청 메트릭을 Prometheus로 전송하는 필터.
  */
@@ -19,15 +21,6 @@ import jakarta.servlet.http.HttpServletResponse;
 public class HttpMetricsFilter extends OncePerRequestFilter {
 
     private final MetricCollector metricCollector;
-
-    private static final Set<String> EXCLUDED_PATHS = Set.of(
-        "/actuator/health",
-        "/actuator/prometheus",
-        "/actuator/metrics",
-        "/actuator/info",
-        "/metrics",
-        "/health"
-    );
 
 
     public HttpMetricsFilter(MetricCollector metricCollector) {
@@ -50,4 +43,5 @@ public class HttpMetricsFilter extends OncePerRequestFilter {
             }
         }
     }
+
 }
