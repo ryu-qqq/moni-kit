@@ -37,7 +37,7 @@
 
 ### 1. **Gradle 추가**
 ```gradle
-implementation 'com.monikit:monikit-starter:1.0.0'
+implementation 'com.monikit:monikit-starter:1.0.1'
 ```
 
 ### 2. **설정 프로퍼티 (application.yml)**
