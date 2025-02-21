@@ -1,68 +1,67 @@
 package com.monikit.core;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@DisplayName("SqlParameterHolder 개선 테스트")
+class SqlParameterHolderTest {
 
-public class SqlParameterHolderTest {
+    @Test
+    @DisplayName("try-with-resources를 사용하면 자동으로 clear()가 호출되어야 한다")
+    void shouldAutoClearUsingTryWithResources() {
+        // Given
+        try (SqlParameterHolder holder = new SqlParameterHolder()) {
+            SqlParameterHolder.addParameter(123);
+            SqlParameterHolder.addParameter("test");
+            assertEquals("SELECT * FROM users WHERE id = 123 AND name = 'test'",
+                SqlParameterHolder.getFormattedParameters("SELECT * FROM users WHERE id = ? AND name = ?"));
+        }
 
-    @AfterEach
-    void clearThreadLocal() {
-        SqlParameterHolder.clear();  // 각 테스트 후 ThreadLocal 초기화
+        // Then (자동 clear 확인)
+        assertEquals("SELECT * FROM users WHERE id = ? AND name = ?",
+            SqlParameterHolder.getFormattedParameters("SELECT * FROM users WHERE id = ? AND name = ?"));
     }
 
     @Test
-    @DisplayName("스레드 간 파라미터가 독립적으로 처리되는지 확인")
-    void shouldAddParameterInDifferentThreadsWithoutInterference() throws InterruptedException, ExecutionException {
-        Callable<String> threadTask1 = () -> {
-            SqlParameterHolder.addParameter("param1");
-            return SqlParameterHolder.getCurrentParameters();
-        };
+    @DisplayName("파라미터를 추가하면 SQL에 올바르게 치환되어야 한다")
+    void shouldFormatSQLWithParameters() {
+        // Given
+        try (SqlParameterHolder holder = new SqlParameterHolder()) {
+            SqlParameterHolder.addParameter(100);
+            SqlParameterHolder.addParameter("hello");
+            SqlParameterHolder.addParameter(null);
 
-        Callable<String> threadTask2 = () -> {
-            SqlParameterHolder.addParameter("param2");
-            return SqlParameterHolder.getCurrentParameters();
-        };
+            // When
+            String formattedSQL = SqlParameterHolder.getFormattedParameters("SELECT * FROM users WHERE age = ? AND name = ? AND status = ?");
 
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        Future<String> result1 = executor.submit(threadTask1);
-        Future<String> result2 = executor.submit(threadTask2);
-        executor.shutdown();
-
-        assertNotEquals(result1.get(), result2.get());
-        assertEquals("[param1]", result1.get());
-        assertEquals("[param2]", result2.get());
+            // Then
+            assertEquals("SELECT * FROM users WHERE age = 100 AND name = 'hello' AND status = NULL", formattedSQL);
+        }
     }
 
     @Test
-    @DisplayName("SQL 파라미터가 실행 후 클리어되는지 확인")
-    void shouldClearParametersAfterExecution() {
-        SqlParameterHolder.addParameter("param1");
+    @DisplayName("멀티스레드 환경에서도 독립적인 값을 유지해야 한다")
+    void shouldMaintainThreadLocalIsolation() throws InterruptedException {
+        // Given
+        try (SqlParameterHolder mainThreadHolder = new SqlParameterHolder()) {
+            SqlParameterHolder.addParameter("main-thread");
 
-        // 파라미터 추가 확인
-        assertEquals("[param1]", SqlParameterHolder.getCurrentParameters());
+            Thread thread = new Thread(() -> {
+                try (SqlParameterHolder childThreadHolder = new SqlParameterHolder()) {
+                    SqlParameterHolder.addParameter("child-thread");
+                    assertEquals("SELECT * FROM logs WHERE id = 'child-thread'",
+                        SqlParameterHolder.getFormattedParameters("SELECT * FROM logs WHERE id = ?"));
+                }
+            });
 
-        // 클리어 후 확인
-        SqlParameterHolder.clear();
-        assertEquals("[]", SqlParameterHolder.getCurrentParameters());
-    }
+            thread.start();
+            thread.join(); // 스레드가 끝날 때까지 대기
 
-    @Test
-    @DisplayName("여러 개의 파라미터를 추가하고 제대로 처리되는지 확인")
-    void shouldHandleMultipleParameters() {
-        SqlParameterHolder.addParameter("param1");
-        SqlParameterHolder.addParameter("param2");
-
-        // 여러 파라미터가 제대로 반환되는지 확인
-        assertEquals("[param1, param2]", SqlParameterHolder.getCurrentParameters());
+            // Then (메인 스레드의 값이 영향을 받지 않아야 함)
+            assertEquals("SELECT * FROM logs WHERE id = 'main-thread'",
+                SqlParameterHolder.getFormattedParameters("SELECT * FROM logs WHERE id = ?"));
+        }
     }
 }

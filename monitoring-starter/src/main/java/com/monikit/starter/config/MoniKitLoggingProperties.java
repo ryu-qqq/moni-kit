@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
  * - 상세 로깅 여부 (`detailedLogging`)
  * - SQL 쿼리 성능 로깅 설정 (`slowQueryThresholdMs`, `criticalQueryThresholdMs`)
  * - 데이터베이스 로깅 활성화 여부 (`datasourceLoggingEnabled`)
+ * - HTTP 필터 활성화 여부 (`filtersEnabled`)
+ * - Trace ID 필터 활성화 여부 (`traceEnabled`)
+ * - HTTP 인터셉터 활성화 여부 (`interceptorsEnabled`)
  * </p>
  *
  * @author ryu-qqq
@@ -22,37 +25,28 @@ public class MoniKitLoggingProperties {
     private long slowQueryThresholdMs = 1000;
     private long criticalQueryThresholdMs = 5000;
     private boolean datasourceLoggingEnabled = true;
+    private boolean filtersEnabled = true;
+    private boolean traceEnabled = true;
+    private boolean interceptorsEnabled = true;
 
-    public boolean isDetailedLogging() {
-        return detailedLogging;
-    }
+    public boolean isDetailedLogging() { return detailedLogging; }
+    public void setDetailedLogging(boolean detailedLogging) { this.detailedLogging = detailedLogging; }
 
-    public void setDetailedLogging(boolean detailedLogging) {
-        this.detailedLogging = detailedLogging;
-    }
+    public long getSlowQueryThresholdMs() { return slowQueryThresholdMs; }
+    public void setSlowQueryThresholdMs(long slowQueryThresholdMs) { this.slowQueryThresholdMs = slowQueryThresholdMs; }
 
-    public long getSlowQueryThresholdMs() {
-        return slowQueryThresholdMs;
-    }
+    public long getCriticalQueryThresholdMs() { return criticalQueryThresholdMs; }
+    public void setCriticalQueryThresholdMs(long criticalQueryThresholdMs) { this.criticalQueryThresholdMs = criticalQueryThresholdMs; }
 
-    public void setSlowQueryThresholdMs(long slowQueryThresholdMs) {
-        this.slowQueryThresholdMs = slowQueryThresholdMs;
-    }
+    public boolean isDatasourceLoggingEnabled() { return datasourceLoggingEnabled; }
+    public void setDatasourceLoggingEnabled(boolean datasourceLoggingEnabled) { this.datasourceLoggingEnabled = datasourceLoggingEnabled; }
 
-    public long getCriticalQueryThresholdMs() {
-        return criticalQueryThresholdMs;
-    }
+    public boolean isFiltersEnabled() { return filtersEnabled; }
+    public void setFiltersEnabled(boolean filtersEnabled) { this.filtersEnabled = filtersEnabled; }
 
-    public void setCriticalQueryThresholdMs(long criticalQueryThresholdMs) {
-        this.criticalQueryThresholdMs = criticalQueryThresholdMs;
-    }
+    public boolean isTraceEnabled() { return traceEnabled; }
+    public void setTraceEnabled(boolean traceEnabled) { this.traceEnabled = traceEnabled; }
 
-    public boolean isDatasourceLoggingEnabled() {
-        return datasourceLoggingEnabled;
-    }
-
-    public void setDatasourceLoggingEnabled(boolean datasourceLoggingEnabled) {
-        this.datasourceLoggingEnabled = datasourceLoggingEnabled;
-    }
-
+    public boolean isInterceptorsEnabled() { return interceptorsEnabled; }
+    public void setInterceptorsEnabled(boolean interceptorsEnabled) { this.interceptorsEnabled = interceptorsEnabled; }
 }

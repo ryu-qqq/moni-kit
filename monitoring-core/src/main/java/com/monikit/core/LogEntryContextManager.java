@@ -1,110 +1,40 @@
 package com.monikit.core;
 
-import java.util.concurrent.Callable;
-
 /**
- * LogEntryContext를 관리하는 매니저 클래스.
+ * 로그 컨텍스트를 관리하는 핸들러 인터페이스.
  * <p>
- * 외부에서 직접 LogEntryContext를 조작할 수 없으며, 이 클래스를 통해서만 로그를 추가하고 관리한다.
+ * - 로그를 추가, 조회, 삭제하는 기능을 제공하며, 요청 단위의 로깅을 관리한다.
+ * - 기본 구현체는 {@link DefaultLogEntryContextManager}이며, 필요하면 커스텀 구현체를 등록하여 확장 가능하다.
+ * - 멀티스레드 환경에서도 요청 컨텍스트를 유지할 수 있도록 {@code propagateToChildThread()} 메서드를 제공한다.
  * </p>
  *
  * @author ryu-qqq
  * @since 1.0
  */
-public class LogEntryContextManager {
-
-    private static final int MAX_LOG_SIZE = 300;
-    private static LogNotifier logNotifier;
-    private static ErrorLogNotifier errorLogNotifier;
+public interface LogEntryContextManager {
 
     /**
-     * LogNotifier를 설정한다 (monitoring-starter에서 주입 가능).
+     * 현재 요청의 로그 컨텍스트에 로그를 추가한다.
      *
-     * @param notifier 사용할 LogNotifier 구현체
+     * @param logEntry 추가할 로그 객체
      */
-    public static void setLogNotifier(LogNotifier notifier) {
-        logNotifier = notifier;
-    }
-
-
-    public static void setErrorLogNotifier(ErrorLogNotifier notifier) {
-        errorLogNotifier = notifier;
-    }
+    void addLog(LogEntry logEntry);
 
     /**
-     * 로그를 추가할 때, 로그 개수가 너무 많으면 컨텍스트를 초기화 후 다시 추가한다.
-     *
-     * @param logEntry 저장할 로그 객체
+     * 현재 요청에서 수집된 모든 로그를 출력하고 컨텍스트를 초기화한다.
+     * <p>
+     * - 이 메서드는 요청이 종료될 때 호출되어야 하며, 로그를 저장소 또는 모니터링 시스템으로 전송하는 역할을 한다.
+     * </p>
      */
-    public static void addLog(LogEntry logEntry) {
-        if (LogEntryContext.size() >= MAX_LOG_SIZE) {
-            logNotifier.notify(LogLevel.WARN, "LogEntryContext cleared due to size limit");
-            flush();
-            LogEntryContext.clear();
-        }
-
-        LogEntryContext.addLog(logEntry);
-    }
+    void flush();
 
     /**
-     * 요청이 끝날 때 실행된 모든 로그를 출력하고 컨텍스트를 정리한다.
+     * 현재 요청의 로그 컨텍스트를 초기화한다.
+     * <p>
+     * - 컨텍스트를 초기화하면 해당 요청에서 기록된 모든 로그가 삭제된다.
+     * - 요청 종료 시 불필요한 메모리 사용을 방지하기 위해 반드시 호출해야 한다.
+     * </p>
      */
-    public static void flush() {
-        for (LogEntry log : LogEntryContext.getLogs()) {
-            logNotifier.notify(log);
-            if(log.getLogLevel().isEmergency()){
-                if(log instanceof ExceptionLog exceptionLog){
-                    errorLogNotifier.onErrorLogDetected(exceptionLog);
-                }
-            }
-        }
-
-        clear();
-    }
-
-
-    public static void clear() {
-        LogEntryContext.clear();
-        LogEntryContext.setErrorOccurred(false);
-    }
-
-
-    /**
-     * 부모 스레드의 컨텍스트를 자식 스레드로 전달하는 Runnable을 생성한다.
-     *
-     * @param task 실행할 Runnable
-     * @return 부모 스레드의 컨텍스트가 복사된 새로운 Runnable
-     */
-    public static Runnable propagateToChildThread(Runnable task) {
-        return LogEntryContext.propagateToChildThread(task);
-    }
-
-
-    /**
-     * 부모 스레드의 컨텍스트를 자식 스레드로 전달하는 Callable을 생성한다.
-     * @param task 실행할 Callable
-     * @return 부모 스레드의 컨텍스트가 복사된 새로운 Callable
-     * @param <T>
-     */
-
-    public static <T> Callable<T> propagateToChildThread(Callable<T> task) {
-        return LogEntryContext.propagateToChildThread(task);
-    }
-
-    /**
-     * 예외를 로깅하는 메서드 (AOP에서 처리하지 않고 이곳에서 예외를 기록하도록 변경)
-     *
-     * @param traceId 트레이스 ID
-     * @param exception 발생한 예외
-     */
-    public static void logException(String traceId, Throwable exception, ErrorCategory errorCategory) {
-        if (LogEntryContext.hasError()) {
-            return;
-        }
-
-        LogEntryContext.addLog(ExceptionLog.create(traceId, exception, errorCategory));
-        LogEntryContext.setErrorOccurred(true);
-    }
-
+    void clear();
 
 }

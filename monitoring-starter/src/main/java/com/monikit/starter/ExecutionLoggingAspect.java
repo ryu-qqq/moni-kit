@@ -9,12 +9,11 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.monikit.core.ExceptionLog;
 import com.monikit.core.ExecutionDetailLog;
 import com.monikit.core.ExecutionTimeLog;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
-import com.monikit.core.ThreadContextPropagator;
-import com.monikit.core.TraceIdProvider;
 
 /**
  * @Service 및 @Repository 어노테이션이 붙은 메서드의 실행 시간을 자동으로 로깅하는 AOP.
@@ -30,47 +29,52 @@ import com.monikit.core.TraceIdProvider;
 @Component
 public class ExecutionLoggingAspect {
 
-    @Value("${logging.detailedLogging:false}")
+    @Value("${monikit.logging.detailedLogging:false}")
     private boolean detailedLogging;
 
-    /**
-     * @Service 또는 @Component가 붙은 클래스의 모든 메서드 타겟
-     */
-    @Pointcut("within(@org.springframework.stereotype.Service *) || within(@org.springframework.stereotype.Repository *)")
-    public void serviceAndComponentMethods() {}
+    private final LogEntryContextManager logEntryContextManager;
+
+    public ExecutionLoggingAspect(LogEntryContextManager logEntryContextManager) {
+        this.logEntryContextManager = logEntryContextManager;
+    }
 
     /**
-     * 서비스 및 컴포넌트 메서드의 실행 시간을 측정하고 로깅
+     * @Service 또는 @Repository가 붙은 클래스의 모든 메서드 타겟.
      */
-    @Around("serviceAndComponentMethods()")
+    @Pointcut("within(@org.springframework.stereotype.Service *) || within(@org.springframework.stereotype.Repository *)")
+    public void serviceAndRepositoryMethods() {}
+
+    /**
+     * 서비스 및 리포지토리 메서드의 실행 시간을 측정하고 로깅.
+     */
+    @Around("serviceAndRepositoryMethods()")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
-        String traceId = TraceIdProvider.currentTraceId();;
+        String traceId = TraceIdProvider.getTraceId();
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
         String inputParams = Arrays.toString(joinPoint.getArgs());
 
         Object result = null;
         try {
-            result = ThreadContextPropagator.runWithContextCallable(joinPoint::proceed);
+            result = joinPoint.proceed();
             return result;
         } catch (Exception e) {
-            LogEntryContextManager.logException(traceId, e, ErrorCategoryClassifier.categorize(e));
+            logEntryContextManager.addLog(ExceptionLog.create(traceId, e, ErrorCategoryClassifier.categorize(e)));
             throw e;
         } finally {
             long executionTime = System.currentTimeMillis() - startTime;
             String outputValue = result != null ? result.toString() : "null";
 
             if (detailedLogging) {
-                LogEntryContextManager.addLog(ExecutionDetailLog.create(
+                logEntryContextManager.addLog(ExecutionDetailLog.create(
                     traceId, className, methodName, executionTime, inputParams, outputValue, LogLevel.DEBUG
                 ));
             } else {
-                LogEntryContextManager.addLog(ExecutionTimeLog.create(
+                logEntryContextManager.addLog(ExecutionTimeLog.create(
                     traceId, LogLevel.INFO, className, methodName, executionTime
                 ));
             }
         }
     }
-
 }

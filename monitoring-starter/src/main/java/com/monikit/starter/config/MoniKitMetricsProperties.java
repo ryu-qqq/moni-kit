@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * MoniKit 메트릭 수집 설정을 관리하는 클래스.
  * <p>
- * - 메트릭 수집 활성화 여부 (`enabled`)
+ * - HTTP 메트릭 필터 활성화 여부 (`metricsEnabled`)
  * </p>
  *
  * @author ryu-qqq
@@ -16,13 +16,10 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "monikit.metrics")
 public class MoniKitMetricsProperties {
 
-    private boolean enabled = true;
+    private boolean metricsEnabled = true;
 
-    public boolean isEnabled() {
-        return enabled;
-    }
+    public boolean isMetricsEnabled() { return metricsEnabled; }
+    public void setMetricsEnabled(boolean metricsEnabled) { this.metricsEnabled = metricsEnabled; }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+
 }

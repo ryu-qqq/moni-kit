@@ -13,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import com.monikit.core.LogEntryContextManager;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -29,7 +31,8 @@ class LogContextScopeFilterTest {
 
     @BeforeEach
     void setUp() {
-        logContextScopeFilter = new LogContextScopeFilter();
+        LogEntryContextManager logEntryContextManager = mock(LogEntryContextManager.class);
+        logContextScopeFilter = new LogContextScopeFilter(logEntryContextManager);
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         filterChain = mock(FilterChain.class);

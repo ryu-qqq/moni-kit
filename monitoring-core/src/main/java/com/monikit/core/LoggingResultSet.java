@@ -11,20 +11,26 @@ public class LoggingResultSet extends ResultSetWrapper {
 
     private final String sql;
     private final long startTime;
+    private final QueryLoggingService queryLoggingService;
 
-    public LoggingResultSet(ResultSet delegate, String sql, long startTime) {
+    public LoggingResultSet(ResultSet delegate, String sql, long startTime, QueryLoggingService queryLoggingService) {
         super(delegate);
         this.sql = sql;
         this.startTime = startTime;
+        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
     public void close() throws SQLException {
-        try {
+        try (SqlParameterHolder holder = new SqlParameterHolder()) { // 자동 clear
             super.close();
         } finally {
-            QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, -1);
-            SqlParameterHolder.clear();
+            queryLoggingService.logQuery(
+                SqlParameterHolder.getFormattedParameters(sql),
+                System.currentTimeMillis() - startTime,
+                -1
+            );
         }
     }
+
 }

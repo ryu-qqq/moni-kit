@@ -16,7 +16,7 @@ public class QueryPerformanceEvaluator {
     private QueryPerformanceEvaluator() {
     }
 
-    static LogLevel evaluate(long executionTime, long slowQueryThresholdMs, long criticalQueryThresholdMs) {
+    public static LogLevel evaluate(long executionTime, long slowQueryThresholdMs, long criticalQueryThresholdMs) {
         if (executionTime > criticalQueryThresholdMs) {
             return LogLevel.ERROR;
         } else if (executionTime > slowQueryThresholdMs) {

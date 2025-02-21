@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Enumeration;
 
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -12,34 +13,41 @@ import com.monikit.core.HttpInboundRequestLog;
 import com.monikit.core.HttpInboundResponseLog;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
-import com.monikit.core.TraceIdProvider;
+import com.monikit.starter.TraceIdProvider;
 import com.monikit.starter.filter.RequestWrapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 /**
  * HTTP 요청 및 응답을 자동으로 로깅하는 인터셉터.
  * <p>
- * - 요청이 들어올 때 HttpInboundRequestLog를 생성하여 로그를 남김.
- * - 응답이 나갈 때 HttpInboundResponseLog를 생성하여 로그를 남김.
- * - TraceId를 자동으로 관리함.
+ * - 요청이 들어올 때 `HttpInboundRequestLog`를 생성하여 로그를 남김.
+ * - 응답이 나갈 때 `HttpInboundResponseLog`를 생성하여 로그를 남김.
+ * - `TraceId`를 자동으로 관리함.
+ * - `LogEntryContextManager`를 주입받아 사용.
  * </p>
  *
  * @author ryu-qqq
  * @since 1.0
  */
-@Component
 public class HttpLoggingInterceptor implements HandlerInterceptor {
 
+    private static final Logger logger = LoggerFactory.getLogger(HttpLoggingInterceptor.class);
     private static final ThreadLocal<Instant> requestStartTime = new ThreadLocal<>();
+    private final LogEntryContextManager logEntryContextManager;
+
+    public HttpLoggingInterceptor(LogEntryContextManager logEntryContextManager) {
+        this.logEntryContextManager = logEntryContextManager;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String traceId = TraceIdProvider.currentTraceId();
+        String traceId = TraceIdProvider.getTraceId();
         requestStartTime.set(Instant.now());
 
-        LogEntryContextManager.addLog(HttpInboundRequestLog.create(
+        logger.debug("HTTP 요청 로깅 시작: {} {}", request.getMethod(), request.getRequestURI());
+
+        logEntryContextManager.addLog(HttpInboundRequestLog.create(
             traceId,
             request.getMethod(),
             request.getRequestURI(),
@@ -55,13 +63,14 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws
-        IOException {
-        String traceId = TraceIdProvider.currentTraceId();
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws IOException {
+        String traceId = TraceIdProvider.getTraceId();
         Instant startTime = requestStartTime.get();
         long executionTime = startTime != null ? Instant.now().toEpochMilli() - startTime.toEpochMilli() : 0;
 
-        LogEntryContextManager.addLog(HttpInboundResponseLog.create(
+        logger.debug("HTTP 응답 로깅 완료: {} {} (Status: {})", request.getMethod(), request.getRequestURI(), response.getStatus());
+
+        logEntryContextManager.addLog(HttpInboundResponseLog.create(
             traceId,
             request.getMethod(),
             request.getRequestURI(),
@@ -109,5 +118,4 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
         }
         return "ResponseBody Can't read";
     }
-
 }

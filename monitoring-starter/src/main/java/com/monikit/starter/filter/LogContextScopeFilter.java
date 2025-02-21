@@ -5,7 +5,8 @@ import java.io.IOException;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
-import com.monikit.core.LogContextScope;
+import com.monikit.core.LogEntryContextManager;
+import com.monikit.starter.LogContextScope;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,6 +29,12 @@ import static com.monikit.starter.filter.ExcludePathConstant.EXCLUDED_PATHS;
 
 public class LogContextScopeFilter extends OncePerRequestFilter {
 
+    private final LogEntryContextManager logEntryContextManager;
+
+    public LogContextScopeFilter(LogEntryContextManager logEntryContextManager) {
+        this.logEntryContextManager = logEntryContextManager;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
@@ -39,12 +46,11 @@ public class LogContextScopeFilter extends OncePerRequestFilter {
             return;
         }
 
-        try (LogContextScope scope = new LogContextScope()) {
+        try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
             RequestWrapper requestWrapper = new RequestWrapper(request);
             ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
             filterChain.doFilter(requestWrapper, wrappedResponse);
-
             wrappedResponse.copyBodyToResponse();
         }
     }

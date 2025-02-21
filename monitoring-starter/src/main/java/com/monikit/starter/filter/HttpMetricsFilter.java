@@ -1,18 +1,17 @@
 package com.monikit.starter.filter;
 
 import java.io.IOException;
-import java.util.Set;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.monikit.core.MetricCollector;
 
+import static com.monikit.starter.filter.ExcludePathConstant.EXCLUDED_PATHS;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import static com.monikit.starter.filter.ExcludePathConstant.EXCLUDED_PATHS;
 
 /**
  * HTTP 요청 메트릭을 Prometheus로 전송하는 필터.

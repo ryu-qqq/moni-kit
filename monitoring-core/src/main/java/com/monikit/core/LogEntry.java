@@ -2,7 +2,6 @@ package com.monikit.core;
 
 import java.time.Instant;
 
-
 /**
  * MoniKit의 모든 로그 엔트리가 구현해야 하는 인터페이스입니다.
  * <p>

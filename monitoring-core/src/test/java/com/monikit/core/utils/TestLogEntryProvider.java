@@ -3,6 +3,15 @@ package com.monikit.core.utils;
 import java.time.Instant;
 
 import com.monikit.core.*;
+import com.monikit.core.BatchJobLog;
+import com.monikit.core.DatabaseQueryLog;
+import com.monikit.core.ExceptionLog;
+import com.monikit.core.ExecutionDetailLog;
+import com.monikit.core.ExecutionTimeLog;
+import com.monikit.core.HttpInboundRequestLog;
+import com.monikit.core.HttpInboundResponseLog;
+import com.monikit.core.HttpOutboundRequestLog;
+import com.monikit.core.HttpOutboundResponseLog;
 
 /**
  * `TestLogEntryProvider`의 테스트 데이터 제공 클래스.

@@ -11,6 +11,14 @@ package com.monikit.core;
  */
 public class DefaultLogNotifier implements LogNotifier {
 
+    private static final DefaultLogNotifier INSTANCE = new DefaultLogNotifier();
+
+    private DefaultLogNotifier() {}
+
+    public static DefaultLogNotifier getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void notify(LogLevel logLevel, String message) {
         System.out.println(message);
@@ -20,4 +28,5 @@ public class DefaultLogNotifier implements LogNotifier {
     public void notify(LogEntry logEntry) {
         System.out.println(logEntry.toString());
     }
+
 }

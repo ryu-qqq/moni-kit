@@ -18,19 +18,21 @@ import org.springframework.jdbc.datasource.DelegatingDataSource;
  */
 public class LoggingDataSource extends DelegatingDataSource {
 
+    private final LoggingPreparedStatementFactory preparedStatementFactory;
 
-    public LoggingDataSource(DataSource targetDataSource) {
+    public LoggingDataSource(DataSource targetDataSource, LoggingPreparedStatementFactory preparedStatementFactory) {
         super(targetDataSource);
+        this.preparedStatementFactory = preparedStatementFactory;
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return new LoggingConnection(super.getConnection());
+        return new LoggingConnection(super.getConnection(), preparedStatementFactory);
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return new LoggingConnection(super.getConnection(username, password));
+        return new LoggingConnection(super.getConnection(username, password), preparedStatementFactory);
     }
 
 }

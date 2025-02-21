@@ -16,50 +16,61 @@ import java.sql.SQLException;
 public class LoggingPreparedStatement extends PreparedStatementWrapper {
 
     private final String sql;
+    private final QueryLoggingService queryLoggingService;
 
-    public LoggingPreparedStatement(PreparedStatement delegate, String sql) {
+    public LoggingPreparedStatement(PreparedStatement delegate, String sql, QueryLoggingService queryLoggingService) {
         super(delegate);
         this.sql = sql;
+        this.queryLoggingService = queryLoggingService;
     }
 
     @Override
     public void setObject(int parameterIndex, Object x) throws SQLException {
-        SqlParameterHolder.addParameter(x);
-        super.setObject(parameterIndex, x);
+        try (SqlParameterHolder holder = new SqlParameterHolder()) { // 자동 clear
+            SqlParameterHolder.addParameter(x);
+            super.setObject(parameterIndex, x);
+        }
     }
 
     @Override
     public boolean execute() throws SQLException {
         long startTime = System.currentTimeMillis();
-        try {
+        try (SqlParameterHolder holder = new SqlParameterHolder()) { // 자동 clear
             return super.execute();
         } finally {
-            QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, 0);
-            SqlParameterHolder.clear();
+            queryLoggingService.logQuery(
+                SqlParameterHolder.getFormattedParameters(sql),
+                System.currentTimeMillis() - startTime,
+                0
+            );
         }
     }
 
     @Override
     public ResultSet executeQuery() throws SQLException {
         long startTime = System.currentTimeMillis();
-        ResultSet resultSet = super.executeQuery();
-
-        return new LoggingResultSet(resultSet, sql, startTime);
+        try (SqlParameterHolder holder = new SqlParameterHolder()) { // 자동 clear
+            ResultSet resultSet = super.executeQuery();
+            return new LoggingResultSet(resultSet, sql, startTime, queryLoggingService);
+        }
     }
 
     @Override
     public int executeUpdate() throws SQLException {
         long startTime = System.currentTimeMillis();
         int rowsAffected = 0;
-        try {
+        try (SqlParameterHolder holder = new SqlParameterHolder()) { // 자동 clear
             rowsAffected = super.executeUpdate();
             return rowsAffected;
         } catch (SQLException e) {
             rowsAffected = -1;
             throw e;
         } finally {
-            QueryLoggingService.logQuery(sql, System.currentTimeMillis() - startTime, rowsAffected);
-            SqlParameterHolder.clear();
+            queryLoggingService.logQuery(
+                SqlParameterHolder.getFormattedParameters(sql),
+                System.currentTimeMillis() - startTime,
+                rowsAffected
+            );
         }
     }
 
