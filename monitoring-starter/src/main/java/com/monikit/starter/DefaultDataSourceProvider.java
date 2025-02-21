@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.stereotype.Component;
 
@@ -26,11 +27,11 @@ import com.monikit.core.DataSourceProvider;
 @Component
 public class DefaultDataSourceProvider implements DataSourceProvider {
 
-    private final DataSource dataSource;
+    private final ObjectProvider<DataSource> dataSourceProvider;
     private final AtomicReference<String> cachedDatabaseName = new AtomicReference<>(null);
 
-    public DefaultDataSourceProvider(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public DefaultDataSourceProvider(ObjectProvider<DataSource> dataSourceProvider) {
+        this.dataSourceProvider = dataSourceProvider;
     }
 
     @Override
@@ -48,6 +49,11 @@ public class DefaultDataSourceProvider implements DataSourceProvider {
      * 데이터소스에서 JDBC URL을 조회하고, 데이터베이스 이름을 추출한다.
      */
     private String fetchDatabaseName() {
+        DataSource dataSource = dataSourceProvider.getIfAvailable();
+        if (dataSource == null) {
+            return "unknownDataSource";
+        }
+
         try (Connection connection = dataSource.getConnection()) {
             String url = connection.getMetaData().getURL();
             return extractDatabaseNameFromUrl(url);
@@ -74,6 +80,7 @@ public class DefaultDataSourceProvider implements DataSourceProvider {
         }
 
         // H2 또는 기타 인메모리 데이터베이스
+        DataSource dataSource = dataSourceProvider.getIfAvailable();
         if (dataSource instanceof EmbeddedDatabase) {
             return "embeddedDatabase";
         }

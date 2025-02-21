@@ -4,6 +4,7 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,10 +57,8 @@ public class DataSourceLoggingConfig {
      */
     @Bean
     @ConditionalOnMissingBean(DataSourceProvider.class)
-    public DataSourceProvider defaultDataSourceProvider(DataSource dataSource) {
-        DefaultDataSourceProvider provider = new DefaultDataSourceProvider(dataSource);
-        logger.info("✅ Using DefaultDataSourceProvider. Resolved database name: {}", provider.getDataSourceName());
-        return provider;
+    public DataSourceProvider defaultDataSourceProvider(ObjectProvider<DataSource> dataSourceProvider) {
+        return new DefaultDataSourceProvider(dataSourceProvider);
     }
 
 }
