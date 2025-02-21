@@ -11,6 +11,15 @@ package com.monikit.core;
  */
 
 public class DefaultErrorLogNotifier implements ErrorLogNotifier {
+
+    private static final DefaultErrorLogNotifier INSTANCE = new DefaultErrorLogNotifier();
+
+    private DefaultErrorLogNotifier() {}
+
+    public static DefaultErrorLogNotifier getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void onErrorLogDetected(ExceptionLog logEntry) {
         System.out.printf("Error, %s%n", logEntry.toString());

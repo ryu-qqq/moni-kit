@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("LogEntryContext 테스트")
+@DisplayName("LogEntryContext & ThreadContextPropagator 테스트")
 class LogEntryContextTest {
 
     @BeforeEach
@@ -69,7 +69,7 @@ class LogEntryContextTest {
             LogEntry log = TestLogEntryProvider.executionTimeLog();
             LogEntryContext.addLog(log);
 
-            Runnable childTask = LogEntryContext.propagateToChildThread(() -> {
+            Runnable childTask = ThreadContextPropagator.propagateToChildThread(() -> {
                 Queue<LogEntry> logs = LogEntryContext.getLogs();
                 assertEquals(1, logs.size());
                 assertTrue(logs.contains(log));
@@ -86,7 +86,7 @@ class LogEntryContextTest {
             LogEntry log = TestLogEntryProvider.executionTimeLog();
             LogEntryContext.addLog(log);
 
-            Callable<Boolean> childTask = LogEntryContext.propagateToChildThread(() -> {
+            Callable<Boolean> childTask = ThreadContextPropagator.propagateToChildThread(() -> {
                 Queue<LogEntry> logs = LogEntryContext.getLogs();
                 assertEquals(1, logs.size());
                 assertTrue(logs.contains(log));
@@ -106,7 +106,7 @@ class LogEntryContextTest {
         void shouldPropagateErrorStateToChildThreadUsingCallable() throws Exception {
             LogEntryContext.setErrorOccurred(true);
 
-            Callable<Boolean> childTask = LogEntryContext.propagateToChildThread(LogEntryContext::hasError);
+            Callable<Boolean> childTask = ThreadContextPropagator.propagateToChildThread(LogEntryContext::hasError);
 
             ExecutorService executor = newSingleThreadExecutor();
             Future<Boolean> future = executor.submit(childTask);
@@ -115,14 +115,13 @@ class LogEntryContextTest {
 
             assertTrue(hasErrorInChildThread);
         }
-
     }
 
     @ParameterizedTest
     @MethodSource("provideTestLogEntries")
     @DisplayName("should add multiple log entries then they should be retrievable")
     void shouldAddMultipleLogEntriesThenTheyShouldBeRetrievable(LogEntry logEntry) {
-        LogEntryContextManager.addLog(logEntry);
+        LogEntryContext.addLog(logEntry);
         assertTrue(LogEntryContext.getLogs().contains(logEntry));
     }
 
@@ -170,9 +169,6 @@ class LogEntryContextTest {
             assertTrue(LogEntryContext.hasError());
 
             LogEntryContext.clear();
-            LogEntryContext.setErrorOccurred(false);
-
-            assertEquals(0, LogEntryContext.size());
             assertFalse(LogEntryContext.hasError());
         }
 
@@ -181,7 +177,7 @@ class LogEntryContextTest {
         void shouldPropagateErrorStateToChildThread() throws InterruptedException {
             LogEntryContext.setErrorOccurred(true);
 
-            Runnable childTask = LogEntryContext.propagateToChildThread(() -> {
+            Runnable childTask = ThreadContextPropagator.propagateToChildThread(() -> {
                 assertTrue(LogEntryContext.hasError());
             });
 
@@ -190,7 +186,4 @@ class LogEntryContextTest {
             thread.join();
         }
     }
-
-
-
 }

@@ -1,6 +1,9 @@
 package com.monikit.core;
 
 import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,98 +12,132 @@ import org.junit.jupiter.api.Test;
 
 import com.monikit.core.utils.TestLogEntryProvider;
 
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("ThreadContextPropagator 테스트")
 class ThreadContextPropagatorTest {
-
 
     @BeforeEach
     void setup() {
         LogEntryContext.clear();
         LogEntryContext.setErrorOccurred(false);
-        LogEntryContextManager.setLogNotifier(new DefaultLogNotifier());
     }
 
-
     @Nested
-    @DisplayName("ThreadContextPropagator with Runnable")
-    class RunnableTests {
+    @DisplayName("Runnable 기반 컨텍스트 전파 테스트")
+    class RunnablePropagationTests {
 
         @Test
-        @DisplayName("should propagate log context to child thread when Runnable is executed")
-        void shouldPropagateLogContextToChildThread() throws Exception {
+        @DisplayName("should propagate log context to child thread using Runnable")
+        void shouldPropagateLogContextToChildThreadUsingRunnable() throws InterruptedException {
             LogEntry log = TestLogEntryProvider.executionTimeLog();
-            LogEntryContextManager.addLog(log);
+            LogEntryContext.addLog(log);
+            LogEntryContext.setErrorOccurred(true);
 
-            Runnable task = () -> {
+            Runnable childTask = ThreadContextPropagator.propagateToChildThread(() -> {
                 Queue<LogEntry> logs = LogEntryContext.getLogs();
                 assertEquals(1, logs.size());
                 assertTrue(logs.contains(log));
-            };
+                assertTrue(LogEntryContext.hasError());
+            });
 
-            ThreadContextPropagator.runWithContextRunnable(task);
+            Thread thread = new Thread(childTask);
+            thread.start();
+            thread.join();
         }
 
         @Test
-        @DisplayName("should handle exceptions in Runnable and flush context")
-        void shouldHandleExceptionsInRunnableAndFlushContext() throws Exception {
+        @DisplayName("should clear child thread context without affecting parent")
+        void shouldClearChildThreadContextWithoutAffectingParent() throws InterruptedException {
             LogEntry log = TestLogEntryProvider.executionTimeLog();
-            LogEntryContextManager.addLog(log);
+            LogEntryContext.addLog(log);
+            LogEntryContext.setErrorOccurred(true);
 
-            Runnable task = () -> {
-                throw new RuntimeException("Test exception");
-            };
+            Runnable childTask = ThreadContextPropagator.propagateToChildThread(() -> {
+                LogEntryContext.clear();
+                assertEquals(0, LogEntryContext.size());
+                assertFalse(LogEntryContext.hasError());
+            });
 
-            try {
-                ThreadContextPropagator.runWithContextRunnable(task);
-            } catch (RuntimeException e) {
-                assertEquals("Test exception", e.getMessage());
-            }
+            Thread thread = new Thread(childTask);
+            thread.start();
+            thread.join();
 
-            assertEquals(0, LogEntryContext.size());
+            // 부모 스레드의 컨텍스트는 유지되어야 함
+            assertEquals(1, LogEntryContext.size());
+            assertTrue(LogEntryContext.hasError());
         }
     }
 
-
     @Nested
-    @DisplayName("ThreadContextPropagator with Callable")
-    class CallableTests {
+    @DisplayName("Callable 기반 컨텍스트 전파 테스트")
+    class CallablePropagationTests {
 
         @Test
-        @DisplayName("should propagate log context to child thread when Callable is executed")
-        void shouldPropagateLogContextToChildThread() throws Exception {
+        @DisplayName("should propagate log context to child thread using Callable and return expected result")
+        void shouldPropagateLogContextToChildThreadUsingCallableAndReturnExpectedResult() throws Exception {
             LogEntry log = TestLogEntryProvider.executionTimeLog();
-            LogEntryContextManager.addLog(log);
+            LogEntryContext.addLog(log);
+            LogEntryContext.setErrorOccurred(true);
 
-            Boolean result = ThreadContextPropagator.runWithContextCallable(() -> {
+            Callable<Boolean> childTask = ThreadContextPropagator.propagateToChildThread(() -> {
                 Queue<LogEntry> logs = LogEntryContext.getLogs();
                 assertEquals(1, logs.size());
                 assertTrue(logs.contains(log));
+                assertTrue(LogEntryContext.hasError());
                 return true;
             });
+
+            ExecutorService executor = newSingleThreadExecutor();
+            Future<Boolean> future = executor.submit(childTask);
+            boolean result = future.get();
+            executor.shutdown();
+
             assertTrue(result);
         }
 
         @Test
-        @DisplayName("should handle exceptions in Callable and flush context")
-        void shouldHandleExceptionsInCallableAndFlushContext() throws Exception {
-            LogEntry log = TestLogEntryProvider.executionTimeLog();
-            LogEntryContextManager.addLog(log);
+        @DisplayName("should propagate error state to child thread using Callable")
+        void shouldPropagateErrorStateToChildThreadUsingCallable() throws Exception {
+            LogEntryContext.setErrorOccurred(true);
 
-            Exception exception = assertThrows(RuntimeException.class, () ->
-                ThreadContextPropagator.runWithContextCallable(() -> {
-                    throw new RuntimeException("Test exception");
-                })
-            );
+            Callable<Boolean> childTask = ThreadContextPropagator.propagateToChildThread(LogEntryContext::hasError);
 
-            assertTrue(exception.getMessage().contains("Test exception"));
-            assertEquals(0, LogEntryContext.size());
+            ExecutorService executor = newSingleThreadExecutor();
+            Future<Boolean> future = executor.submit(childTask);
+            boolean hasErrorInChildThread = future.get();
+            executor.shutdown();
+
+            assertTrue(hasErrorInChildThread);
         }
 
+        @Test
+        @DisplayName("should clear child thread context without affecting parent using Callable")
+        void shouldClearChildThreadContextWithoutAffectingParentUsingCallable() throws Exception {
+            LogEntry log = TestLogEntryProvider.executionTimeLog();
+            LogEntryContext.addLog(log);
+            LogEntryContext.setErrorOccurred(true);
+
+            Callable<Boolean> childTask = ThreadContextPropagator.propagateToChildThread(() -> {
+                LogEntryContext.clear();
+                assertEquals(0, LogEntryContext.size());
+                assertFalse(LogEntryContext.hasError());
+                return true;
+            });
+
+            ExecutorService executor = newSingleThreadExecutor();
+            Future<Boolean> future = executor.submit(childTask);
+            boolean result = future.get();
+            executor.shutdown();
+
+            assertTrue(result);
+
+            // 부모 스레드의 컨텍스트는 유지되어야 함
+            assertEquals(1, LogEntryContext.size());
+            assertTrue(LogEntryContext.hasError());
+        }
     }
-
-
-
 }

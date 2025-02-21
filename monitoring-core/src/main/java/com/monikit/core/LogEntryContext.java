@@ -1,7 +1,6 @@
 package com.monikit.core;
 
 import java.util.Queue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -13,8 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author ryu-qqq
  * @since 1.0
  */
-public class LogEntryContext {
-
+class LogEntryContext {
 
     private static final InheritableThreadLocal<Queue<LogEntry>> logThreadLocal =
         new InheritableThreadLocal<>() {
@@ -47,7 +45,7 @@ public class LogEntryContext {
      *
      * @return 현재 요청에서 발생한 로그 리스트
      */
-    public static Queue<LogEntry> getLogs() {
+    static Queue<LogEntry> getLogs() {
         return new ConcurrentLinkedQueue<>(logThreadLocal.get());
     }
 
@@ -55,7 +53,7 @@ public class LogEntryContext {
      *
      * @return 현재 요청에서 발생한 로그 리스트의 사이즈
      */
-    public static int size() {
+    static int size() {
         return logThreadLocal.get().size();
     }
 
@@ -65,6 +63,7 @@ public class LogEntryContext {
      */
     static void clear() {
         logThreadLocal.remove();
+        hasError.set(false);
     }
 
     /**
@@ -72,7 +71,7 @@ public class LogEntryContext {
      *
      * @return 예외 발생 여부 (true면 예외 발생)
      */
-    public static boolean hasError() {
+    static boolean hasError() {
         return hasError.get();
     }
 
@@ -82,44 +81,5 @@ public class LogEntryContext {
     static void setErrorOccurred(boolean errorOccurred) {
         hasError.set(errorOccurred);
     }
-
-
-
-    /**
-     * 현재 스레드의 컨텍스트를 자식 스레드로 전달하는 Runnable을 생성한다.
-     *
-     * @param task 실행할 Runnable
-     * @return 부모 스레드의 컨텍스트가 복사된 새로운 Runnable
-     */
-    static Runnable propagateToChildThread(Runnable task) {
-        Queue<LogEntry> parentLogs = new ConcurrentLinkedQueue<>(logThreadLocal.get());
-        Boolean parentHasError = hasError.get();
-
-        return () -> {
-            logThreadLocal.set(new ConcurrentLinkedQueue<>(parentLogs));
-            hasError.set(parentHasError);
-            task.run();
-        };
-    }
-
-    /**
-     * 현재 스레드의 컨텍스트를 자식 스레드로 전달하는 Callable을 생성한다.
-     *
-     * @param <T> 반환 타입
-     * @param task 실행할 Callable
-     * @return 부모 스레드의 컨텍스트가 복사된 새로운 Callable
-     */
-    static <T> Callable<T> propagateToChildThread(Callable<T> task) {
-        Queue<LogEntry> parentLogs = new ConcurrentLinkedQueue<>(logThreadLocal.get());
-        Boolean parentHasError = hasError.get();
-
-        return () -> {
-            logThreadLocal.set(new ConcurrentLinkedQueue<>(parentLogs));
-            hasError.set(parentHasError);
-            return task.call();
-        };
-    }
-
-
 
 }

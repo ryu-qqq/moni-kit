@@ -1,119 +1,170 @@
 package com.monikit.starter.interceptor;
 
 import java.io.IOException;
-import java.util.List;
+import java.time.Instant;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.util.ContentCachingResponseWrapper;
 
-import com.monikit.core.DefaultLogNotifier;
 import com.monikit.core.HttpInboundRequestLog;
 import com.monikit.core.HttpInboundResponseLog;
-import com.monikit.core.LogEntryContext;
 import com.monikit.core.LogEntryContextManager;
-import com.monikit.core.LogLevel;
-import com.monikit.core.TraceIdProvider;
-import com.monikit.starter.MdcTraceIdProvider;
-import com.monikit.starter.filter.RequestWrapper;
+import com.monikit.starter.TraceIdProvider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("HttpLoggingInterceptor 테스트")
 class HttpLoggingInterceptorTest {
 
-    private final HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-    private MockHttpServletRequest request;
-    private MockHttpServletResponse response;
-    private ContentCachingResponseWrapper wrappedResponse;
-    private Object handler;
+    private LogEntryContextManager mockLogEntryContextManager;
+    private HttpLoggingInterceptor interceptor;
 
     @BeforeEach
-    void setup() {
-        request = new MockHttpServletRequest();
-        response = new MockHttpServletResponse();
-        wrappedResponse = new ContentCachingResponseWrapper(response);
-        handler = new Object();
-
-        LogEntryContextManager.flush();
-        TraceIdProvider.setInstance(new MdcTraceIdProvider());
-        LogEntryContextManager.setLogNotifier(new DefaultLogNotifier());
-
+    void setUp() {
+        mockLogEntryContextManager = mock(LogEntryContextManager.class);
+        interceptor = new HttpLoggingInterceptor(mockLogEntryContextManager);
     }
 
-    @Test
-    @DisplayName("should log request details including body when preHandle is called")
-    void shouldLogRequestDetailsIncludingBodyWhenPreHandleIsCalled() throws IOException {
-        request.setMethod("POST");
-        request.setRequestURI("/test");
-        request.setQueryString("param=value");
-        request.addHeader("User-Agent", "JUnit Test Agent");
-        request.setRemoteAddr("127.0.0.1");
+    @Nested
+    @DisplayName("preHandle() 테스트")
+    class PreHandleTests {
 
-        String requestBody = "{ \"key\": \"value\" }";
-        request.setContent(requestBody.getBytes());
+        @Test
+        @DisplayName("HTTP 요청이 정상적으로 로깅되어야 한다")
+        void shouldLogHttpRequest() {
+            // Given
+            MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/test");
+            request.setQueryString("param1=value1");
+            request.addHeader("User-Agent", "TestAgent");
+            request.setRemoteAddr("127.0.0.1");
 
-        RequestWrapper wrappedRequest = new RequestWrapper(request);
+            MockHttpServletResponse response = new MockHttpServletResponse();
 
-        MdcTraceIdProvider.setTraceId("test-trace-id");
-        boolean result = interceptor.preHandle(wrappedRequest, response, handler);
+            // When
+            boolean result = interceptor.preHandle(request, response, new Object());
 
-        assertTrue(result, "preHandle should return true");
+            // Then
+            assertTrue(result);
+            ArgumentCaptor<HttpInboundRequestLog> captor = ArgumentCaptor.forClass(HttpInboundRequestLog.class);
+            verify(mockLogEntryContextManager, times(1)).addLog(captor.capture());
 
-        List<HttpInboundRequestLog> logs = LogEntryContext.getLogs().stream()
-            .filter(log -> log instanceof HttpInboundRequestLog)
-            .map(log -> (HttpInboundRequestLog) log)
-            .toList();
-
-        assertEquals(1, logs.size());
-        HttpInboundRequestLog log = logs.getFirst();
-
-        assertEquals("test-trace-id", log.getTraceId());
-        assertEquals("POST", log.getHttpMethod());
-        assertEquals("/test", log.getRequestUri());
-        assertEquals("param=value", log.getQueryParams());
-        assertEquals("JUnit Test Agent", log.getUserAgent());
-        assertEquals("127.0.0.1", log.getClientIp());
-        assertEquals(LogLevel.INFO, log.getLogLevel());
-
-        assertEquals(requestBody, log.getRequestBody());
+            HttpInboundRequestLog log = captor.getValue();
+            assertEquals("POST", log.getHttpMethod());
+            assertEquals("/api/test", log.getRequestUri());
+            assertEquals("param1=value1", log.getQueryParams());
+            assertEquals("TestAgent", log.getUserAgent());
+            assertEquals("127.0.0.1", log.getClientIp());
+        }
     }
 
-    @Test
-    @DisplayName("should log response details including body when afterCompletion is called")
-    void shouldLogResponseDetailsIncludingBodyWhenAfterCompletionIsCalled() throws IOException {
-        request.setMethod("POST");
-        request.setRequestURI("/api/data");
+    @Nested
+    @DisplayName("afterCompletion() 테스트")
+    class AfterCompletionTests {
 
-        response.setStatus(200);
-        response.setHeader("Content-Type", "application/json");
+        @Test
+        @DisplayName("HTTP 응답이 정상적으로 로깅되어야 한다")
+        void shouldLogHttpResponse() throws IOException {
+            // Given
+            MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/test");
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            response.setStatus(200);
+            response.addHeader("Content-Type", "application/json");
 
-        String responseBody = "{ \"success\": true }";
-        wrappedResponse.getOutputStream().write(responseBody.getBytes());
-        wrappedResponse.flushBuffer();
+            // 요청이 들어올 때 preHandle() 먼저 호출해야 afterCompletion()에서 실행 시간을 측정 가능
+            interceptor.preHandle(request, response, new Object());
 
-        MdcTraceIdProvider.setTraceId("test-trace-id");
-        interceptor.afterCompletion(request, wrappedResponse, handler, null);
+            // When
+            interceptor.afterCompletion(request, response, new Object(), null);
 
-        List<HttpInboundResponseLog> logs = LogEntryContext.getLogs().stream()
-            .filter(log -> log instanceof HttpInboundResponseLog)
-            .map(log -> (HttpInboundResponseLog) log)
-            .toList();
+            // Then
+            ArgumentCaptor<HttpInboundResponseLog> captor = ArgumentCaptor.forClass(HttpInboundResponseLog.class);
+            verify(mockLogEntryContextManager, times(1)).addLog(captor.capture());
 
-        assertEquals(1, logs.size());
-        HttpInboundResponseLog log = logs.getFirst();
+            HttpInboundResponseLog log = captor.getValue();
+            assertEquals("GET", log.getHttpMethod());
+            assertEquals("/api/test", log.getRequestUri());
+            assertEquals(200, log.getStatusCode());
+            assertTrue(log.getHeaders().contains("Content-Type"));
+        }
 
-        assertEquals("test-trace-id", log.getTraceId());
-        assertEquals("POST", log.getHttpMethod());
-        assertEquals("/api/data", log.getRequestUri());
-        assertEquals(200, log.getStatusCode());
-        assertEquals(LogLevel.INFO, log.getLogLevel());
+        @Test
+        @DisplayName("HTTP 응답 시간이 정상적으로 측정되어야 한다")
+        void shouldCaptureExecutionTime() throws IOException {
+            // Given
+            MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/time");
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            response.setStatus(200);
 
-        assertEquals(responseBody, log.getResponseBody());
+            interceptor.preHandle(request, response, new Object());
+
+            // 실행 시간 테스트를 위해 약간의 지연 추가
+            Instant beforeExecution = Instant.now();
+            try {
+                Thread.sleep(50); // 50ms 지연
+            } catch (InterruptedException ignored) {}
+
+            // When
+            interceptor.afterCompletion(request, response, new Object(), null);
+            Instant afterExecution = Instant.now();
+
+            // Then
+            ArgumentCaptor<HttpInboundResponseLog> captor = ArgumentCaptor.forClass(HttpInboundResponseLog.class);
+            verify(mockLogEntryContextManager, times(1)).addLog(captor.capture());
+
+            HttpInboundResponseLog log = captor.getValue();
+            long executionTime = log.getExecutionTime();
+            assertTrue(executionTime >= 50, "Execution time should be greater than or equal to 50ms");
+            assertTrue(executionTime <= (afterExecution.toEpochMilli() - beforeExecution.toEpochMilli()) + 10);
+        }
     }
 
+    @Nested
+    @DisplayName("TraceId 테스트")
+    class TraceIdTests {
+
+
+        @AfterEach
+        void cleanup() {
+            TraceIdProvider.clear();
+        }
+
+
+        @Test
+        @DisplayName("TraceId가 요청 및 응답에 올바르게 적용되어야 한다")
+        void shouldApplyTraceIdToRequestAndResponseLogs() throws IOException {
+            // Given
+            String expectedTraceId = "trace-id-1234";
+            TraceIdProvider.setTraceId(expectedTraceId);
+
+            MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/trace");
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            response.setStatus(200);
+
+            // When
+            interceptor.preHandle(request, response, new Object());
+            interceptor.afterCompletion(request, response, new Object(), null);
+
+            // Then
+            ArgumentCaptor<HttpInboundRequestLog> requestCaptor = ArgumentCaptor.forClass(HttpInboundRequestLog.class);
+            ArgumentCaptor<HttpInboundResponseLog> responseCaptor = ArgumentCaptor.forClass(HttpInboundResponseLog.class);
+
+            verify(mockLogEntryContextManager, times(1)).addLog(requestCaptor.capture());
+            verify(mockLogEntryContextManager, times(1)).addLog(responseCaptor.capture());
+
+            HttpInboundRequestLog requestLog = requestCaptor.getValue();
+            HttpInboundResponseLog responseLog = responseCaptor.getValue();
+
+            assertEquals(expectedTraceId, requestLog.getTraceId());
+            assertEquals(expectedTraceId, responseLog.getTraceId());
+        }
+    }
 }
