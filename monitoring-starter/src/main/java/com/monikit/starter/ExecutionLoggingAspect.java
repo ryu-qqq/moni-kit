@@ -68,7 +68,7 @@ public class ExecutionLoggingAspect {
 
             if (detailedLogging) {
                 logEntryContextManager.addLog(ExecutionDetailLog.create(
-                    traceId, className, methodName, executionTime, inputParams, outputValue, LogLevel.DEBUG
+                    traceId, className, methodName, executionTime, inputParams, outputValue, LogLevel.INFO
                 ));
             } else {
                 logEntryContextManager.addLog(ExecutionTimeLog.create(
