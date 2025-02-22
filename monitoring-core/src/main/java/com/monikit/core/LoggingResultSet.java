@@ -26,7 +26,7 @@ public class LoggingResultSet extends ResultSetWrapper {
             super.close();
         } finally {
             queryLoggingService.logQuery(
-                SqlParameterHolder.getFormattedParameters(sql),
+                SqlParameterHolder.getCurrentParameters(),
                 System.currentTimeMillis() - startTime,
                 -1
             );

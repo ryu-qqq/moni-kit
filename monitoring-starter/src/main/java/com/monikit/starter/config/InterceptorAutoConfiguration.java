@@ -47,7 +47,7 @@ public class InterceptorAutoConfiguration implements WebMvcConfigurer {
             return;
         }
 
-        logger.info("✅ HTTP interceptors active on");
+        logger.info("HTTP interceptors active on");
         registry.addInterceptor(httpLoggingInterceptor(null))
             .addPathPatterns("/**");
     }

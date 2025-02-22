@@ -39,7 +39,7 @@ public class LoggingPreparedStatement extends PreparedStatementWrapper {
             return super.execute();
         } finally {
             queryLoggingService.logQuery(
-                SqlParameterHolder.getFormattedParameters(sql),
+                SqlParameterHolder.getCurrentParameters(),
                 System.currentTimeMillis() - startTime,
                 0
             );
@@ -67,7 +67,7 @@ public class LoggingPreparedStatement extends PreparedStatementWrapper {
             throw e;
         } finally {
             queryLoggingService.logQuery(
-                SqlParameterHolder.getFormattedParameters(sql),
+                SqlParameterHolder.getCurrentParameters(),
                 System.currentTimeMillis() - startTime,
                 rowsAffected
             );

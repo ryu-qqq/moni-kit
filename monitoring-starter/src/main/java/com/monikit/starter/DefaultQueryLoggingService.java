@@ -76,7 +76,7 @@ public class DefaultQueryLoggingService implements QueryLoggingService {
         if (sql == null || sql.isEmpty()) {
             return "No Parameters";
         }
-        return SqlParameterHolder.getFormattedParameters(sql);
+        return SqlParameterHolder.getCurrentParameters();
     }
 
 

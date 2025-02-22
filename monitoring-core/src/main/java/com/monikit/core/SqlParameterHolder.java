@@ -40,14 +40,10 @@ public class SqlParameterHolder implements AutoCloseable {
     /**
      * 현재 스레드의 SQL 실행에 사용된 모든 파라미터를 문자열로 반환.
      *
-     * @return SQL 바인딩된 파라미터 목록 (예: `id=1 AND name='John'`)
+     * @return 파라미터 목록 문자열
      */
-    public static String getFormattedParameters(String sql) {
-        List<Object> parameters = parametersHolder.get();
-        for (Object param : parameters) {
-            sql = sql.replaceFirst("\\?", formatValue(param));
-        }
-        return sql;
+    public static String getCurrentParameters() {
+        return parametersHolder.get().toString();
     }
 
     /**
@@ -58,18 +54,4 @@ public class SqlParameterHolder implements AutoCloseable {
         parametersHolder.get().clear();
     }
 
-    /**
-     * 파라미터 값을 SQL 로그 포맷에 맞게 변환.
-     * - String: `'값'` (작은따옴표 추가)
-     * - Number: 그대로 사용
-     * - Null: `NULL` 문자열로 변환
-     *
-     * @param value 변환할 값
-     * @return 변환된 SQL 값
-     */
-    private static String formatValue(Object value) {
-        if (value == null) return "NULL";
-        if (value instanceof String) return "'" + value + "'";
-        return value.toString();
-    }
 }

@@ -15,13 +15,13 @@ class SqlParameterHolderTest {
         try (SqlParameterHolder holder = new SqlParameterHolder()) {
             SqlParameterHolder.addParameter(123);
             SqlParameterHolder.addParameter("test");
-            assertEquals("SELECT * FROM users WHERE id = 123 AND name = 'test'",
-                SqlParameterHolder.getFormattedParameters("SELECT * FROM users WHERE id = ? AND name = ?"));
+            assertEquals("[123, test]",
+                SqlParameterHolder.getCurrentParameters());
         }
 
         // Then (자동 clear 확인)
-        assertEquals("SELECT * FROM users WHERE id = ? AND name = ?",
-            SqlParameterHolder.getFormattedParameters("SELECT * FROM users WHERE id = ? AND name = ?"));
+        assertEquals("[]",
+            SqlParameterHolder.getCurrentParameters());
     }
 
     @Test
@@ -34,10 +34,10 @@ class SqlParameterHolderTest {
             SqlParameterHolder.addParameter(null);
 
             // When
-            String formattedSQL = SqlParameterHolder.getFormattedParameters("SELECT * FROM users WHERE age = ? AND name = ? AND status = ?");
+            String formattedSQL = SqlParameterHolder.getCurrentParameters();
 
             // Then
-            assertEquals("SELECT * FROM users WHERE age = 100 AND name = 'hello' AND status = NULL", formattedSQL);
+            assertEquals("[100, hello, null]", formattedSQL);
         }
     }
 
@@ -52,7 +52,7 @@ class SqlParameterHolderTest {
                 try (SqlParameterHolder childThreadHolder = new SqlParameterHolder()) {
                     SqlParameterHolder.addParameter("child-thread");
                     assertEquals("SELECT * FROM logs WHERE id = 'child-thread'",
-                        SqlParameterHolder.getFormattedParameters("SELECT * FROM logs WHERE id = ?"));
+                        SqlParameterHolder.getCurrentParameters());
                 }
             });
 
@@ -60,8 +60,8 @@ class SqlParameterHolderTest {
             thread.join(); // 스레드가 끝날 때까지 대기
 
             // Then (메인 스레드의 값이 영향을 받지 않아야 함)
-            assertEquals("SELECT * FROM logs WHERE id = 'main-thread'",
-                SqlParameterHolder.getFormattedParameters("SELECT * FROM logs WHERE id = ?"));
+            assertEquals("[main-thread]",
+                SqlParameterHolder.getCurrentParameters());
         }
     }
 }
