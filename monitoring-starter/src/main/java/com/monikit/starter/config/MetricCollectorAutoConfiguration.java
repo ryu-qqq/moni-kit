@@ -34,13 +34,12 @@ public class MetricCollectorAutoConfiguration {
 
     /**
      * PrometheusMetricCollector 등록
-     * - Micrometer(Prometheus)가 존재할 때만 등록됨.
-     * - `MetricCollector`가 이미 존재하면 등록되지 않음.
+     * - Micrometer(Prometheus)가 존재하고, `monikit.metrics.metricsEnabled=true`일 때만 등록.
+     * - `MetricCollector`가 이미 존재하면 `CompositeMetricCollector`를 통해 여러 개를 관리.
      */
     @Bean
-    @Primary
-    @ConditionalOnMissingBean(MetricCollector.class)
-    @ConditionalOnClass(PrometheusMeterRegistry.class) // PrometheusMeterRegistry일 때만 등록
+    @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnClass(PrometheusMeterRegistry.class)
     public MetricCollector prometheusMetricCollector(PrometheusMeterRegistry meterRegistry) {
         logger.info("Prometheus detected, registering PrometheusMetricCollector.");
         return new PrometheusMetricCollector(meterRegistry);
