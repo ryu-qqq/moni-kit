@@ -3,7 +3,6 @@ package com.monikit.starter.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +11,6 @@ import org.springframework.context.annotation.Primary;
 import com.monikit.core.MetricCollector;
 import com.monikit.starter.NoOpMetricCollector;
 import com.monikit.starter.PrometheusMetricCollector;
-
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 /**

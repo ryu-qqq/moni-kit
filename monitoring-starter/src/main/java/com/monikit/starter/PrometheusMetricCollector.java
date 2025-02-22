@@ -16,7 +16,6 @@ import com.monikit.core.MetricCollector;
  * - SQL 쿼리 실행 횟수 및 실행 시간을 수집하여 Prometheus로 전송.
  * </p>
  */
-@Component
 public class PrometheusMetricCollector implements MetricCollector {
 
     private final MeterRegistry meterRegistry;
