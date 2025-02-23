@@ -19,7 +19,7 @@ public class SqlParameterHolder implements AutoCloseable {
     /**
      * 각 스레드별로 SQL 바인딩 파라미터를 저장하는 `ThreadLocal`
      */
-    private static final ThreadLocal<List<Object>> parametersHolder = ThreadLocal.withInitial(ArrayList::new);
+    private final ThreadLocal<List<Object>> parametersHolder = ThreadLocal.withInitial(ArrayList::new);
 
     /**
      * SQL 실행 시 `try-with-resources` 패턴을 활용하여 자동 초기화.
@@ -33,7 +33,7 @@ public class SqlParameterHolder implements AutoCloseable {
      *
      * @param parameter 바인딩된 값
      */
-    public static void addParameter(Object parameter) {
+    public void addParameter(Object parameter) {
         parametersHolder.get().add(parameter);
     }
 
@@ -42,7 +42,7 @@ public class SqlParameterHolder implements AutoCloseable {
      *
      * @return 파라미터 목록 문자열
      */
-    public static String getCurrentParameters() {
+    public String getCurrentParameters() {
         return parametersHolder.get().toString();
     }
 

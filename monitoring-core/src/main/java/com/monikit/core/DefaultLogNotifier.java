@@ -1,5 +1,6 @@
 package com.monikit.core;
 
+
 /**
  * 기본 로그 노티파이어 (System.out.println() 기반).
  * <p>

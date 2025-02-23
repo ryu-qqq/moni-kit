@@ -9,5 +9,4 @@ public enum ErrorCategory {
     OUTBOUND_NETWORK_ERROR,
     UNKNOWN_ERROR,
 
-
 }
