@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Enumeration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -32,7 +30,6 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class HttpLoggingInterceptor implements HandlerInterceptor {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpLoggingInterceptor.class);
     private static final ThreadLocal<Instant> requestStartTime = new ThreadLocal<>();
     private final LogEntryContextManager logEntryContextManager;
 
@@ -44,8 +41,6 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String traceId = TraceIdProvider.getTraceId();
         requestStartTime.set(Instant.now());
-
-        logger.debug("HTTP 요청 로깅 시작: {} {}", request.getMethod(), request.getRequestURI());
 
         logEntryContextManager.addLog(HttpInboundRequestLog.create(
             traceId,
@@ -67,8 +62,6 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
         String traceId = TraceIdProvider.getTraceId();
         Instant startTime = requestStartTime.get();
         long executionTime = startTime != null ? Instant.now().toEpochMilli() - startTime.toEpochMilli() : 0;
-
-        logger.debug("HTTP 응답 로깅 완료: {} {} (Status: {})", request.getMethod(), request.getRequestURI(), response.getStatus());
 
         logEntryContextManager.addLog(HttpInboundResponseLog.create(
             traceId,

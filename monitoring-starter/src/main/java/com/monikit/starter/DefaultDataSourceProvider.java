@@ -73,7 +73,6 @@ public class DefaultDataSourceProvider implements DataSourceProvider {
             return "unknownDataSource";
         }
 
-        // 일반적인 MySQL, PostgreSQL, MariaDB, H2 등의 URL 패턴에서 데이터베이스명 추출
         if (url.startsWith("jdbc:mysql://") || url.startsWith("jdbc:postgresql://") || url.startsWith("jdbc:mariadb://")) {
             String[] parts = url.split("/");
             return parts.length > 3 ? parts[3].split("\\?")[0] : "unknownDataSource";

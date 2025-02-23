@@ -14,6 +14,7 @@ import com.monikit.core.ExecutionDetailLog;
 import com.monikit.core.ExecutionTimeLog;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
+import com.monikit.starter.config.MoniKitLoggingProperties;
 
 /**
  * @Service 및 @Repository 어노테이션이 붙은 메서드의 실행 시간을 자동으로 로깅하는 AOP.
@@ -23,19 +24,19 @@ import com.monikit.core.LogLevel;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.1
  */
 @Aspect
 @Component
 public class ExecutionLoggingAspect {
 
-    @Value("${monikit.logging.detailedLogging:false}")
-    private boolean detailedLogging;
-
     private final LogEntryContextManager logEntryContextManager;
+    private final MoniKitLoggingProperties loggingProperties;
 
-    public ExecutionLoggingAspect(LogEntryContextManager logEntryContextManager) {
+    public ExecutionLoggingAspect(LogEntryContextManager logEntryContextManager,
+                                  MoniKitLoggingProperties loggingProperties) {
         this.logEntryContextManager = logEntryContextManager;
+        this.loggingProperties = loggingProperties;
     }
 
     /**
@@ -49,6 +50,10 @@ public class ExecutionLoggingAspect {
      */
     @Around("serviceAndRepositoryMethods()")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (!loggingProperties.isLogEnabled()) {
+            return joinPoint.proceed();
+        }
+
         long startTime = System.currentTimeMillis();
         String traceId = TraceIdProvider.getTraceId();
         String className = joinPoint.getSignature().getDeclaringTypeName();
@@ -66,7 +71,7 @@ public class ExecutionLoggingAspect {
             long executionTime = System.currentTimeMillis() - startTime;
             String outputValue = result != null ? result.toString() : "null";
 
-            if (detailedLogging) {
+            if (loggingProperties.isDetailedLogging()) {
                 logEntryContextManager.addLog(ExecutionDetailLog.create(
                     traceId, className, methodName, executionTime, inputParams, outputValue, LogLevel.INFO
                 ));

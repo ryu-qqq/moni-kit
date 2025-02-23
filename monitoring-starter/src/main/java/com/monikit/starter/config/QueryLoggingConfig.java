@@ -10,7 +10,7 @@ import com.monikit.core.DataSourceProvider;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.MetricCollector;
 import com.monikit.core.QueryLoggingService;
-import com.monikit.starter.DefaultQueryLoggingService;
+import com.monikit.core.DefaultQueryLoggingService;
 
 /**
  * `QueryLoggingService`를 빈으로 등록하는 설정 클래스.
@@ -55,7 +55,8 @@ public class QueryLoggingConfig {
             logEntryContextManager,
             metricCollector,
             dataSourceProvider,
-            moniKitLoggingProperties
+            moniKitLoggingProperties.getSlowQueryThresholdMs(),
+            moniKitLoggingProperties.getCriticalQueryThresholdMs()
         );
 
         logger.info("Successfully created QueryLoggingService: {}", queryLoggingService.getClass().getSimpleName());

@@ -39,6 +39,15 @@ dependencies {
     runtimeOnly "org.springframework.cloud:spring-cloud-starter-openfeign"
 
 
+    // ✅ FeignException을 테스트에서 인식하도록 추가
+    testImplementation "org.springframework.cloud:spring-cloud-starter-openfeign"
+
+    // ✅ Spring Web 예외 (`WebServerException`, `ServletException`, `BindException`) 추가
+    testImplementation "org.springframework.boot:spring-boot-starter-web"
+
+    // ✅ Spring JDBC 예외 (`TransientDataAccessException`, `NonTransientDataAccessException`) 추가
+    testImplementation "org.springframework:spring-jdbc"
+
     // 테스트 의존성
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"

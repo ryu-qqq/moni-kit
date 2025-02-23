@@ -2,7 +2,8 @@ package com.monikit.starter.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,15 +15,12 @@ import com.monikit.starter.filter.LogContextScopeFilter;
 import com.monikit.starter.filter.TraceIdFilter;
 /**
  * 필터를 자동으로 등록하는 설정 클래스.
- * <p>
- * - 사용자가 직접 필터를 등록하지 않아도, `monitoring-starter`를 추가하면 자동으로 적용됨.
- * - 특정 필터를 활성화할지 여부는 `monikit.logging.filters.*` 설정에 따라 결정됨.
- * </p>
  *
  * @author ryu-qqq
  * @since 1.0
  */
 @Configuration
+@EnableConfigurationProperties({MoniKitLoggingProperties.class, MoniKitMetricsProperties.class})
 public class FilterAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(FilterAutoConfiguration.class);
@@ -37,74 +35,70 @@ public class FilterAutoConfiguration {
     }
 
     /**
-     * TraceIdFilter 빈을 등록 (사용자가 직접 구현한 필터가 없을 경우 기본 제공).
+     * ✅ monikit.logging.filters.trace-enabled=true일 때 TraceIdFilter 빈 등록
      */
     @Bean
-    @ConditionalOnMissingBean(TraceIdFilter.class)
+    @ConditionalOnProperty(name = "monikit.logging.filters.trace-enabled", havingValue = "true", matchIfMissing = true)
     public TraceIdFilter traceIdFilter() {
         return new TraceIdFilter();
     }
 
-    /**
-     * TraceIdFilter를 자동으로 등록하는 빈.
-     * - `monikit.logging.filters.trace-enabled=true`일 때만 활성화.
-     */
     @Bean
+    @ConditionalOnProperty(name = "monikit.logging.filters.trace-enabled", havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<TraceIdFilter> traceIdFilterRegistration(TraceIdFilter traceIdFilter) {
         FilterRegistrationBean<TraceIdFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(traceIdFilter);
         registrationBean.setOrder(1);
         registrationBean.addUrlPatterns("/*");
 
-        if (!loggingProperties.isTraceEnabled()) {
-            registrationBean.setEnabled(false);
-            logger.info("TraceIdFilter active off (monikit.logging.filters.trace-enabled=false)");
-        } else {
-            logger.info("TraceIdFilter active on");
-        }
+        logger.info("TraceIdFilter active: {}", loggingProperties.isTraceEnabled());
+        registrationBean.setEnabled(loggingProperties.isTraceEnabled());
         return registrationBean;
     }
 
     /**
-     * LogContextScopeFilter는 무조건 활성화 (필수 필터)
+     * ✅ monikit.logging.filters.log-enabled=true 일때 LogContextScopeFilter 빈 등록
      */
     @Bean
-    public FilterRegistrationBean<LogContextScopeFilter> logContextScopeFilter(
-        LogEntryContextManager logEntryContextManager) {
+    @ConditionalOnProperty(name = "monikit.logging.filters.log-enabled", havingValue = "true", matchIfMissing = true)
+    public LogContextScopeFilter logContextScopeFilter(LogEntryContextManager logEntryContextManager) {
+        return new LogContextScopeFilter(logEntryContextManager);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "monikit.logging.filters.log-enabled", havingValue = "true", matchIfMissing = true)
+    public FilterRegistrationBean<LogContextScopeFilter> logContextScopeFilterRegistration(LogContextScopeFilter logContextScopeFilter) {
         FilterRegistrationBean<LogContextScopeFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new LogContextScopeFilter(logEntryContextManager));
+        registrationBean.setFilter(logContextScopeFilter);
         registrationBean.setOrder(2);
         registrationBean.addUrlPatterns("/*");
-        logger.info("LogContextScopeFilter active on");
+
+        logger.info("LogContextScopeFilter active: {}", loggingProperties.isLogEnabled());
+        registrationBean.setEnabled(loggingProperties.isLogEnabled());
+
         return registrationBean;
     }
 
     /**
-     * HttpMetricsFilter 빈을 등록 (사용자가 직접 구현한 필터가 없을 경우 기본 제공).
+     * ✅ monikit.logging.filters.metrics-enabled=true일 때 HttpMetricsFilter 빈 등록
      */
     @Bean
-    @ConditionalOnMissingBean(HttpMetricsFilter.class)
+    @ConditionalOnProperty(name = "monikit.logging.filters.metrics-enabled", havingValue = "true", matchIfMissing = true)
     public HttpMetricsFilter httpMetricsFilter(MetricCollector metricCollector) {
         return new HttpMetricsFilter(metricCollector);
     }
 
-    /**
-     * HttpMetricsFilter를 자동으로 등록하는 빈.
-     * - `monikit.logging.filters.metrics-enabled=true`일 때만 활성화.
-     */
     @Bean
+    @ConditionalOnProperty(name = "monikit.logging.filters.metrics-enabled", havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<HttpMetricsFilter> httpMetricsFilterRegistration(HttpMetricsFilter httpMetricsFilter) {
         FilterRegistrationBean<HttpMetricsFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(httpMetricsFilter);
         registrationBean.setOrder(3);
         registrationBean.addUrlPatterns("/*");
 
-        if (!metricsProperties.isMetricsEnabled()) {
-            registrationBean.setEnabled(false);
-            logger.info("HttpMetricsFilter active off (monikit.logging.filters.metrics-enabled=false)");
-        } else {
-            logger.info("HttpMetricsFilter active on");
-        }
+        logger.info("HttpMetricsFilter active: {}", metricsProperties.isMetricsEnabled());
+        registrationBean.setEnabled(metricsProperties.isMetricsEnabled());
         return registrationBean;
     }
+
 }

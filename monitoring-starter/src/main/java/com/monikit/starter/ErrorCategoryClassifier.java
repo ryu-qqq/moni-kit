@@ -49,17 +49,14 @@ public class ErrorCategoryClassifier {
             return ErrorCategory.INBOUND_NETWORK_ERROR;
         }
 
-        // ✅ OUTBOUND NETWORK ERROR (우리 서버가 외부 API 호출할 때)
         else if (exception instanceof FeignException) {
             return ErrorCategory.OUTBOUND_NETWORK_ERROR;
         }
 
-        // ✅ 구체적인 예외가 아니라면, 최종적으로 RuntimeException을 APPLICATION_ERROR로 처리
         else if (exception instanceof RuntimeException) {
             return ErrorCategory.APPLICATION_ERROR;
         }
 
-        // ✅ 마지막까지 어떤 카테고리에도 해당되지 않으면 UNKNOWN_ERROR 처리
         return ErrorCategory.UNKNOWN_ERROR;
     }
 }

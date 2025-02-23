@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.monikit.core.LoggingPreparedStatement;
 import com.monikit.core.QueryLoggingService;
-
+import com.monikit.core.SqlParameterHolder;
 
 /**
  * `LoggingPreparedStatement`를 생성하는 팩토리.
@@ -27,7 +27,9 @@ public class LoggingPreparedStatementFactory {
     }
 
     public LoggingPreparedStatement create(PreparedStatement delegate, String sql) {
-        return new LoggingPreparedStatement(delegate, sql, queryLoggingService);
+        SqlParameterHolder holder = new SqlParameterHolder();
+        String traceId = TraceIdProvider.getTraceId();
+        return new LoggingPreparedStatement(delegate, traceId, sql, holder, queryLoggingService);
     }
 
 }

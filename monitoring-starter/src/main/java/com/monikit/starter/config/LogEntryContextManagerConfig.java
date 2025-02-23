@@ -6,9 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.monikit.core.DefaultErrorLogNotifier;
 import com.monikit.core.DefaultLogEntryContextManager;
-import com.monikit.core.DefaultLogNotifier;
 import com.monikit.core.DefaultThreadContextHandler;
 import com.monikit.core.ErrorLogNotifier;
 import com.monikit.core.LogEntryContextManager;
@@ -30,28 +28,6 @@ import com.monikit.core.ThreadContextHandler;
 public class LogEntryContextManagerConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(LogEntryContextManagerConfig.class);
-
-    /**
-     * 사용자가 `LogNotifier` 빈을 제공하지 않았을 경우 `DefaultLogNotifier`를 기본값으로 등록.
-     */
-    @Bean
-    @ConditionalOnMissingBean(LogNotifier.class)
-    public LogNotifier defaultLogNotifier() {
-        LogNotifier logNotifier = DefaultLogNotifier.getInstance();
-        logger.info("LogNotifier Bean Registered: {}", logNotifier.getClass().getSimpleName());
-        return logNotifier;
-    }
-
-    /**
-     * 사용자가 `ErrorLogNotifier` 빈을 제공하지 않았을 경우 `DefaultErrorLogNotifier`를 기본값으로 등록.
-     */
-    @Bean
-    @ConditionalOnMissingBean(ErrorLogNotifier.class)
-    public ErrorLogNotifier defaultErrorLogNotifier() {
-        ErrorLogNotifier errorLogNotifier = DefaultErrorLogNotifier.getInstance();
-        logger.info("ErrorLogNotifier Bean Registered: {}", errorLogNotifier.getClass().getSimpleName());
-        return errorLogNotifier;
-    }
 
     /**
      * `LogEntryContextManager` 빈을 등록.
