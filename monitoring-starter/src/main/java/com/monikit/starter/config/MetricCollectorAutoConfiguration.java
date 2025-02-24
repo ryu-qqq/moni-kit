@@ -44,7 +44,7 @@ public class MetricCollectorAutoConfiguration {
         logger.info("Metrics are enabled. Registering MoniKitMetricCollector with existing MeterRegistry.");
 
         if (meterRegistry instanceof CompositeMeterRegistry compositeMeterRegistry) {
-            logger.info("CompositeMeterRegistry detected, existing registries will be maintained.");
+            logger.info("CompositeMeterRegistry detected, ensuring custom metrics are added properly.");
             compositeMeterRegistry.getRegistries().forEach(reg -> logger.info("Existing registry: {}", reg.getClass().getSimpleName()));
         }
 
@@ -55,7 +55,7 @@ public class MetricCollectorAutoConfiguration {
      * `metricsEnabled=false`이면 `NoOpMetricCollector`를 기본값으로 사용.
      */
     @Bean
-    @Primary
+    @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "false", matchIfMissing = false)
     public MetricCollector noOpMetricCollector() {
         logger.info("Metrics are disabled via configuration, using NoOpMetricCollector.");
         return new NoOpMetricCollector();
