@@ -2,6 +2,7 @@ package com.monikit.starter.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +44,7 @@ public class MetricCollectorAutoConfiguration {
         logger.info("Metrics are enabled. Registering MoniKitMetricCollector with existing MeterRegistry.");
 
         if (meterRegistry instanceof CompositeMeterRegistry compositeMeterRegistry) {
-            logger.info("CompositeMeterRegistry detected, ensuring custom metrics are added properly.");
+            logger.info("CompositeMeterRegistry detected, existing registries will be maintained.");
             compositeMeterRegistry.getRegistries().forEach(reg -> logger.info("Existing registry: {}", reg.getClass().getSimpleName()));
         }
 
