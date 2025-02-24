@@ -13,9 +13,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:${logbackVersion}"
     implementation "net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}"
 
-    // 메트릭 수집 의존성 prometheus
-    implementation "io.micrometer:micrometer-registry-prometheus"
-    implementation "org.springframework.boot:spring-boot-starter-actuator"
+
 
     // Spring Boot 기본 의존성
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -31,6 +29,15 @@ dependencies {
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
 
     compileOnly "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
+
+    // 메트릭 수집 의존성 prometheus
+    compileOnly "io.micrometer:micrometer-core"
+    compileOnly "org.springframework.boot:spring-boot-starter-actuator"
+    runtimeOnly "io.micrometer:micrometer-registry-prometheus"
+
+    testImplementation "io.micrometer:micrometer-core"
+    testImplementation "io.micrometer:micrometer-registry-prometheus"
+
 
     runtimeOnly "com.zaxxer:HikariCP:${hikariCPVersion}"
 
