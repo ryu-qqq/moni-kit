@@ -14,6 +14,7 @@ import com.monikit.starter.MoniKitMetricCollector;
 import com.monikit.starter.NoOpMetricCollector;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 
 /**
  * 사용자가 원하는 `MetricCollector`를 주입할 수 있도록 자동 설정하는 클래스.
@@ -39,7 +40,13 @@ public class MetricCollectorAutoConfiguration {
     @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnBean(MeterRegistry.class)
     public MetricCollector moniKitMetricCollector(MeterRegistry meterRegistry) {
-        logger.info("Metrics are enabled. Registering MoniKitMetricCollector with provided MeterRegistry.");
+        logger.info("Metrics are enabled. Registering MoniKitMetricCollector with existing MeterRegistry.");
+
+        if (meterRegistry instanceof CompositeMeterRegistry compositeMeterRegistry) {
+            logger.info("CompositeMeterRegistry detected, ensuring custom metrics are added properly.");
+            compositeMeterRegistry.getRegistries().forEach(reg -> logger.info("Existing registry: {}", reg.getClass().getSimpleName()));
+        }
+
         return new MoniKitMetricCollector(meterRegistry);
     }
 
