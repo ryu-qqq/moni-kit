@@ -2,9 +2,11 @@ package com.monikit.starter.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 
 import com.monikit.core.MetricCollector;
@@ -30,21 +32,21 @@ public class MetricCollectorAutoConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MetricCollectorAutoConfiguration.class);
 
     /**
-     * `metricsEnabled=true`이면 `MoniKitMetricCollector`가 무조건 등록됨.
-     * 사용자가 `MeterRegistry`를 등록했든 안 했든 관계없이 동작.
+     * `metricsEnabled=true`이면 `MoniKitMetricCollector`가 모든 빈이 등록된 후 마지막에 실행되도록 설정.
      */
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "true", matchIfMissing = true)
-    public MetricCollector moniKitMetricCollector(MeterRegistry meterRegistry) {
-        logger.info("Metrics are enabled. Registering MoniKitMetricCollector with provided MeterRegistry.");
-        return new MoniKitMetricCollector(meterRegistry);
+    public SmartInitializingSingleton moniKitMetricCollectorInitializer(MeterRegistry meterRegistry) {
+        return () -> {
+            logger.info("✅ 모든 빈이 등록된 후 MoniKitMetricCollector를 등록합니다.");
+            new MoniKitMetricCollector(meterRegistry);
+        };
     }
 
     /**
      * `metricsEnabled=false`이면 `NoOpMetricCollector`를 기본값으로 사용.
      */
     @Bean
-    @Primary
     @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "false", matchIfMissing = false)
     public MetricCollector noOpMetricCollector() {
         logger.info("Metrics are disabled via configuration, using NoOpMetricCollector.");
