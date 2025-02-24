@@ -54,7 +54,7 @@ public class MetricCollectorAutoConfiguration {
      * `metricsEnabled=false`이면 `NoOpMetricCollector`를 기본값으로 사용.
      */
     @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "false", matchIfMissing = false)
+    @Primary
     public MetricCollector noOpMetricCollector() {
         logger.info("Metrics are disabled via configuration, using NoOpMetricCollector.");
         return new NoOpMetricCollector();
