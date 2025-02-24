@@ -3,6 +3,7 @@ package com.monikit.starter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import com.monikit.core.MetricCollector;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.Tags;
 
 /**
  * Prometheus 기반의 메트릭 수집기.
@@ -33,23 +35,17 @@ public class MoniKitMetricCollector implements MetricCollector {
     public void recordHttpRequest(String method, String uri, int statusCode, long duration) {
         String normalizedUri = HttpRequestMetricUtils.normalizeUri(uri);
 
-
         meterRegistry.counter("http_requests_total",
-                "method", method,
-                "uri", normalizedUri,
-                "status", String.valueOf(statusCode))
+                Tags.of("method", method, "uri", normalizedUri, "status", String.valueOf(statusCode)))
             .increment();
 
-
-        String timerKey = method + "|" + normalizedUri;
+        String timerKey = String.join("::", method, normalizedUri);
         Timer timer = timerCache.computeIfAbsent(timerKey, key ->
             Timer.builder("http_request_duration")
                 .description("HTTP request processing time")
-                .tag("method", method)
-                .tag("uri", normalizedUri)
+                .tags("method", method, "uri", normalizedUri) // ✅ .tags() 사용
                 .register(meterRegistry)
         );
-
 
         timer.record(duration, TimeUnit.MILLISECONDS);
     }
@@ -58,33 +54,28 @@ public class MoniKitMetricCollector implements MetricCollector {
     public void recordQueryMetrics(String sql, long executionTime, String dataSourceName) {
         String queryCategory = QueryMetricUtils.categorizeQuery(sql);
 
-        // 1. 기본적인 SQL 실행 횟수 및 평균 실행 시간 기록
         meterRegistry.counter("sql_query_total",
-                "query_category", queryCategory,
-                "datasource", dataSourceName)
+                Tags.of("query_category", queryCategory, "datasource", dataSourceName))
             .increment();
 
-        // ✅ Timer 캐싱 적용
-        String timerKey = queryCategory + "|" + dataSourceName;
+        String timerKey = String.join("::", queryCategory, dataSourceName);
+
         Timer timer = timerCache.computeIfAbsent(timerKey, key ->
             Timer.builder("sql_query_duration")
                 .description("SQL query execution time")
-                .tag("query_category", queryCategory)
-                .tag("datasource", dataSourceName)
+                .tags("query_category", queryCategory, "datasource", dataSourceName) // ✅ .tags() 사용
                 .register(meterRegistry)
         );
 
-        // 3. Timer 기록
         timer.record(executionTime, TimeUnit.MILLISECONDS);
 
-        // 느린 쿼리 로그 기록
-        if (executionTime > 500) {
+        if (executionTime > 2000) {
             logger.warn("Slow Query Detected! [Execution Time: {} ms] SQL: {}", executionTime, sql);
         }
 
-        // 랜덤 샘플링하여 일부 쿼리 로그 출력
-        if (Math.random() < 0.1) {
+        if (ThreadLocalRandom.current().nextInt(100) < 10) { // 10% 확률
             logger.info("Sampled Query Log: {}", sql);
         }
     }
+
 }

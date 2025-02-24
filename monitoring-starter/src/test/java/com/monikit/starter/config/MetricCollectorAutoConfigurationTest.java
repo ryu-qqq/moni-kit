@@ -1,7 +1,5 @@
 package com.monikit.starter.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,6 +9,8 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import com.monikit.core.MetricCollector;
 import com.monikit.starter.MoniKitMetricCollector;
 import com.monikit.starter.NoOpMetricCollector;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheusmetrics.PrometheusConfig;
@@ -23,40 +23,30 @@ class MetricCollectorAutoConfigurationTest {
         .withConfiguration(AutoConfigurations.of(MetricCollectorAutoConfiguration.class));
 
     @Nested
-    @DisplayName("monikit.metrics.metricsEnabled=true일 때")
-    class WhenMetricsEnabled {
+    @DisplayName("MoniKitMetricCollector 등록 테스트")
+    class MoniKitMetricCollectorTests {
 
         @Test
-        @DisplayName("MeterRegistry가 존재하면 MoniKitMetricCollector가 등록되어야 한다.")
-        void shouldRegisterMoniKitMetricCollectorWhenMeterRegistryExists() {
+        @DisplayName("metricsEnabled=true && MeterRegistry가 존재할 때 MoniKitMetricCollector가 등록되어야 한다.")
+        void shouldRegisterMoniKitMetricCollectorWhenEnabledAndMeterRegistryExists() {
             contextRunner
                 .withPropertyValues("monikit.metrics.metricsEnabled=true")
-                .withBean(MeterRegistry.class, () -> new PrometheusMeterRegistry(PrometheusConfig.DEFAULT)) // MeterRegistry 등록
+                .withBean(MeterRegistry.class, () -> new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
                 .run(context -> {
                     assertThat(context).hasSingleBean(MetricCollector.class);
                     assertThat(context.getBean(MetricCollector.class)).isInstanceOf(MoniKitMetricCollector.class);
                 });
         }
 
-        @Test
-        @DisplayName("MeterRegistry가 없으면 NoOpMetricCollector가 등록되어야 한다.")
-        void shouldRegisterNoOpMetricCollectorWhenMeterRegistryIsMissing() {
-            contextRunner
-                .withPropertyValues("monikit.metrics.metricsEnabled=true")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(MetricCollector.class);
-                    assertThat(context.getBean(MetricCollector.class)).isInstanceOf(NoOpMetricCollector.class);
-                });
-        }
     }
 
     @Nested
-    @DisplayName("monikit.metrics.metricsEnabled=false일 때")
-    class WhenMetricsDisabled {
+    @DisplayName("NoOpMetricCollector 등록 테스트")
+    class NoOpMetricCollectorTests {
 
         @Test
-        @DisplayName("무조건 NoOpMetricCollector가 등록되어야 한다.")
-        void shouldRegisterNoOpMetricCollector() {
+        @DisplayName("metricsEnabled=false일 때 NoOpMetricCollector가 기본값으로 등록되어야 한다.")
+        void shouldRegisterNoOpMetricCollectorWhenDisabled() {
             contextRunner
                 .withPropertyValues("monikit.metrics.metricsEnabled=false")
                 .run(context -> {
@@ -66,14 +56,20 @@ class MetricCollectorAutoConfigurationTest {
         }
     }
 
-    @Test
-    @DisplayName("MetricCollector 빈이 단 하나만 등록되는지 검증")
-    void shouldRegisterOnlyOneMetricCollector() {
-        contextRunner
-            .withPropertyValues("monikit.metrics.metricsEnabled=true")
-            .withBean(MeterRegistry.class, () -> new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
-            .run(context -> {
-                assertThat(context).hasSingleBean(MetricCollector.class);
-            });
+    @Nested
+    @DisplayName("SmartInitializingSingleton 검증 테스트")
+    class SmartInitializingSingletonTests {
+
+        @Test
+        @DisplayName("모든 빈이 초기화된 후 MetricCollector가 정상적으로 등록되었는지 검증해야 한다.")
+        void shouldEnsureMetricCollectorIsInitializedAfterAllBeans() {
+            contextRunner
+                .withPropertyValues("monikit.metrics.metricsEnabled=true")
+                .withBean(MeterRegistry.class, () -> new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
+                .run(context -> {
+                    MetricCollector metricCollector = context.getBean(MetricCollector.class);
+                    assertThat(metricCollector).isInstanceOf(MoniKitMetricCollector.class);
+                });
+        }
     }
 }

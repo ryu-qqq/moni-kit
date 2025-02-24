@@ -3,6 +3,7 @@ package com.monikit.starter.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -35,30 +36,37 @@ public class MetricCollectorAutoConfiguration {
 
     /**
      * `metricsEnabled=true`이면 `MoniKitMetricCollector`가 무조건 등록됨.
-     * 사용자가 `MeterRegistry`를 등록했든 안 했든 관계없이 동작.
+     * MeterRegistry가 존재하면 이를 활용하고, 없으면 NoOpMetricCollector 사용.
      */
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "true", matchIfMissing = true)
     public MetricCollector moniKitMetricCollector(ObjectProvider<MeterRegistry> meterRegistryProvider) {
-        MeterRegistry meterRegistry = meterRegistryProvider.getIfAvailable();
-
-        if (meterRegistry == null) {
-            logger.warn("No MeterRegistry found, defaulting to NoOpMetricCollector.");
-            return new NoOpMetricCollector();
-        }
-
-        logger.info("Metrics are enabled. Registering MoniKitMetricCollector with existing MeterRegistry.");
-        return new MoniKitMetricCollector(meterRegistry);
+        return new MoniKitMetricCollector(meterRegistryProvider.getIfAvailable());
     }
-
 
     /**
      * `metricsEnabled=false`이면 `NoOpMetricCollector`를 기본값으로 사용.
      */
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "false", matchIfMissing = false)
+    @Primary
     public MetricCollector noOpMetricCollector() {
         logger.info("Metrics are disabled via configuration, using NoOpMetricCollector.");
         return new NoOpMetricCollector();
+    }
+
+    /**
+     * 모든 빈이 초기화된 후 `MetricCollector`가 정상적으로 초기화되었는지 확인하는 후처리 로직.
+     */
+    @Bean
+    public SmartInitializingSingleton initializeMetricsCollector(ObjectProvider<MetricCollector> metricCollectorProvider) {
+        return () -> {
+            MetricCollector metricCollector = metricCollectorProvider.getIfAvailable();
+            if (metricCollector != null) {
+                logger.info("SmartInitializingSingleton: MetricCollector [{}] initialized", metricCollector.getClass().getSimpleName());
+            } else {
+                logger.warn("SmartInitializingSingleton: No MetricCollector registered!");
+            }
+        };
     }
 }
