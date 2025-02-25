@@ -3,7 +3,6 @@ package com.monikit.starter.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,18 +17,14 @@ import com.monikit.starter.filter.TraceIdFilter;
  * @since 1.0
  */
 @Configuration
-@EnableConfigurationProperties({MoniKitLoggingProperties.class, MoniKitMetricsProperties.class})
 public class FilterAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(FilterAutoConfiguration.class);
 
     private final MoniKitLoggingProperties loggingProperties;
-    private final MoniKitMetricsProperties metricsProperties;
 
-    public FilterAutoConfiguration(MoniKitLoggingProperties loggingProperties,
-                                   MoniKitMetricsProperties metricsProperties) {
+    public FilterAutoConfiguration(MoniKitLoggingProperties loggingProperties) {
         this.loggingProperties = loggingProperties;
-        this.metricsProperties = metricsProperties;
     }
 
     /**

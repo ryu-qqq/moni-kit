@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 import com.monikit.core.LogEntryContextManager;
-import com.monikit.core.MetricCollector;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @TestConfiguration
 public class MockBeanConfig {
@@ -20,7 +20,11 @@ public class MockBeanConfig {
 
     @Bean
     @Primary
-    public MetricCollector metricCollector() {
-        return mock(MetricCollector.class);
+    public MoniKitLoggingProperties mockMoniKitLoggingProperties() {
+        MoniKitLoggingProperties properties = mock(MoniKitLoggingProperties.class);
+        when(properties.isTraceEnabled()).thenReturn(true);
+        when(properties.isLogEnabled()).thenReturn(true);
+        return properties;
     }
+
 }
