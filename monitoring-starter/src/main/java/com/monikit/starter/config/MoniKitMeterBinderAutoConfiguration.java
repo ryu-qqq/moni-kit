@@ -23,7 +23,7 @@ public class MoniKitMeterBinderAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public MeterBinder sqlQueryCountMetricsBinder() {
+    public SqlQueryCountMetricsBinder sqlQueryCountMetricsBinder() {
         logger.info("Registered MeterBinder: SqlQueryCountMetricsBinder");
         return new SqlQueryCountMetricsBinder();
     }
@@ -33,7 +33,7 @@ public class MoniKitMeterBinderAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public MeterBinder sqlQueryDurationMetricsBinder() {
+    public SqlQueryDurationMetricsBinder sqlQueryDurationMetricsBinder() {
         logger.info("Registered MeterBinder: SqlQueryDurationMetricsBinder");
         return new SqlQueryDurationMetricsBinder();
     }
@@ -43,7 +43,7 @@ public class MoniKitMeterBinderAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public MeterBinder httpResponseCountMetricsBinder() {
+    public HttpResponseCountMetricsBinder httpResponseCountMetricsBinder() {
         logger.info("Registered MeterBinder: HttpResponseCountMetricsBinder");
         return new HttpResponseCountMetricsBinder();
     }
@@ -53,7 +53,7 @@ public class MoniKitMeterBinderAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public MeterBinder httpResponseDurationMetricsBinder() {
+    public HttpResponseDurationMetricsBinder httpResponseDurationMetricsBinder() {
         logger.info("Registered MeterBinder: HttpResponseDurationMetricsBinder");
         return new HttpResponseDurationMetricsBinder();
     }
