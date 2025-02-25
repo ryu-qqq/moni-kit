@@ -9,8 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.monikit.core.LogEntryContextManager;
-import com.monikit.core.MetricCollector;
-import com.monikit.starter.filter.HttpMetricsFilter;
 import com.monikit.starter.filter.LogContextScopeFilter;
 import com.monikit.starter.filter.TraceIdFilter;
 /**
@@ -76,28 +74,6 @@ public class FilterAutoConfiguration {
         logger.info("LogContextScopeFilter active: {}", loggingProperties.isLogEnabled());
         registrationBean.setEnabled(loggingProperties.isLogEnabled());
 
-        return registrationBean;
-    }
-
-    /**
-     * ✅ monikit.logging.filters.metrics-enabled=true일 때 HttpMetricsFilter 빈 등록
-     */
-    @Bean
-    @ConditionalOnProperty(name = "monikit.logging.filters.metrics-enabled", havingValue = "true", matchIfMissing = true)
-    public HttpMetricsFilter httpMetricsFilter(MetricCollector metricCollector) {
-        return new HttpMetricsFilter(metricCollector);
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "monikit.logging.filters.metrics-enabled", havingValue = "true", matchIfMissing = true)
-    public FilterRegistrationBean<HttpMetricsFilter> httpMetricsFilterRegistration(HttpMetricsFilter httpMetricsFilter) {
-        FilterRegistrationBean<HttpMetricsFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(httpMetricsFilter);
-        registrationBean.setOrder(3);
-        registrationBean.addUrlPatterns("/*");
-
-        logger.info("HttpMetricsFilter active: {}", metricsProperties.isMetricsEnabled());
-        registrationBean.setEnabled(metricsProperties.isMetricsEnabled());
         return registrationBean;
     }
 

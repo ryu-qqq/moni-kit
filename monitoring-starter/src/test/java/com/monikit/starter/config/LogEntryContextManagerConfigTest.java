@@ -8,11 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
+import com.monikit.core.DefaultErrorLogNotifier;
 import com.monikit.core.DefaultLogEntryContextManager;
 import com.monikit.core.DefaultLogNotifier;
 import com.monikit.core.DefaultThreadContextHandler;
-import com.monikit.core.DefaultErrorLogNotifier;
-
 import com.monikit.core.ErrorCategory;
 import com.monikit.core.ErrorLogNotifier;
 import com.monikit.core.LogEntry;
@@ -20,9 +19,13 @@ import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogNotifier;
 import com.monikit.core.ThreadContextHandler;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LogEntryContextManagerConfigTest {
+
 
     private final ApplicationContextRunner contextRunner =
         new ApplicationContextRunner()
@@ -119,4 +122,5 @@ class LogEntryContextManagerConfigTest {
                 });
         }
     }
+
 }

@@ -39,13 +39,11 @@ public class QueryLoggingConfig {
     @ConditionalOnMissingBean(QueryLoggingService.class)
     public QueryLoggingService queryLoggingService(
         LogEntryContextManager logEntryContextManager,
-        MetricCollector metricCollector,
         DataSourceProvider dataSourceProvider,
         MoniKitLoggingProperties moniKitLoggingProperties
     ) {
         logger.info("Creating QueryLoggingService bean...");
         logger.info("Using LogEntryContextManager: {}", logEntryContextManager.getClass().getSimpleName());
-        logger.info("Using MetricCollector: {}", metricCollector.getClass().getSimpleName());
         logger.info("Using DataSourceProvider: {}", dataSourceProvider.getClass().getSimpleName());
         logger.info("MoniKit Logging Properties: SlowQueryThreshold={}, CriticalQueryThreshold={}",
             moniKitLoggingProperties.getSlowQueryThresholdMs(),
@@ -53,7 +51,6 @@ public class QueryLoggingConfig {
 
         QueryLoggingService queryLoggingService = new DefaultQueryLoggingService(
             logEntryContextManager,
-            metricCollector,
             dataSourceProvider,
             moniKitLoggingProperties.getSlowQueryThresholdMs(),
             moniKitLoggingProperties.getCriticalQueryThresholdMs()

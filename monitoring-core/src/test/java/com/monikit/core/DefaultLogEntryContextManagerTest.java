@@ -1,5 +1,7 @@
 package com.monikit.core;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -10,17 +12,29 @@ import com.monikit.core.utils.TestLogEntryProvider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @DisplayName("DefaultLogEntryContextManager 테스트")
 class DefaultLogEntryContextManagerTest {
 
     private DefaultLogEntryContextManager logEntryContextManager;
+    private LogNotifier mockLogNotifier;
+    private ErrorLogNotifier mockErrorLogNotifier;
+    private MetricCollector mockMetricCollector;
 
     @BeforeEach
     void setup() {
         LogEntryContext.clear();
         LogEntryContext.setErrorOccurred(false);
-        logEntryContextManager = new DefaultLogEntryContextManager(DefaultLogNotifier.getInstance(), DefaultErrorLogNotifier.getInstance());
+        mockLogNotifier = mock(LogNotifier.class);
+        mockErrorLogNotifier = mock(ErrorLogNotifier.class);
+        mockMetricCollector = mock(MetricCollector.class);
+
+        when(mockMetricCollector.supports(any())).thenReturn(true);
+
+        logEntryContextManager = new DefaultLogEntryContextManager(mockLogNotifier, mockErrorLogNotifier, List.of(mockMetricCollector));
+
     }
 
     @Nested
@@ -39,6 +53,7 @@ class DefaultLogEntryContextManagerTest {
             // Then
             assertEquals(1, LogEntryContext.size());
             assertTrue(LogEntryContext.getLogs().contains(log));
+            verify(mockMetricCollector, times(1)).record(log);
         }
 
         @Test
@@ -51,6 +66,7 @@ class DefaultLogEntryContextManagerTest {
 
             // When & Then
             assertTrue(LogEntryContext.size() <= 300);
+            verify(mockLogNotifier, atLeastOnce()).notify(eq(LogLevel.WARN), anyString());
         }
     }
 
@@ -70,6 +86,7 @@ class DefaultLogEntryContextManagerTest {
 
             // Then
             assertEquals(0, LogEntryContext.size());
+            verify(mockLogNotifier, times(2)).notify(any(LogEntry.class));
         }
 
         @Test

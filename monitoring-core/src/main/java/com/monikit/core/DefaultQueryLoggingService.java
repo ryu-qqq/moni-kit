@@ -9,22 +9,20 @@ package com.monikit.core;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.1
+ * @since 1.0.1
  */
 
 public class DefaultQueryLoggingService implements QueryLoggingService {
 
     private final LogEntryContextManager logEntryContextManager;
-    private final MetricCollector metricCollector;
     private final DataSourceProvider dataSourceProvider;
     private final long slowQueryThresholdMs;
     private final long criticalQueryThresholdMs;
 
-    public DefaultQueryLoggingService(LogEntryContextManager logEntryContextManager, MetricCollector metricCollector,
+    public DefaultQueryLoggingService(LogEntryContextManager logEntryContextManager,
                                       DataSourceProvider dataSourceProvider, long slowQueryThresholdMs,
                                       long criticalQueryThresholdMs) {
         this.logEntryContextManager = logEntryContextManager;
-        this.metricCollector = metricCollector;
         this.dataSourceProvider = dataSourceProvider;
         this.slowQueryThresholdMs = slowQueryThresholdMs;
         this.criticalQueryThresholdMs = criticalQueryThresholdMs;
@@ -53,7 +51,6 @@ public class DefaultQueryLoggingService implements QueryLoggingService {
         );
 
         logEntryContextManager.addLog(logEntry);
-        metricCollector.recordQueryMetrics(sql, executionTime, dataSourceName);
     }
 
 }

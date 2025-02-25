@@ -12,13 +12,12 @@ import static org.mockito.Mockito.*;
 class DefaultQueryLoggingServiceTest {
 
     private final LogEntryContextManager mockLogEntryContextManager = mock(LogEntryContextManager.class);
-    private final MetricCollector mockMetricCollector = mock(MetricCollector.class);
     private final DataSourceProvider mockDataSourceProvider = mock(DataSourceProvider.class);
     private final long slowQueryThresholdMs = 500;
     private final long criticalQueryThresholdMs = 2000;
 
     private final DefaultQueryLoggingService loggingService = new DefaultQueryLoggingService(
-        mockLogEntryContextManager, mockMetricCollector, mockDataSourceProvider, slowQueryThresholdMs, criticalQueryThresholdMs
+        mockLogEntryContextManager, mockDataSourceProvider, slowQueryThresholdMs, criticalQueryThresholdMs
     );
 
     @Nested
@@ -52,26 +51,6 @@ class DefaultQueryLoggingServiceTest {
             assertEquals(executionTime, capturedLog.getExecutionTime());
             assertEquals(dataSourceName, capturedLog.getDataSource());
             assertEquals(rowsAffected, capturedLog.getRowsAffected());
-        }
-
-        @Test
-        @DisplayName("logQuery()가 호출되면 SQL 실행 메트릭이 기록되어야 한다.")
-        void shouldRecordQueryMetrics() {
-            // Given
-            String traceId = "test-trace";
-            String sql = "UPDATE products SET price = ? WHERE id = ?";
-            String parameter = "[100, 1]";
-            long executionTime = 1200; // Slow Query
-            int rowsAffected = 5;
-            String dataSourceName = "replicaDB";
-
-            when(mockDataSourceProvider.getDataSourceName()).thenReturn(dataSourceName);
-
-            // When
-            loggingService.logQuery(traceId, sql, parameter, executionTime, rowsAffected);
-
-            // Then
-            verify(mockMetricCollector).recordQueryMetrics(sql, executionTime, dataSourceName);
         }
     }
 

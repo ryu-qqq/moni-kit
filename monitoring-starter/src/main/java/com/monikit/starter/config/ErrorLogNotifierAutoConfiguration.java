@@ -34,4 +34,5 @@ public class ErrorLogNotifierAutoConfiguration {
         return DefaultErrorLogNotifier.getInstance();
     }
 
+
 }

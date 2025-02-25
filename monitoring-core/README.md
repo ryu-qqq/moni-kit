@@ -70,10 +70,20 @@ public class DefaultLogEntryContextManager implements LogEntryContextManager {
     private static final int MAX_LOG_SIZE = 300;
     private final LogNotifier logNotifier;
     private final ErrorLogNotifier errorLogNotifier;
+    private final Map<LogType, List<MetricCollector<? extends LogEntry>>> metricCollectorMap;
 
-    public DefaultLogEntryContextManager(LogNotifier logNotifier, ErrorLogNotifier errorLogNotifier) {
+    public DefaultLogEntryContextManager(LogNotifier logNotifier, ErrorLogNotifier errorLogNotifier,
+                                         List<MetricCollector<? extends LogEntry>> metricCollectors) {
         this.logNotifier = logNotifier;
         this.errorLogNotifier = errorLogNotifier;
+        this.metricCollectorMap = Optional.ofNullable(metricCollectors)
+            .orElse(Collections.emptyList())
+            .stream()
+            .flatMap(collector -> Arrays.stream(LogType.values())
+                .filter(collector::supports)
+                .map(type -> Map.entry(type, collector)))
+            .collect(Collectors.groupingBy(Map.Entry::getKey,
+                Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
     }
 
     @Override
@@ -83,6 +93,11 @@ public class DefaultLogEntryContextManager implements LogEntryContextManager {
             flush();
         }
         LogEntryContext.addLog(logEntry);
+
+        List<MetricCollector<LogEntry>> collectors = (List<MetricCollector<LogEntry>>)
+            (List<?>) metricCollectorMap.getOrDefault(logEntry.getLogType(), Collections.emptyList());
+
+        collectors.forEach(collector -> collector.record(logEntry));
     }
 
     @Override
@@ -106,7 +121,7 @@ public class DefaultLogEntryContextManager implements LogEntryContextManager {
 - 요청 단위로 로그를 관리하며, 일정 크기(`MAX_LOG_SIZE`) 이상이 되면 자동으로 `flush()` 호출
 - `flush()`를 통해 수집된 로그를 저장소 또는 모니터링 시스템으로 전송
 - `ErrorLogNotifier`를 활용하여 긴급 오류 발생 시 추가 조치 수행 가능
-
+-  `metricCollectorMap` 을 활용하여 `LogType` 별로 등록된 `MetricCollector` 를 빠르게 조회할 수 있도록 최적화되었습니다.
 사용자가 별도로 설정하지 않으면 `DefaultLogEntryContextManager`가 자동으로 빈으로 등록됩니다. 필요하면 `LogEntryContextManager`를 구현하여 커스텀 로깅 관리를 설정할 수 있습니다.
 
 
@@ -279,22 +294,19 @@ public interface QueryLoggingService {
 ```
 
 ### DefaultQueryLoggingService (기본 구현체)
-SQL 실행 정보를 `LogEntryContextManager`를 통해 저장하고, `MetricCollector`를 이용해 SQL 실행 관련 메트릭을 수집합니다.
+SQL 실행 정보를 `LogEntryContextManager`를 통해 저장한다.
 ```java
 public class DefaultQueryLoggingService implements QueryLoggingService {
     private final LogEntryContextManager logEntryContextManager;
-    private final MetricCollector metricCollector;
     private final DataSourceProvider dataSourceProvider;
     private final long slowQueryThresholdMs;
     private final long criticalQueryThresholdMs;
 
     public DefaultQueryLoggingService(LogEntryContextManager logEntryContextManager,
-                                      MetricCollector metricCollector,
                                       DataSourceProvider dataSourceProvider,
                                       long slowQueryThresholdMs,
                                       long criticalQueryThresholdMs) {
         this.logEntryContextManager = logEntryContextManager;
-        this.metricCollector = metricCollector;
         this.dataSourceProvider = dataSourceProvider;
         this.slowQueryThresholdMs = slowQueryThresholdMs;
         this.criticalQueryThresholdMs = criticalQueryThresholdMs;
@@ -313,7 +325,6 @@ public class DefaultQueryLoggingService implements QueryLoggingService {
         );
 
         logEntryContextManager.addLog(logEntry);
-        metricCollector.recordQueryMetrics(sql, executionTime, dataSourceName);
     }
 }
 ```
@@ -415,11 +426,17 @@ public class SqlParameterHolder implements AutoCloseable {
 
 
 ## 7. MetricCollector
-메트릭 수집을 위한 공통 인터페이스로, HTTP 요청 및 SQL 쿼리 실행 메트릭을 수집할 수 있도록 설계되었습니다.
-사용자가 직접 구현하여 원하는 메트릭 시스템과 연동할 수 있습니다.
+`MetricCollector`는 모든 메트릭 수집기를 위한 공통 인터페이스로, 다양한 메트릭 시스템과 연동할 수 있도록 설계되었습니다. HTTP 요청, SQL 쿼리 실행 등 다양한 유형의 로그 데이터를 수집할 수 있습니다.
+
+### 주요 기능
+- `LogType`에 따라 특정 메트릭 수집기 지원 여부를 확인합니다.
+- 메트릭 데이터를 기록하는 `record` 메서드를 제공합니다.
+- 사용자가 직접 구현하여 Prometheus, OpenTelemetry 등의 메트릭 시스템과 연동할 수 있습니다.
+
 ```java
-public interface MetricCollector {
-    void recordHttpRequest(String method, String uri, int statusCode, long duration);
-    void recordQueryMetrics(String sql, long executionTime, String dataSourceName);
+public interface MetricCollector <T extends LogEntry>{
+    boolean supports(LogType logType);
+    void record(T logEntry);
 }
+
 ```
