@@ -58,6 +58,8 @@ public class MockBeanConfig {
         return new HttpResponseMetricsRecorder(httpResponseCountMetricsBinder(), httpResponseDurationMetricsBinder());
     }
 
+
+
     @Bean
     public SqlQueryCountMetricsBinder sqlQueryCountMetricsBinder() {
         return new SqlQueryCountMetricsBinder();
@@ -69,13 +71,18 @@ public class MockBeanConfig {
     }
 
     @Bean
+    public QueryMetricsRecorder queryMetricsRecorder(){
+        return new QueryMetricsRecorder(sqlQueryCountMetricsBinder(), sqlQueryDurationMetricsBinder());
+    }
+
+    @Bean
     public HttpInboundResponseMetricCollector httpInboundResponseMetricCollector() {
         return new HttpInboundResponseMetricCollector(moniKitMetricsProperties(), responseStatusCounter());
     }
 
     @Bean
     public DatabaseQueryMetricCollector databaseQueryMetricCollector() {
-        return new DatabaseQueryMetricCollector(moniKitMetricsProperties(), sqlQueryCountMetricsBinder(), sqlQueryDurationMetricsBinder());
+        return new DatabaseQueryMetricCollector(moniKitMetricsProperties(), queryMetricsRecorder());
     }
 
     @Bean

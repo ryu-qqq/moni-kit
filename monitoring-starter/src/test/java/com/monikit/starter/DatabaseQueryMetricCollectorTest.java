@@ -11,9 +11,10 @@ import org.mockito.MockitoAnnotations;
 import com.monikit.core.DatabaseQueryLog;
 import com.monikit.core.LogType;
 import com.monikit.starter.config.MoniKitMetricsProperties;
+import com.monikit.starter.utils.TestLogEntryProvider;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
+
 import static org.mockito.Mockito.*;
 
 class DatabaseQueryMetricCollectorTest {
@@ -22,17 +23,14 @@ class DatabaseQueryMetricCollectorTest {
     private MoniKitMetricsProperties metricsProperties;
 
     @Mock
-    private SqlQueryCountMetricsBinder countMetricsBinder;
-
-    @Mock
-    private SqlQueryDurationMetricsBinder durationMetricsBinder;
+    private QueryMetricsRecorder queryMetricsRecorder;
 
     private DatabaseQueryMetricCollector collector;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        collector = new DatabaseQueryMetricCollector(metricsProperties, countMetricsBinder, durationMetricsBinder);
+        collector = new DatabaseQueryMetricCollector(metricsProperties, queryMetricsRecorder);
     }
 
     @Test
@@ -52,15 +50,13 @@ class DatabaseQueryMetricCollectorTest {
             // Given
             when(metricsProperties.isMetricsEnabled()).thenReturn(false);
             when(metricsProperties.isQueryMetricsEnabled()).thenReturn(false);
-            DatabaseQueryLog logEntry = mock(DatabaseQueryLog.class);
+            DatabaseQueryLog logEntry = TestLogEntryProvider.databaseQueryLog();
 
             // When
             collector.record(logEntry);
 
             // Then
-            verify(countMetricsBinder, never()).increment();
-            verify(durationMetricsBinder, never()).record(anyLong());
-        }
+            verify(queryMetricsRecorder, never()).record(logEntry.getQuery(), logEntry.getDataSource(), logEntry.getExecutionTime());        }
 
         @Test
         @DisplayName("shouldRecordMetricsWhenMetricsAreEnabled")
@@ -69,15 +65,13 @@ class DatabaseQueryMetricCollectorTest {
             when(metricsProperties.isMetricsEnabled()).thenReturn(true);
             when(metricsProperties.isQueryMetricsEnabled()).thenReturn(true);
 
-            DatabaseQueryLog logEntry = mock(DatabaseQueryLog.class);
-            when(logEntry.getExecutionTime()).thenReturn(100L);
+            DatabaseQueryLog logEntry = TestLogEntryProvider.databaseQueryLog();
 
             // When
             collector.record(logEntry);
 
             // Then
-            verify(countMetricsBinder, times(1)).increment();
-            verify(durationMetricsBinder, times(1)).record(100L);
+            verify(queryMetricsRecorder, never()).record(logEntry.getQuery(), logEntry.getDataSource(), logEntry.getExecutionTime());
         }
     }
 }

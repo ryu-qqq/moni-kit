@@ -40,17 +40,47 @@ class SqlQueryCountMetricsBinderTest {
         @DisplayName("shouldIncrementSqlQueryCounter")
         void shouldIncrementSqlQueryCounter() {
             // Given
-            int initialCount = metricsBinder.getQueryCount();
+            String sql = "SELECT * FROM users WHERE id = ?";
+            String dataSource = "primary_db";
 
             // When
-            metricsBinder.increment();
+            metricsBinder.increment(sql, dataSource);
 
             // Then
-            Counter counter = meterRegistry.find("sql_query_total").counter();
+            Counter counter = meterRegistry.find("sql_query_total")
+                .tags("query", sql, "dataSource", dataSource)
+                .counter();
 
             assertNotNull(counter, "Counter should be created");
-            assertEquals(initialCount + 1, metricsBinder.getQueryCount(), "Query count should be incremented");
             assertEquals(1.0, counter.count(), "Counter should be incremented once");
+        }
+
+        @Test
+        @DisplayName("shouldHandleMultipleQueriesAndDataSources")
+        void shouldHandleMultipleQueriesAndDataSources() {
+            // Given
+            String sql1 = "SELECT * FROM users WHERE id = ?";
+            String dataSource1 = "primary_db";
+            String sql2 = "UPDATE orders SET status = ? WHERE id = ?";
+            String dataSource2 = "secondary_db";
+
+            // When
+            metricsBinder.increment(sql1, dataSource1);
+            metricsBinder.increment(sql2, dataSource2);
+
+            // Then
+            Counter counter1 = meterRegistry.find("sql_query_total")
+                .tags("query", sql1, "dataSource", dataSource1)
+                .counter();
+            Counter counter2 = meterRegistry.find("sql_query_total")
+                .tags("query", sql2, "dataSource", dataSource2)
+                .counter();
+
+            assertNotNull(counter1, "Counter for sql1 should be created");
+            assertNotNull(counter2, "Counter for sql2 should be created");
+
+            assertEquals(1.0, counter1.count(), "Counter for sql1 should be incremented once");
+            assertEquals(1.0, counter2.count(), "Counter for sql2 should be incremented once");
         }
     }
 }

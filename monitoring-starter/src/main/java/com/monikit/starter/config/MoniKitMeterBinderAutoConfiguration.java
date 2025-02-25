@@ -11,8 +11,6 @@ import com.monikit.starter.HttpResponseDurationMetricsBinder;
 import com.monikit.starter.SqlQueryCountMetricsBinder;
 import com.monikit.starter.SqlQueryDurationMetricsBinder;
 
-import io.micrometer.core.instrument.binder.MeterBinder;
-
 @Configuration
 public class MoniKitMeterBinderAutoConfiguration {
 

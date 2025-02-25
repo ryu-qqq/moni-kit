@@ -32,16 +32,12 @@ import io.micrometer.core.instrument.Timer;
 public class DatabaseQueryMetricCollector implements MetricCollector<DatabaseQueryLog> {
 
     private final MoniKitMetricsProperties metricsProperties;
-    private final SqlQueryCountMetricsBinder countMetricsBinder;
-    private final SqlQueryDurationMetricsBinder durationMetricsBinder;
+    private final QueryMetricsRecorder queryMetricsRecorder;
 
-    public DatabaseQueryMetricCollector(
-        MoniKitMetricsProperties metricsProperties,
-        SqlQueryCountMetricsBinder countMetricsBinder,
-        SqlQueryDurationMetricsBinder durationMetricsBinder) {
+    public DatabaseQueryMetricCollector(MoniKitMetricsProperties metricsProperties,
+                                        QueryMetricsRecorder queryMetricsRecorder) {
         this.metricsProperties = metricsProperties;
-        this.countMetricsBinder = countMetricsBinder;
-        this.durationMetricsBinder = durationMetricsBinder;
+        this.queryMetricsRecorder = queryMetricsRecorder;
     }
 
     @Override
@@ -55,8 +51,10 @@ public class DatabaseQueryMetricCollector implements MetricCollector<DatabaseQue
             return;
         }
 
-        countMetricsBinder.increment();
+        String sql = QueryMetricUtils.categorizeQuery(logEntry.getQuery());
+        String dataSource = logEntry.getDataSource();
+        long executionTime = logEntry.getExecutionTime();
 
-        durationMetricsBinder.record(logEntry.getExecutionTime());
+        queryMetricsRecorder.record(sql, dataSource, executionTime);
     }
 }

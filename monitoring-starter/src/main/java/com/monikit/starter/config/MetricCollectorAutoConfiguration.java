@@ -14,6 +14,7 @@ import com.monikit.starter.HttpOutboundResponseMetricCollector;
 import com.monikit.starter.HttpResponseCountMetricsBinder;
 import com.monikit.starter.HttpResponseDurationMetricsBinder;
 import com.monikit.starter.HttpResponseMetricsRecorder;
+import com.monikit.starter.QueryMetricsRecorder;
 import com.monikit.starter.SqlQueryCountMetricsBinder;
 import com.monikit.starter.SqlQueryDurationMetricsBinder;
 
@@ -33,6 +34,19 @@ public class MetricCollectorAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(MetricCollectorAutoConfiguration.class);
 
+
+    /**
+     * SQL 쿼리 실행 메트릭을 수집하는 `QueryMetricsRecorder` 빈 등록.
+     */
+    @Bean
+    @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnMissingBean
+    public QueryMetricsRecorder queryMetricsRecorder( SqlQueryCountMetricsBinder countMetricsBinder,
+                                                      SqlQueryDurationMetricsBinder durationMetricsBinder){
+        logger.info("Registered QueryMetricsRecorder: QueryMetricsRecorder");
+        return new QueryMetricsRecorder(countMetricsBinder, durationMetricsBinder);
+    }
+
     /**
      * SQL 쿼리 실행 메트릭을 수집하는 `DatabaseQueryMetricCollector` 빈 등록.
      */
@@ -41,11 +55,10 @@ public class MetricCollectorAutoConfiguration {
     @ConditionalOnMissingBean
     public MetricCollector<?> databaseQueryMetricCollector(
         MoniKitMetricsProperties metricsProperties,
-        SqlQueryCountMetricsBinder countMetricsBinder,
-        SqlQueryDurationMetricsBinder durationMetricsBinder
+        QueryMetricsRecorder queryMetricsRecorder
     ) {
         logger.info("Registered MetricCollector: DatabaseQueryMetricCollector");
-        return new DatabaseQueryMetricCollector(metricsProperties, countMetricsBinder, durationMetricsBinder);
+        return new DatabaseQueryMetricCollector(metricsProperties, queryMetricsRecorder);
     }
 
     /**
@@ -85,5 +98,10 @@ public class MetricCollectorAutoConfiguration {
         logger.info("Registered HttpResponseMetricsRecorder: HttpResponseMetricsRecorder");
         return new HttpResponseMetricsRecorder(countMetricsBinder, durationMetricsBinder);
     }
+
+
+
+
+
 
 }

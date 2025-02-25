@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.monikit.core.MetricCollector;
 import com.monikit.starter.*;
 
 class MetricCollectorAutoConfigurationTest {
