@@ -27,7 +27,7 @@ class MetricCollectorAutoConfigurationTest {
         .withConfiguration(AutoConfigurations.of(MetricCollectorAutoConfiguration.class))
         .withUserConfiguration(MockTestConfiguration.class)
         .withPropertyValues(
-            "monikit.metrics.query.enabled=true",
+            "monikit.metrics.queryMetricsEnabled=true",
             "monikit.metrics.httpMetricsEnabled=true",
             "monikit.metrics.externalMallMetricsEnabled=true"
         );

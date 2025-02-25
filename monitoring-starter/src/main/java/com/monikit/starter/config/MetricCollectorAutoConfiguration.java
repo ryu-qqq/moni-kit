@@ -35,7 +35,7 @@ public class MetricCollectorAutoConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MetricCollectorAutoConfiguration.class);
 
     @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.query.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = true)
     public Counter sqlQueryCounter(MeterRegistry meterRegistry) {
         logger.info("Registered Metric Bean: sql_query_total (Counter) - Tracking total SQL queries");
         return Counter.builder("sql_query_total")
@@ -44,15 +44,13 @@ public class MetricCollectorAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.query.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = true)
     public Timer sqlQueryTimer(MeterRegistry meterRegistry) {
         logger.info("Registered Metric Bean: sql_query_duration (Timer) - Tracking SQL query execution time");
         return Timer.builder("sql_query_duration")
             .description("SQL query execution time")
             .register(meterRegistry);
     }
-
-
 
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
@@ -77,7 +75,7 @@ public class MetricCollectorAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.query.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean(DatabaseQueryMetricCollector.class)
     public MetricCollector<?> databaseQueryMetricCollector(
         @Qualifier("sqlQueryCounter") Counter sqlQueryCounter,
