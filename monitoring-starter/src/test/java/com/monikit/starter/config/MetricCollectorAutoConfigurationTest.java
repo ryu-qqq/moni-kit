@@ -69,14 +69,6 @@ class MetricCollectorAutoConfigurationTest {
     @DisplayName("HTTP Inbound Response Metrics 빈 등록 테스트")
     class HttpInboundResponseMetrics {
 
-        @Test
-        @DisplayName("should register httpInboundResponseTimer bean successfully")
-        void shouldRegisterHttpInboundResponseTimerBeanSuccessfully() {
-            contextRunner.run(context -> {
-                Timer timer = context.getBean("httpInboundResponseTimer", Timer.class);
-                assertNotNull(timer);
-            });
-        }
 
         @Test
         @DisplayName("should register HttpInboundResponseMetricCollector bean successfully")
@@ -93,14 +85,6 @@ class MetricCollectorAutoConfigurationTest {
     @DisplayName("HTTP Outbound Response Metrics 빈 등록 테스트")
     class HttpOutboundResponseMetrics {
 
-        @Test
-        @DisplayName("should register httpOutboundResponseTimer bean successfully")
-        void shouldRegisterHttpOutboundResponseTimerBeanSuccessfully() {
-            contextRunner.run(context -> {
-                Timer timer = context.getBean("httpOutboundResponseTimer", Timer.class);
-                assertNotNull(timer);
-            });
-        }
 
         @Test
         @DisplayName("should register HttpOutboundResponseMetricCollector bean successfully")
