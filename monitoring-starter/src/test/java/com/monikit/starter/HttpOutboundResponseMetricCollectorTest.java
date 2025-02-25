@@ -73,7 +73,6 @@ class HttpOutboundResponseMetricCollectorTest {
         void shouldRecordMetricsWhenMetricsEnabled() {
             // Given
             when(mockMetricsProperties.isMetricsEnabled()).thenReturn(true);
-            when(mockMetricsProperties.isExternalMallMetricsEnabled()).thenReturn(true);
 
             HttpOutboundResponseLog logEntry = TestLogEntryProvider.httpOutboundResponseLog();
 
@@ -82,7 +81,7 @@ class HttpOutboundResponseMetricCollectorTest {
 
             // Then
             verify(mockHttpResponseMetricsRecorder)
-                .record("http_outbound_response_count", logEntry.getTargetUrl(), logEntry.getStatusCode(), logEntry.getExecutionTime());
+                .record(logEntry.getTargetUrl(), logEntry.getStatusCode(), logEntry.getExecutionTime());
         }
     }
 }

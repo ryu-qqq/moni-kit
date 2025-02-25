@@ -7,7 +7,10 @@ import com.monikit.core.LogType;
 import com.monikit.core.MetricCollector;
 import com.monikit.starter.config.MoniKitMetricsProperties;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.binder.MeterBinder;
+
 /**
  * 외부 API로 나가는 HTTP 응답 메트릭을 수집하는 기본 구현체.
  * <p>
@@ -16,7 +19,7 @@ import io.micrometer.core.instrument.Timer;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.3
+ * @since 1.0.0.1
  */
 
 public class HttpOutboundResponseMetricCollector implements MetricCollector<HttpOutboundResponseLog> {
@@ -38,7 +41,7 @@ public class HttpOutboundResponseMetricCollector implements MetricCollector<Http
 
     @Override
     public void record(HttpOutboundResponseLog logEntry) {
-        if (!metricsProperties.isMetricsEnabled() || !metricsProperties.isExternalMallMetricsEnabled()) {
+        if (!metricsProperties.isMetricsEnabled()) {
             return;
         }
 
@@ -46,7 +49,7 @@ public class HttpOutboundResponseMetricCollector implements MetricCollector<Http
         int statusCode = logEntry.getStatusCode();
         long responseTime = logEntry.getExecutionTime();
 
-        httpResponseMetricsRecorder.record("http_outbound_response_count", path, statusCode, responseTime);
+        httpResponseMetricsRecorder.record(path, statusCode, responseTime);
 
     }
 

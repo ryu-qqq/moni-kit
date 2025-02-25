@@ -7,7 +7,7 @@ package com.monikit.core;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.2
+ * @since 1.0.0.1
  */
 public interface MetricCollector <T extends LogEntry>{
 

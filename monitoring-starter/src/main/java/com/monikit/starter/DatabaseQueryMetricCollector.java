@@ -26,21 +26,22 @@ import io.micrometer.core.instrument.Timer;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.2
+ * @since 1.1
  */
+
 public class DatabaseQueryMetricCollector implements MetricCollector<DatabaseQueryLog> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseQueryMetricCollector.class);
-
-    private final Counter sqlQueryCounter;
-    private final Timer sqlQueryTimer;
     private final MoniKitMetricsProperties metricsProperties;
+    private final SqlQueryCountMetricsBinder countMetricsBinder;
+    private final SqlQueryDurationMetricsBinder durationMetricsBinder;
 
-    public DatabaseQueryMetricCollector(Counter sqlQueryCounter, Timer sqlQueryTimer,
-                                        MoniKitMetricsProperties metricsProperties) {
-        this.sqlQueryCounter = sqlQueryCounter;
-        this.sqlQueryTimer = sqlQueryTimer;
+    public DatabaseQueryMetricCollector(
+        MoniKitMetricsProperties metricsProperties,
+        SqlQueryCountMetricsBinder countMetricsBinder,
+        SqlQueryDurationMetricsBinder durationMetricsBinder) {
         this.metricsProperties = metricsProperties;
+        this.countMetricsBinder = countMetricsBinder;
+        this.durationMetricsBinder = durationMetricsBinder;
     }
 
     @Override
@@ -54,20 +55,8 @@ public class DatabaseQueryMetricCollector implements MetricCollector<DatabaseQue
             return;
         }
 
-        String sql = logEntry.getQuery();
-        long executionTime = logEntry.getExecutionTime();
+        countMetricsBinder.increment();
 
-        sqlQueryCounter.increment();
-        sqlQueryTimer.record(executionTime, TimeUnit.MILLISECONDS);
-
-        if (executionTime > metricsProperties.getSlowQueryThresholdMs()) {
-            logger.warn("⚠️ Slow Query Detected! [Execution Time: {} ms] SQL: {}", executionTime, sql);
-        }
-
-        if (ThreadLocalRandom.current().nextInt(100) < metricsProperties.getQuerySamplingRate()) {
-            logger.info("📌 Sampled Query Log: {}", sql);
-        }
-
+        durationMetricsBinder.record(logEntry.getExecutionTime());
     }
-
 }

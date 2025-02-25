@@ -17,7 +17,7 @@ import com.monikit.starter.config.MoniKitMetricsProperties;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.3
+ * @since 1.0.0.1
  */
 public class HttpInboundResponseMetricCollector implements MetricCollector<HttpInboundResponseLog> {
 
@@ -46,7 +46,7 @@ public class HttpInboundResponseMetricCollector implements MetricCollector<HttpI
         int statusCode = logEntry.getStatusCode();
         long responseTime = logEntry.getExecutionTime();
 
-        httpResponseMetricsRecorder.record("http_inbound_response_count", path, statusCode, responseTime);
+        httpResponseMetricsRecorder.record(path, statusCode, responseTime);
 
     }
 }

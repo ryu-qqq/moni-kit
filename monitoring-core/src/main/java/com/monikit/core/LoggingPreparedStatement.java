@@ -15,7 +15,7 @@ import java.sql.Timestamp;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 public class LoggingPreparedStatement extends PreparedStatementWrapper {
     private final String traceId;

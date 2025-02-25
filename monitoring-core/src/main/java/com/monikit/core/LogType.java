@@ -8,7 +8,7 @@ package com.monikit.core;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 public enum LogType {
     EXECUTION_TIME,

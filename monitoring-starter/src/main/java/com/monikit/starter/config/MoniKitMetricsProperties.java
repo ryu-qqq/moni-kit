@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.3
+ * @since 1.0.1
  */
 @Configuration
 @ConfigurationProperties(prefix = "monikit.metrics")
@@ -22,7 +22,6 @@ public class MoniKitMetricsProperties {
     private boolean metricsEnabled = true;
     private boolean queryMetricsEnabled = true;
     private boolean httpMetricsEnabled = true;
-    private boolean externalMallMetricsEnabled = true;
 
     private long slowQueryThresholdMs = 2000;
     private int querySamplingRate = 10;
@@ -36,9 +35,6 @@ public class MoniKitMetricsProperties {
 
     public boolean isHttpMetricsEnabled() { return httpMetricsEnabled; }
     public void setHttpMetricsEnabled(boolean httpMetricsEnabled) { this.httpMetricsEnabled = httpMetricsEnabled; }
-
-    public boolean isExternalMallMetricsEnabled() { return externalMallMetricsEnabled; }
-    public void setExternalMallMetricsEnabled(boolean externalMallMetricsEnabled) { this.externalMallMetricsEnabled = externalMallMetricsEnabled; }
 
     public long getSlowQueryThresholdMs() { return slowQueryThresholdMs; }
     public void setSlowQueryThresholdMs(long slowQueryThresholdMs) { this.slowQueryThresholdMs = slowQueryThresholdMs; }

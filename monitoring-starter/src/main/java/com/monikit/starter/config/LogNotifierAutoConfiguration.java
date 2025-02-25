@@ -22,7 +22,7 @@ import com.monikit.starter.DefaultSlf4jLogNotifier;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 @Configuration
 public class LogNotifierAutoConfiguration {

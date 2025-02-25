@@ -22,7 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 
 public class TraceIdFilter extends OncePerRequestFilter {

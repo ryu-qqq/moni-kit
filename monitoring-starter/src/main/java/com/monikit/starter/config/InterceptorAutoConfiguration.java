@@ -21,7 +21,7 @@ import com.monikit.starter.interceptor.HttpLoggingInterceptor;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 @Configuration
 @EnableConfigurationProperties(MoniKitLoggingProperties.class)

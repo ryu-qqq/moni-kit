@@ -24,7 +24,7 @@ import com.monikit.starter.config.MoniKitLoggingProperties;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.1
+ * @since 1.0.0.1
  */
 @Aspect
 @Component

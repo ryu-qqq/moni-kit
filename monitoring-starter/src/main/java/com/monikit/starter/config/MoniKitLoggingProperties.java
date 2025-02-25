@@ -17,7 +17,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 @ConfigurationProperties(prefix = "monikit.logging")
 public class MoniKitLoggingProperties {

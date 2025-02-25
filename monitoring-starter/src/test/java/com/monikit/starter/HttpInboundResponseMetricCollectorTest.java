@@ -82,7 +82,7 @@ class HttpInboundResponseMetricCollectorTest {
 
             // Then
             verify(mockHttpResponseMetricsRecorder)
-                .record("http_inbound_response_count", logEntry.getRequestUri(), logEntry.getStatusCode(), logEntry.getExecutionTime());
+                .record(logEntry.getRequestUri(), logEntry.getStatusCode(), logEntry.getExecutionTime());
 
         }
     }

@@ -14,7 +14,7 @@ import com.monikit.starter.filter.TraceIdFilter;
  * 필터를 자동으로 등록하는 설정 클래스.
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 @Configuration
 public class FilterAutoConfiguration {

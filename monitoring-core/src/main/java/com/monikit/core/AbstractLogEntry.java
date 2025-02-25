@@ -11,7 +11,7 @@ import java.util.Map;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 public abstract class AbstractLogEntry implements LogEntry {
 

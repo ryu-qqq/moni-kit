@@ -17,7 +17,7 @@ import com.monikit.core.ErrorLogNotifier;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 @Configuration
 public class ErrorLogNotifierAutoConfiguration {

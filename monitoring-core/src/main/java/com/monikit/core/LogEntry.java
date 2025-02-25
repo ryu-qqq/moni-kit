@@ -10,7 +10,7 @@ import java.time.Instant;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0
+ * @since 1.0.0
  */
 public interface LogEntry {
     /**
