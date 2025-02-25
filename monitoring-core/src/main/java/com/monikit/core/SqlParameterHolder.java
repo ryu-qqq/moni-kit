@@ -12,7 +12,7 @@ import java.util.List;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.1
+ * @since 1.0.1
  */
 public class SqlParameterHolder implements AutoCloseable {
 

@@ -1,75 +1,140 @@
 package com.monikit.starter.config;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 
 import com.monikit.core.MetricCollector;
-import com.monikit.starter.MoniKitMetricCollector;
-import com.monikit.starter.NoOpMetricCollector;
+import com.monikit.starter.DatabaseQueryMetricCollector;
+import com.monikit.starter.HttpInboundResponseMetricCollector;
+import com.monikit.starter.HttpOutboundResponseMetricCollector;
+import com.monikit.starter.HttpResponseMetricsRecorder;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.prometheusmetrics.PrometheusConfig;
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
-
-@DisplayName("MetricCollectorAutoConfiguration 테스트")
 class MetricCollectorAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-        .withConfiguration(AutoConfigurations.of(MetricCollectorAutoConfiguration.class));
+        .withAllowBeanDefinitionOverriding(true)
+        .withConfiguration(AutoConfigurations.of(MetricCollectorAutoConfiguration.class))
+        .withUserConfiguration(MockTestConfiguration.class)
+        .withPropertyValues(
+            "monikit.metrics.query.enabled=true",
+            "monikit.metrics.httpMetricsEnabled=true",
+            "monikit.metrics.externalMallMetricsEnabled=true"
+        );
 
     @Nested
-    @DisplayName("MoniKitMetricCollector 등록 테스트")
-    class MoniKitMetricCollectorTests {
+    @DisplayName("SQL Query Metrics 빈 등록 테스트")
+    class SqlQueryMetrics {
 
         @Test
-        @DisplayName("metricsEnabled=true && MeterRegistry가 존재할 때 MoniKitMetricCollector가 등록되어야 한다.")
-        void shouldRegisterMoniKitMetricCollectorWhenEnabledAndMeterRegistryExists() {
-            contextRunner
-                .withPropertyValues("monikit.metrics.metricsEnabled=true")
-                .withBean(MeterRegistry.class, () -> new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
-                .run(context -> {
-                    assertThat(context).hasSingleBean(MetricCollector.class);
-                    assertThat(context.getBean(MetricCollector.class)).isInstanceOf(MoniKitMetricCollector.class);
-                });
+        @DisplayName("should register sqlQueryCounter bean successfully")
+        void shouldRegisterSqlQueryCounterBeanSuccessfully() {
+            contextRunner.run(context -> {
+                Counter counter = context.getBean("sqlQueryCounter", Counter.class);
+                assertNotNull(counter);
+            });
         }
 
+        @Test
+        @DisplayName("should register sqlQueryTimer bean successfully")
+        void shouldRegisterSqlQueryTimerBeanSuccessfully() {
+            contextRunner.run(context -> {
+                Timer timer = context.getBean("sqlQueryTimer", Timer.class);
+                assertNotNull(timer);
+            });
+        }
+
+        @Test
+        @DisplayName("should register DatabaseQueryMetricCollector bean successfully")
+        void shouldRegisterDatabaseQueryMetricCollectorBeanSuccessfully() {
+            contextRunner.run(context -> {
+                MetricCollector<?> collector = context.getBean(DatabaseQueryMetricCollector.class);
+                assertNotNull(collector);
+                assertInstanceOf(DatabaseQueryMetricCollector.class, collector);
+            });
+        }
     }
 
     @Nested
-    @DisplayName("NoOpMetricCollector 등록 테스트")
-    class NoOpMetricCollectorTests {
+    @DisplayName("HTTP Inbound Response Metrics 빈 등록 테스트")
+    class HttpInboundResponseMetrics {
 
         @Test
-        @DisplayName("metricsEnabled=false일 때 NoOpMetricCollector가 기본값으로 등록되어야 한다.")
-        void shouldRegisterNoOpMetricCollectorWhenDisabled() {
-            contextRunner
-                .withPropertyValues("monikit.metrics.metricsEnabled=false")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(MetricCollector.class);
-                    assertThat(context.getBean(MetricCollector.class)).isInstanceOf(NoOpMetricCollector.class);
-                });
+        @DisplayName("should register httpInboundResponseTimer bean successfully")
+        void shouldRegisterHttpInboundResponseTimerBeanSuccessfully() {
+            contextRunner.run(context -> {
+                Timer timer = context.getBean("httpInboundResponseTimer", Timer.class);
+                assertNotNull(timer);
+            });
+        }
+
+        @Test
+        @DisplayName("should register HttpInboundResponseMetricCollector bean successfully")
+        void shouldRegisterHttpInboundResponseMetricCollectorBeanSuccessfully() {
+            contextRunner.run(context -> {
+                MetricCollector<?> collector = context.getBean(HttpInboundResponseMetricCollector.class);
+                assertNotNull(collector);
+                assertInstanceOf(HttpInboundResponseMetricCollector.class, collector);
+            });
         }
     }
 
     @Nested
-    @DisplayName("SmartInitializingSingleton 검증 테스트")
-    class SmartInitializingSingletonTests {
+    @DisplayName("HTTP Outbound Response Metrics 빈 등록 테스트")
+    class HttpOutboundResponseMetrics {
 
         @Test
-        @DisplayName("모든 빈이 초기화된 후 MetricCollector가 정상적으로 등록되었는지 검증해야 한다.")
-        void shouldEnsureMetricCollectorIsInitializedAfterAllBeans() {
-            contextRunner
-                .withPropertyValues("monikit.metrics.metricsEnabled=true")
-                .withBean(MeterRegistry.class, () -> new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
-                .run(context -> {
-                    MetricCollector metricCollector = context.getBean(MetricCollector.class);
-                    assertThat(metricCollector).isInstanceOf(MoniKitMetricCollector.class);
-                });
+        @DisplayName("should register httpOutboundResponseTimer bean successfully")
+        void shouldRegisterHttpOutboundResponseTimerBeanSuccessfully() {
+            contextRunner.run(context -> {
+                Timer timer = context.getBean("httpOutboundResponseTimer", Timer.class);
+                assertNotNull(timer);
+            });
+        }
+
+        @Test
+        @DisplayName("should register HttpOutboundResponseMetricCollector bean successfully")
+        void shouldRegisterHttpOutboundResponseMetricCollectorBeanSuccessfully() {
+            contextRunner.run(context -> {
+                MetricCollector<?> collector = context.getBean(HttpOutboundResponseMetricCollector.class);
+                assertNotNull(collector);
+                assertInstanceOf(HttpOutboundResponseMetricCollector.class, collector);
+            });
+        }
+    }
+
+    /**
+     * 테스트 전용 모의 빈 설정
+     */
+    /**
+     * 테스트 전용 모의 빈 설정
+     */
+    @TestConfiguration
+    static class MockTestConfiguration {
+
+        @Bean
+        public MeterRegistry meterRegistry() {
+            return new io.micrometer.core.instrument.simple.SimpleMeterRegistry();
+        }
+
+        @Bean
+        public MoniKitMetricsProperties moniKitMetricsProperties() {
+            return new MoniKitMetricsProperties();
+        }
+
+        @Bean
+        public HttpResponseMetricsRecorder responseStatusCounter() {
+            return new HttpResponseMetricsRecorder(meterRegistry());
         }
     }
 }

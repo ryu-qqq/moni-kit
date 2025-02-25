@@ -49,31 +49,45 @@ monikit:
 
 ---
 
-## **2. 메트릭 수집 설정**
+## 2. 메트릭 수집 설정
 ### MoniKitMetricsProperties (`monikit.metrics`)
 
-`MoniKitMetricsProperties` 클래스는 **HTTP 및 SQL 쿼리 실행 시간 등의 메트릭을 수집할지 여부를 설정**합니다.
+`MoniKitMetricsProperties` 클래스는 **HTTP 요청, SQL 쿼리 실행 시간, 외부몰 요청 메트릭 등을 수집할지 여부를 설정**합니다.
 
 ```java
 @ConfigurationProperties(prefix = "monikit.metrics")
 public class MoniKitMetricsProperties {
     private boolean metricsEnabled = true;
+    private boolean queryMetricsEnabled = true;
+    private boolean httpMetricsEnabled = true;
+    private boolean externalMallMetricsEnabled = true;
+    private long slowQueryThresholdMs = 2000;
+    private int querySamplingRate = 10;
+
 }
 ```
 
 ### **설정 옵션**
 | 옵션명 | 기본값 | 설명 |
 |--------|--------|------|
-| `monikit.metrics.metricsEnabled` | `true` | HTTP 요청 및 SQL 쿼리 실행 메트릭 수집 활성화 여부 |
+| `monikit.metrics.metricsEnabled` | `true` | 전체 메트릭 수집 활성화 여부 |
+| `monikit.metrics.queryMetricsEnabled` | `true` | SQL 쿼리 실행 메트릭 수집 활성화 여부 |
+| `monikit.metrics.httpMetricsEnabled` | `true` | HTTP 요청 메트릭 수집 활성화 여부 |
+| `monikit.metrics.externalMallMetricsEnabled` | `true` | 외부몰 요청 메트릭 수집 활성화 여부 |
+| `monikit.metrics.slowQueryThresholdMs` | `2000` | 슬로우 쿼리 감지 임계값 (ms) |
+| `monikit.metrics.querySamplingRate` | `10` | SQL 쿼리 샘플링 비율 (%) |
 
 ### **설정 예시 (application.yml)**
 ```yaml
 monikit:
   metrics:
-    metricsEnabled: false
+    metricsEnabled: true
+    queryMetricsEnabled: true
+    httpMetricsEnabled: true
+    externalMallMetricsEnabled: true
+    slowQueryThresholdMs: 3000
+    querySamplingRate: 20
 ```
-
----
 
 ## **3. 설정 유효성 검사**
 ### 🚨 `logEnabled`가 `false`일 때 개별 로깅 옵션이 활성화되어 있으면 경고 발생
@@ -121,6 +135,11 @@ monikit:
     criticalQueryThresholdMs: 5000
   metrics:
     metricsEnabled: true
+    queryMetricsEnabled: true
+    httpMetricsEnabled: true
+    externalMallMetricsEnabled: true
+    slowQueryThresholdMs: 3000
+    querySamplingRate: 20
 ```
 
 3. **Spring Boot 실행 시 자동으로 설정이 반영됨**
@@ -191,14 +210,12 @@ public ErrorLogNotifier defaultErrorLogNotifier() {
 |--------|------|------------|
 | `TraceIdFilter` | HTTP 요청마다 Trace ID를 설정하여 로깅 | `monikit.logging.filters.trace-enabled=true` |
 | `LogContextScopeFilter` | 요청 단위로 로그 컨텍스트를 관리 | `monikit.logging.filters.log-enabled=true` |
-| `HttpMetricsFilter` | HTTP 요청에 대한 실행 시간 메트릭을 수집 | `monikit.logging.filters.metrics-enabled=true` |
 
 ### 🔧 **설정 옵션**
 | 옵션명 | 기본값 | 설명 |
 |--------|--------|------|
 | `monikit.logging.filters.trace-enabled` | `true` | Trace ID 필터 활성화 여부 |
 | `monikit.logging.filters.log-enabled` | `true` | 로그 컨텍스트 필터 활성화 여부 |
-| `monikit.logging.filters.metrics-enabled` | `true` | HTTP 메트릭 필터 활성화 여부 |
 
 ### **설정 예시 (application.yml)**
 ```yaml
@@ -213,7 +230,37 @@ monikit:
 
 ---
 
-## **4. 요약**
+## **4. 메트릭 자동 등록** (`MetricCollectorAutoConfiguration`)
+
+`MetricCollectorAutoConfiguration` 클래스는 **특정 메트릭 수집이 활성화된 경우, 자동으로 적절한 `MetricCollector` 빈을 등록**합니다.
+
+### ✅ 주요 메트릭 자동 등록
+| 등록 대상 | 역할 | 활성화 설정 |
+|--------|------|------------|
+| `DatabaseQueryMetricCollector` | SQL 쿼리 실행 시간 및 총 실행 횟수를 기록 | `monikit.metrics.queryMetricsEnabled=true` |
+| `HttpInboundResponseMetricCollector` | HTTP 요청 응답 시간 및 상태 코드별 요청 수를 기록 | `monikit.metrics.httpMetricsEnabled=true` |
+| `HttpOutboundResponseMetricCollector` | 외부 API 호출 응답 시간 및 응답 코드 기록 | `monikit.metrics.externalMallMetricsEnabled=true` |
+
+### 🔧 **설정 옵션**
+| 옵션명 | 기본값 | 설명 |
+|--------|--------|------|
+| `monikit.metrics.queryMetricsEnabled` | `true` | SQL 쿼리 메트릭 활성화 여부 |
+| `monikit.metrics.httpMetricsEnabled` | `true` | HTTP 응답 메트릭 활성화 여부 |
+| `monikit.metrics.externalMallMetricsEnabled` | `true` | 외부 API 요청 메트릭 활성화 여부 |
+
+### **설정 예시 (application.yml)**
+```yaml
+monikit:
+  metrics:
+    queryMetricsEnabled: true
+    httpMetricsEnabled: true
+    externalMallMetricsEnabled: true
+```
+
+---
+
+
+## **5. 요약**
 | 설정 클래스 | 역할 | 관련 설정 prefix |
 |------------|------|----------------|
 | `DataSourceLoggingConfig` | 데이터소스 로깅 설정 자동 적용 | `monikit.logging` |

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.monikit.starter.filter.HttpMetricsFilter;
 import com.monikit.starter.filter.LogContextScopeFilter;
 import com.monikit.starter.filter.TraceIdFilter;
 
@@ -48,34 +47,6 @@ class FilterAutoConfigurationTest {
                 .run(context -> {
                     assertFalse(context.containsBean("traceIdFilter"));
                     assertFalse(context.containsBean("traceIdFilterRegistration"));
-                });
-        }
-    }
-
-    @Nested
-    @DisplayName("HttpMetricsFilter 자동 등록 테스트")
-    class HttpMetricsFilterAutoConfigurationTests {
-
-        @Test
-        @DisplayName("monikit.logging.filters.metrics-enabled=true 설정 시 HttpMetricsFilter가 등록되어야 한다")
-        void shouldRegisterHttpMetricsFilterWhenEnabled() {
-            contextRunner
-                .withPropertyValues("monikit.logging.filters.metrics-enabled=true")
-                .run(context -> {
-                    assertTrue(context.containsBean("httpMetricsFilter"));
-                    assertTrue(context.containsBean("httpMetricsFilterRegistration"));
-                    assertNotNull(context.getBean(HttpMetricsFilter.class));
-                });
-        }
-
-        @Test
-        @DisplayName("monikit.logging.filters.metrics-enabled=false 설정 시 HttpMetricsFilter가 등록되지 않아야 한다")
-        void shouldNotRegisterHttpMetricsFilterWhenDisabled() {
-            contextRunner
-                .withPropertyValues("monikit.logging.filters.metrics-enabled=false")
-                .run(context -> {
-                    assertFalse(context.containsBean("httpMetricsFilter"));
-                    assertFalse(context.containsBean("httpMetricsFilterRegistration"));
                 });
         }
     }

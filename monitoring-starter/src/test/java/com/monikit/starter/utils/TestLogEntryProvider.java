@@ -31,6 +31,8 @@ public class TestLogEntryProvider {
     private static final String METHOD_NAME = "testMethod";
     private static final String QUERY = "SELECT * FROM test_table";
     private static final long EXECUTION_TIME = 200;
+    private static final long LONG_EXECUTION_TIME = 20000;
+
     private static final String DATA_SOURCE = "test-db";
     private static final String TABLE_NAME = "test_table";
     private static final String PARAMETERS = "{}";
@@ -60,6 +62,10 @@ public class TestLogEntryProvider {
 
     public static DatabaseQueryLog databaseQueryLog() {
         return DatabaseQueryLog.create(TRACE_ID, QUERY, EXECUTION_TIME, DATA_SOURCE, TABLE_NAME, ROWS_AFFECTED, RESULT_SIZE, LOG_LEVEL);
+    }
+
+    public static DatabaseQueryLog slowDatabaseQueryLog() {
+        return DatabaseQueryLog.create(TRACE_ID, QUERY, LONG_EXECUTION_TIME, DATA_SOURCE, TABLE_NAME, ROWS_AFFECTED, RESULT_SIZE, LOG_LEVEL);
     }
 
     public static ExceptionLog exceptionLog() {
