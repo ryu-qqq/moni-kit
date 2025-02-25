@@ -43,7 +43,7 @@ public class MetricCollectorAutoConfiguration {
      * SQL 쿼리 실행 메트릭을 수집하는 `DatabaseQueryMetricCollector` 빈 등록.
      */
     @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean
     public MetricCollector<?> databaseQueryMetricCollector(
         MoniKitMetricsProperties metricsProperties,
@@ -58,7 +58,7 @@ public class MetricCollectorAutoConfiguration {
      * HTTP Inbound 응답 메트릭을 수집하는 `HttpInboundResponseMetricCollector` 빈 등록.
      */
     @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean
     public MetricCollector<?> httpInboundResponseMetricCollector(
         MoniKitMetricsProperties metricsProperties,
@@ -72,7 +72,7 @@ public class MetricCollectorAutoConfiguration {
      * HTTP Outbound 응답 메트릭을 수집하는 `HttpOutboundResponseMetricCollector` 빈 등록.
      */
     @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean
     public MetricCollector<?> httpOutboundResponseMetricCollector(
         MoniKitMetricsProperties metricsProperties,
@@ -84,7 +84,7 @@ public class MetricCollectorAutoConfiguration {
 
 
     @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean
     public HttpResponseMetricsRecorder httpResponseMetricsRecorder(HttpResponseCountMetricsBinder countMetricsBinder,
                                                                    HttpResponseDurationMetricsBinder durationMetricsBinder){
