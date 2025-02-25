@@ -137,7 +137,6 @@ monikit:
     metricsEnabled: true
     queryMetricsEnabled: true
     httpMetricsEnabled: true
-    externalMallMetricsEnabled: true
     slowQueryThresholdMs: 3000
     querySamplingRate: 20
 ```
@@ -246,7 +245,6 @@ monikit:
 |--------|--------|------|
 | `monikit.metrics.queryMetricsEnabled` | `true` | SQL 쿼리 메트릭 활성화 여부 |
 | `monikit.metrics.httpMetricsEnabled` | `true` | HTTP 응답 메트릭 활성화 여부 |
-| `monikit.metrics.externalMallMetricsEnabled` | `true` | 외부 API 요청 메트릭 활성화 여부 |
 
 ### **설정 예시 (application.yml)**
 ```yaml
@@ -254,7 +252,6 @@ monikit:
   metrics:
     queryMetricsEnabled: true
     httpMetricsEnabled: true
-    externalMallMetricsEnabled: true
 ```
 
 ---
