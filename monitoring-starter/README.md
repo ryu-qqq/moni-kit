@@ -207,24 +207,24 @@ public ErrorLogNotifier defaultErrorLogNotifier() {
 ### ✅ 주요 필터
 | 필터명 | 역할 | 활성화 설정 |
 |--------|------|------------|
-| `TraceIdFilter` | HTTP 요청마다 Trace ID를 설정하여 로깅 | `monikit.logging.filters.trace-enabled=true` |
-| `LogContextScopeFilter` | 요청 단위로 로그 컨텍스트를 관리 | `monikit.logging.filters.log-enabled=true` |
+| `TraceIdFilter` | HTTP 요청마다 Trace ID를 설정하여 로깅 | `monikit.logging.filters.traceEnabled=true` |
+| `LogContextScopeFilter` | 요청 단위로 로그 컨텍스트를 관리 | `monikit.logging.filters.logEnabled=true` |
 
 ### 🔧 **설정 옵션**
 | 옵션명 | 기본값 | 설명 |
 |--------|--------|------|
-| `monikit.logging.filters.trace-enabled` | `true` | Trace ID 필터 활성화 여부 |
-| `monikit.logging.filters.log-enabled` | `true` | 로그 컨텍스트 필터 활성화 여부 |
+| `monikit.logging.filters.traceEnabled` | `true` | Trace ID 필터 활성화 여부 |
+| `monikit.logging.filters.logEnabled` | `true` | 로그 컨텍스트 필터 활성화 여부 |
 
 ### **설정 예시 (application.yml)**
 ```yaml
 monikit:
   logging:
     filters:
-      trace-enabled: true
-      log-enabled: true
+      traceEnabled: true
+      logEnabled: true
   metrics:
-    metrics-enabled: true
+     metricsEnabled: true
 ```
 
 ---
