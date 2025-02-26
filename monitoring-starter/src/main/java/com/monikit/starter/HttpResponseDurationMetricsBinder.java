@@ -33,6 +33,7 @@ public class HttpResponseDurationMetricsBinder implements MeterBinder {
                 .description("Time taken for HTTP responses")
                 .tag("path", path)
                 .tag("status", String.valueOf(statusCode))
+                .publishPercentiles(0.5, 0.95, 0.99)
                 .register(meterRegistry)
         );
 

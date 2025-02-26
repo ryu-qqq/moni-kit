@@ -46,6 +46,7 @@ public class SqlQueryDurationMetricsBinder implements MeterBinder {
                 .description("SQL query execution time")
                 .tag("query", sql)
                 .tag("dataSource", dataSource)
+                .publishPercentiles(0.5, 0.95, 0.99)
                 .register(meterRegistry)
         );
 
