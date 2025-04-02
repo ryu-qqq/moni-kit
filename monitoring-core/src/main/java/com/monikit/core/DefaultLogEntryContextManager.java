@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +28,7 @@ public class DefaultLogEntryContextManager implements LogEntryContextManager {
     private final LogNotifier logNotifier;
     private final ErrorLogNotifier errorLogNotifier;
     private final Map<LogType, List<MetricCollector<? extends LogEntry>>> metricCollectorMap;
-
+    private final ThreadLocal<AtomicBoolean> errorAlert = ThreadLocal.withInitial(() -> new AtomicBoolean(false));
 
     public DefaultLogEntryContextManager(LogNotifier logNotifier, ErrorLogNotifier errorLogNotifier,
                                          List<MetricCollector<? extends LogEntry>> metricCollectors) {
@@ -60,13 +61,17 @@ public class DefaultLogEntryContextManager implements LogEntryContextManager {
 
     @Override
     public void flush() {
+        AtomicBoolean alertFlag = errorAlert.get();
+
+
         for (LogEntry log : LogEntryContext.getLogs()) {
             logNotifier.notify(log);
-            if (log.getLogLevel().isEmergency() && log instanceof ExceptionLog exceptionLog) {
+            if (log.getLogLevel().isEmergency() && log instanceof ExceptionLog exceptionLog && alertFlag.compareAndSet(false, true)) {
                 errorLogNotifier.onErrorLogDetected(exceptionLog);
             }
         }
         clear();
+        errorAlert.remove();
     }
 
     @Override

@@ -108,4 +108,57 @@ class DefaultLogEntryContextManagerTest {
             assertFalse(LogEntryContext.hasError());
         }
     }
+
+    @Nested
+    @DisplayName("Emergency ExceptionLog 관련 테스트")
+    class EmergencyLogTests {
+
+        @Test
+        @DisplayName("flush 시 emergency 레벨의 ExceptionLog가 존재하면 errorLogNotifier가 호출되어야 한다")
+        void shouldCallErrorLogNotifierWhenEmergencyExceptionLogExists() {
+            // Given
+            ExceptionLog emergencyLog = TestLogEntryProvider.exceptionLog();
+            logEntryContextManager.addLog(emergencyLog);
+
+            // When
+            logEntryContextManager.flush();
+
+            // Then
+            verify(mockErrorLogNotifier, times(1)).onErrorLogDetected(emergencyLog);
+        }
+
+        @Test
+        @DisplayName("여러 개의 emergency ExceptionLog가 있어도 errorLogNotifier는 한 번만 호출되어야 한다")
+        void shouldCallErrorLogNotifierOnlyOnceWhenMultipleEmergencyLogsExist() {
+            // Given
+            ExceptionLog log1 = TestLogEntryProvider.exceptionLog();
+            ExceptionLog log2 = TestLogEntryProvider.exceptionLog();
+
+            logEntryContextManager.addLog(log1);
+            logEntryContextManager.addLog(log2);
+
+            // When
+            logEntryContextManager.flush();
+
+            // Then
+            verify(mockErrorLogNotifier, times(1)).onErrorLogDetected(any(ExceptionLog.class));
+        }
+
+        @Test
+        @DisplayName("emergency ExceptionLog가 없을 경우 errorLogNotifier가 호출되지 않아야 한다")
+        void shouldNotCallErrorLogNotifierWhenNoEmergencyLogExists() {
+            // Given
+            LogEntry normalLog = TestLogEntryProvider.executionTimeLog(); // emergency 아님
+            logEntryContextManager.addLog(normalLog);
+
+            // When
+            logEntryContextManager.flush();
+
+            // Then
+            verify(mockErrorLogNotifier, never()).onErrorLogDetected(any());
+        }
+    }
+
+
+
 }
