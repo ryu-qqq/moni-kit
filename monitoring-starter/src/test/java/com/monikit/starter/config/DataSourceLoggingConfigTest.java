@@ -24,7 +24,7 @@ class DataSourceLoggingConfigTest {
         .withConfiguration(AutoConfigurations.of(DataSourceLoggingConfig.class))
         .withUserConfiguration(TestConfig.class)
         .withBean(LoggingPreparedStatementFactory.class, () -> new LoggingPreparedStatementFactory(null))
-        .withBean(DataSource.class, FakeDataSource::new);
+        .withBean("originalDataSource", DataSource.class, FakeDataSource::new);
 
     @TestConfiguration
     @EnableConfigurationProperties(MoniKitLoggingProperties.class)
