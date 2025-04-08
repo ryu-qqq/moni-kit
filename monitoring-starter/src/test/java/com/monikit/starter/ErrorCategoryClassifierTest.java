@@ -1,12 +1,9 @@
 package com.monikit.starter;
 
-import feign.FeignException;
-import jakarta.servlet.ServletException;
-
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.Map;
+
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,8 +15,7 @@ import org.springframework.dao.TransientDataAccessException;
 import com.monikit.core.ErrorCategory;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+
 
 @DisplayName("ErrorCategoryClassifier 테스트")
 class ErrorCategoryClassifierTest {
@@ -109,36 +105,6 @@ class ErrorCategoryClassifierTest {
 
             // Then
             assertEquals(ErrorCategory.INBOUND_NETWORK_ERROR, result);
-        }
-
-
-        @Test
-        @DisplayName("ServletException 예외는 INBOUND_NETWORK_ERROR로 분류되어야 한다.")
-        void shouldCategorizeServletExceptionAsInboundNetworkError() {
-            // Given
-            ServletException exception = new ServletException("Servlet issue");
-
-            // When
-            ErrorCategory result = ErrorCategoryClassifier.categorize(exception);
-
-            // Then
-            assertEquals(ErrorCategory.INBOUND_NETWORK_ERROR, result);
-        }
-
-        @Test
-        @DisplayName("FeignException 예외는 OUTBOUND_NETWORK_ERROR로 분류되어야 한다.")
-        void shouldCategorizeFeignExceptionAsOutboundNetworkError() {
-            // Given
-            FeignException exception = FeignException.errorStatus("GET", feign.Response.builder()
-                .status(500)
-                .request(feign.Request.create(feign.Request.HttpMethod.GET, "http://example.com", Map.of(), null, null, null))
-                .build());
-
-            // When
-            ErrorCategory result = ErrorCategoryClassifier.categorize(exception);
-
-            // Then
-            assertEquals(ErrorCategory.OUTBOUND_NETWORK_ERROR, result);
         }
 
     }

@@ -1,0 +1,29 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'io.spring.dependency-management'
+}
+
+dependencies {
+    implementation "org.slf4j:slf4j-api"
+    implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+}
+
+
+jar {
+    enabled = true
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'monikit-config'
+        }
+    }
+}

@@ -6,15 +6,14 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
+import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.core.ExceptionLog;
 import com.monikit.core.ExecutionDetailLog;
 import com.monikit.core.ExecutionTimeLog;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
-import com.monikit.starter.config.MoniKitLoggingProperties;
+import com.monikit.core.TraceIdProvider;
 
 /**
  * @Service 및 @Repository 어노테이션이 붙은 메서드의 실행 시간을 자동으로 로깅하는 AOP.
@@ -27,16 +26,17 @@ import com.monikit.starter.config.MoniKitLoggingProperties;
  * @since 1.0.0.1
  */
 @Aspect
-@Component
 public class ExecutionLoggingAspect {
 
     private final LogEntryContextManager logEntryContextManager;
     private final MoniKitLoggingProperties loggingProperties;
+    private final TraceIdProvider traceIdProvider;
 
     public ExecutionLoggingAspect(LogEntryContextManager logEntryContextManager,
-                                  MoniKitLoggingProperties loggingProperties) {
+                                  MoniKitLoggingProperties loggingProperties, TraceIdProvider traceIdProvider) {
         this.logEntryContextManager = logEntryContextManager;
         this.loggingProperties = loggingProperties;
+        this.traceIdProvider = traceIdProvider;
     }
 
     /**
@@ -55,7 +55,7 @@ public class ExecutionLoggingAspect {
         }
 
         long startTime = System.currentTimeMillis();
-        String traceId = TraceIdProvider.getTraceId();
+        String traceId = traceIdProvider.getTraceId();
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
         String inputParams = Arrays.toString(joinPoint.getArgs());

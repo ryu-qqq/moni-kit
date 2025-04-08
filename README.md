@@ -42,13 +42,21 @@
 
 ```
 root/                       
-│── monitoring-core/          # 로깅에 필요한 필수 순수 자바 코드      
-│── monitoring-starter/       # 실제 로그를 출력하고 메트릭을 수집하는 구현체가 제공
+│── monitoring-config/                  # 로깅에 필요한 설정 파일
+│── monitoring-core/                    # 로깅에 필요한 필수 순수 자바 코드     
+│── monitoring-metric/                  # 로깅에서 수집한 매트릭   
+│── monitoring-starter/                 # 기본 모니터링 스타터 팩
+│── monitoring-starter-jdbc/            # jdbc 관련 로깅 
+│── monitoring-starter-web/             # web 관련 로깅
 ```
 ---
 
-1. [monitoring-core](monitoring-core/README.md)  패키지 상세 설명
-2. [monitoring-starter](monitoring-starter/README.md) 패키지 상세 설명
+1. [monitoring-config](monitoring-config/README.md)  패키지 상세 설명
+2. [monitoring-core](monitoring-core/README.md)  패키지 상세 설명
+3. [monitoring-metric](monitoring-metric/README.md)  패키지 상세 설명
+4. [monitoring-starter](monitoring-starter/README.md)  패키지 상세 설명
+5. [monitoring-starter-jdbc](monitoring-starter-jdbc/README.md)  패키지 상세 설명
+6. [monitoring-starter-web](monitoring-starter-web/README.md) 패키지 상세 설명
 
 ### 향후 개발 계획
 
