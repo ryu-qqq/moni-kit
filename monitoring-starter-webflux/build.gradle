@@ -29,7 +29,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifactId = 'monikit-starter-web'
+            artifactId = 'monikit-starter-webflux'
         }
     }
 }

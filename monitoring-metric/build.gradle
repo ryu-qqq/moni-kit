@@ -34,7 +34,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifactId = 'monikit-core'
+            artifactId = 'monikit-core-metric'
         }
     }
 }
