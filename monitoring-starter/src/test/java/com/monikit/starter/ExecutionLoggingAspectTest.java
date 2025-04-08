@@ -1,7 +1,7 @@
 package com.monikit.starter;
 
+import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.core.*;
-import com.monikit.starter.config.MoniKitLoggingProperties;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -20,6 +20,9 @@ import static org.mockito.Mockito.*;
 class ExecutionLoggingAspectTest {
 
     @Mock
+    private TraceIdProvider traceIdProvider;
+
+    @Mock
     private LogEntryContextManager mockLogEntryContextManager;
 
     @Mock
@@ -33,7 +36,7 @@ class ExecutionLoggingAspectTest {
 
     @BeforeEach
     void setUp() {
-        reset(mockLogEntryContextManager, mockLoggingProperties);
+        reset(mockLogEntryContextManager, mockLoggingProperties, traceIdProvider);
     }
 
     @Nested

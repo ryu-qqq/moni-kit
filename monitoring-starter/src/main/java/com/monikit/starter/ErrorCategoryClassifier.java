@@ -11,8 +11,6 @@ import org.springframework.validation.BindException;
 
 import com.monikit.core.ErrorCategory;
 
-import feign.FeignException;
-import jakarta.servlet.ServletException;
 
 /**
  * 예외를 적절한 {@link ErrorCategory }로 분류하는 클래스.
@@ -44,14 +42,10 @@ public class ErrorCategoryClassifier {
             exception instanceof UnknownHostException ||
             exception instanceof ConnectException ||
             exception instanceof BindException ||
-            exception instanceof WebServerException ||
-            exception instanceof ServletException) {
+            exception instanceof WebServerException) {
             return ErrorCategory.INBOUND_NETWORK_ERROR;
         }
 
-        else if (exception instanceof FeignException) {
-            return ErrorCategory.OUTBOUND_NETWORK_ERROR;
-        }
 
         else if (exception instanceof RuntimeException) {
             return ErrorCategory.APPLICATION_ERROR;

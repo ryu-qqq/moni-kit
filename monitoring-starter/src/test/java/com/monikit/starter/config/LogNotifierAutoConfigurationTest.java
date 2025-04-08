@@ -8,9 +8,11 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import com.monikit.core.DefaultLogNotifier;
 import com.monikit.core.LogNotifier;
-import com.monikit.starter.DefaultSlf4jLogNotifier;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class LogNotifierAutoConfigurationTest {
@@ -33,19 +35,6 @@ class LogNotifierAutoConfigurationTest {
                     LogNotifier logNotifier = context.getBean(LogNotifier.class);
                     assertNotNull(logNotifier);
                     assertFalse(logNotifier instanceof DefaultLogNotifier);
-                    assertFalse(logNotifier instanceof DefaultSlf4jLogNotifier);
-                });
-        }
-
-        @Test
-        @DisplayName("SLF4J가 존재하는 경우 DefaultSlf4jLogNotifier가 자동 등록되어야 한다")
-        void shouldRegisterDefaultSlf4jLogNotifierIfSlf4jExists() {
-            contextRunner
-                .run(context -> {
-                    assertTrue(context.containsBean("slf4jLogNotifier"));
-                    LogNotifier logNotifier = context.getBean(LogNotifier.class);
-                    assertNotNull(logNotifier);
-                    assertInstanceOf(DefaultSlf4jLogNotifier.class, logNotifier);
                 });
         }
 

@@ -48,6 +48,9 @@ public class LogEntryContextManagerConfig {
     public LogEntryContextManager logEntryContextManager(LogNotifier logNotifier, ErrorLogNotifier errorLogNotifier, List<MetricCollector<? extends LogEntry>> metricCollectors) {
         LogEntryContextManager logEntryContextManager = new DefaultLogEntryContextManager(logNotifier, errorLogNotifier, metricCollectors);
         logger.info("LogEntryContextManager Bean Registered: {}", logEntryContextManager.getClass().getSimpleName());
+        logger.info("MetricCollectors Registered: {}",
+            metricCollectors.stream().map(Object::getClass).map(Class::getSimpleName).toList());
+
         return logEntryContextManager;
     }
 
