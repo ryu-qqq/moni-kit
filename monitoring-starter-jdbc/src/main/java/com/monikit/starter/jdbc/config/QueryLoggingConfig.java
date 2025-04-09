@@ -3,6 +3,7 @@ package com.monikit.starter.jdbc.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,6 +34,7 @@ import com.monikit.starter.jdbc.proxy.LoggingPreparedStatementFactory;
  */
 
 @Configuration
+@EnableConfigurationProperties({MoniKitLoggingProperties.class})
 public class QueryLoggingConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(QueryLoggingConfig.class);
