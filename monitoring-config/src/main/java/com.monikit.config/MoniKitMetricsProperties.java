@@ -2,6 +2,7 @@ package com.monikit.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * MoniKit의 메트릭 수집 기능에 대한 설정을 정의하는 구성 클래스.
@@ -37,7 +38,7 @@ import org.springframework.context.annotation.Configuration;
  * @since 1.1.0
  */
 
-
+@Primary
 @Configuration
 @ConfigurationProperties(prefix = "monikit.metrics")
 public class MoniKitMetricsProperties {

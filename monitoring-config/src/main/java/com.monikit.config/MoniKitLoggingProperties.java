@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import jakarta.annotation.PostConstruct;
 
@@ -28,6 +29,7 @@ import jakarta.annotation.PostConstruct;
  * @since 1.1.0
  */
 
+@Primary
 @Configuration
 @ConfigurationProperties(prefix = "monikit.logging")
 public class MoniKitLoggingProperties {
