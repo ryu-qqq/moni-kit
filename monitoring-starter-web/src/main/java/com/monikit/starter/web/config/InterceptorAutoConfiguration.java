@@ -40,7 +40,7 @@ public class InterceptorAutoConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        logger.info("monikit.logging.filters.log-enabled = {}", loggingProperties.isLogEnabled());
+        logger.info("monikit.logging.log-enabled = {}", loggingProperties.isLogEnabled());
 
         if (!loggingProperties.isLogEnabled() || httpLoggingInterceptor == null) {
             logger.info("HTTP Logging Interceptor active off");

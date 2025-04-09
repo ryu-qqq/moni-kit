@@ -30,7 +30,7 @@ class HttpLoggingInterceptorConfigurationTest {
         @DisplayName("shouldRegisterBeanWhenLogEnabledTrue")
         void shouldRegisterBeanWhenLogEnabledTrue() {
             contextRunner
-                .withPropertyValues("monikit.logging.filters.log-enabled=true")
+                .withPropertyValues("monikit.logging.log-enabled=true")
                 .run(context -> {
                     assertTrue(context.containsBean("httpLoggingInterceptor"));
                     assertNotNull(context.getBean(HttpLoggingInterceptor.class));
@@ -50,7 +50,7 @@ class HttpLoggingInterceptorConfigurationTest {
         @DisplayName("shouldNotRegisterBeanWhenLogEnabledFalse")
         void shouldNotRegisterBeanWhenLogEnabledFalse() {
             contextRunner
-                .withPropertyValues("monikit.logging.filters.log-enabled=false")
+                .withPropertyValues("monikit.logging.log-enabled=false")
                 .run(context -> {
                     assertFalse(context.containsBean("httpLoggingInterceptor"));
                 });

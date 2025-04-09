@@ -25,7 +25,7 @@ public class HttpLoggingInterceptorConfiguration {
      * `monikit.logging.filters.log-enabled=true`일 때만 HttpLoggingInterceptor 빈을 생성.
      */
     @Bean
-    @ConditionalOnProperty(name = "monikit.logging.filters.log-enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = true)
     public HttpLoggingInterceptor httpLoggingInterceptor(LogEntryContextManager logEntryContextManager, TraceIdProvider traceIdProvider) {
         return new HttpLoggingInterceptor(logEntryContextManager, traceIdProvider);
     }

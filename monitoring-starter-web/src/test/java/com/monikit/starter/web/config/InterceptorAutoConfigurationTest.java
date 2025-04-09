@@ -45,7 +45,7 @@ class InterceptorAutoConfigurationTest {
         void shouldSkipInterceptorWhenLogEnabledIsFalse() {
             contextRunner
                 .withBean(HttpLoggingInterceptor.class, () -> mock(HttpLoggingInterceptor.class))
-                .withPropertyValues("monikit.logging.filters.log-enabled=false")
+                .withPropertyValues("monikit.logging.log-enabled=false")
                 .run(context -> {
                     assertTrue(context.getBeansOfType(WebMvcConfigurer.class).size() > 0);
                 });
@@ -55,7 +55,7 @@ class InterceptorAutoConfigurationTest {
         @DisplayName("shouldNotFailIfHttpLoggingInterceptorMissingAndLogDisabled")
         void shouldNotFailIfHttpLoggingInterceptorMissingAndLogDisabled() {
             contextRunner
-                .withPropertyValues("monikit.logging.filters.log-enabled=false")
+                .withPropertyValues("monikit.logging.log-enabled=false")
                 .run(context -> {
                     assertTrue(context.getBeansOfType(WebMvcConfigurer.class).size() > 0);
                 });

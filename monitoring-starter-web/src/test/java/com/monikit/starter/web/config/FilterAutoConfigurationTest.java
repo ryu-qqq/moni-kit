@@ -33,7 +33,7 @@ class FilterAutoConfigurationTest {
         @DisplayName("shouldRegisterTraceIdFilterWhenTraceEnabledTrue")
         void shouldRegisterTraceIdFilterWhenTraceEnabledTrue() {
             contextRunner
-                .withPropertyValues("monikit.logging.filters.trace-enabled=true")
+                .withPropertyValues("monikit.logging.trace-enabled=true")
                 .run(context -> {
                     assertTrue(context.containsBean("traceIdFilter"));
                     assertTrue(context.containsBean("traceIdFilterRegistration"));
@@ -49,7 +49,7 @@ class FilterAutoConfigurationTest {
         @DisplayName("shouldNotRegisterTraceIdFilterWhenTraceEnabledFalse")
         void shouldNotRegisterTraceIdFilterWhenTraceEnabledFalse() {
             contextRunner
-                .withPropertyValues("monikit.logging.filters.trace-enabled=false")
+                .withPropertyValues("monikit.logging.trace-enabled=false")
                 .run(context -> {
                     assertFalse(context.containsBean("traceIdFilter"));
                     assertFalse(context.containsBean("traceIdFilterRegistration"));
@@ -65,7 +65,7 @@ class FilterAutoConfigurationTest {
         @DisplayName("shouldRegisterLogContextScopeFilterWhenLogEnabledTrue")
         void shouldRegisterLogContextScopeFilterWhenLogEnabledTrue() {
             contextRunner
-                .withPropertyValues("monikit.logging.filters.log-enabled=true")
+                .withPropertyValues("monikit.logging.log-enabled=true")
                 .run(context -> {
                     assertTrue(context.containsBean("logContextScopeFilter"));
                     assertTrue(context.containsBean("logContextScopeFilterRegistration"));
@@ -81,7 +81,7 @@ class FilterAutoConfigurationTest {
         @DisplayName("shouldNotRegisterLogContextScopeFilterWhenLogEnabledFalse")
         void shouldNotRegisterLogContextScopeFilterWhenLogEnabledFalse() {
             contextRunner
-                .withPropertyValues("monikit.logging.filters.log-enabled=false")
+                .withPropertyValues("monikit.logging.log-enabled=false")
                 .run(context -> {
                     assertFalse(context.containsBean("logContextScopeFilter"));
                     assertFalse(context.containsBean("logContextScopeFilterRegistration"));

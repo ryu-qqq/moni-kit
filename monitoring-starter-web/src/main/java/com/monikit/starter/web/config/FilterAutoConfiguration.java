@@ -34,14 +34,14 @@ public class FilterAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "monikit.logging.filters.trace-enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "monikit.logging.trace-enabled", havingValue = "true", matchIfMissing = true)
     public TraceIdFilter traceIdFilter(TraceIdProvider traceIdProvider) {
         logger.info("Initializing TraceIdFilter with traceEnabled={}", loggingProperties.isTraceEnabled());
         return new TraceIdFilter(traceIdProvider);
     }
 
     @Bean
-    @ConditionalOnProperty(name = "monikit.logging.filters.trace-enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "monikit.logging.trace-enabled", havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<TraceIdFilter> traceIdFilterRegistration(TraceIdFilter traceIdFilter) {
         FilterRegistrationBean<TraceIdFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(traceIdFilter);
@@ -53,14 +53,14 @@ public class FilterAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "monikit.logging.filters.log-enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = true)
     public LogContextScopeFilter logContextScopeFilter(LogEntryContextManager logEntryContextManager) {
         logger.info("Initializing LogContextScopeFilter with logEnabled={}", loggingProperties.isLogEnabled());
         return new LogContextScopeFilter(logEntryContextManager);
     }
 
     @Bean
-    @ConditionalOnProperty(name = "monikit.logging.filters.log-enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<LogContextScopeFilter> logContextScopeFilterRegistration(LogContextScopeFilter logContextScopeFilter) {
         FilterRegistrationBean<LogContextScopeFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(logContextScopeFilter);
