@@ -3,9 +3,7 @@ package com.monikit.starter.web.config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.web.interceptor.HttpLoggingInterceptor;
@@ -18,7 +16,6 @@ import com.monikit.starter.web.interceptor.HttpLoggingInterceptor;
  * @since 1.1.0
  */
 @Configuration
-@EnableConfigurationProperties(MoniKitLoggingProperties.class)
 public class HttpLoggingInterceptorConfiguration {
 
     /**
