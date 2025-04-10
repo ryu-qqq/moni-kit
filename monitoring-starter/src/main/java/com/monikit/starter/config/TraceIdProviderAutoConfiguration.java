@@ -16,7 +16,7 @@ import com.monikit.core.TraceIdProvider;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.1
+ * @since 1.1.0
  */
 @Configuration
 public class TraceIdProviderAutoConfiguration {
