@@ -9,7 +9,6 @@ dependencies {
     implementation project(':monitoring-config')
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
 
-    // 메트릭 수집 의존성 prometheus
     compileOnly "io.micrometer:micrometer-core"
     compileOnly "org.springframework.boot:spring-boot-starter-actuator"
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
@@ -21,7 +20,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
     testImplementation "org.assertj:assertj-core:${assertJCoreVersion}"
 
-
 }
 
 
@@ -29,12 +27,11 @@ jar {
     enabled = true
 }
 
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifactId = 'monikit-core-metric'
+            artifactId = 'monikit-metric'
         }
     }
 }

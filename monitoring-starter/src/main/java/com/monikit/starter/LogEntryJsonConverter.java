@@ -14,6 +14,7 @@ import com.monikit.core.LogEntry;
  * @author ryu-qqq
  * @since 1.0.0
  */
+
 public class LogEntryJsonConverter {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()

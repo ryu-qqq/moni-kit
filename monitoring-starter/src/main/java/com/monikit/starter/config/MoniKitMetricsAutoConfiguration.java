@@ -18,6 +18,7 @@ import com.monikit.config.MoniKitMetricsProperties;
  * @author ryu
  * @since 1.1.0
  */
+
 @AutoConfiguration
 @EnableConfigurationProperties(MoniKitMetricsProperties.class)
 public class MoniKitMetricsAutoConfiguration {

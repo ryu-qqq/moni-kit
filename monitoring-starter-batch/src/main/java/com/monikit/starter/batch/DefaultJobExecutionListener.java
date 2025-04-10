@@ -1,46 +1,34 @@
 package com.monikit.starter.batch;
 
-import jakarta.annotation.Nullable;
-
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.core.annotation.Order;
 
 import com.monikit.core.BatchJobLog;
-import com.monikit.core.ErrorLogNotifier;
-import com.monikit.core.ExceptionLog;
-import com.monikit.core.LogEntry;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
-import com.monikit.core.LogNotifier;
-import com.monikit.core.MetricCollector;
 import com.monikit.core.TraceIdProvider;
+
+import jakarta.annotation.Nullable;
 
 @Order(0)
 public class DefaultJobExecutionListener implements JobExecutionListener {
 
-    private final LogNotifier logNotifier;
-    private final MetricCollector<LogEntry> metricCollector;
     private final TraceIdProvider traceIdProvider;
     private final LogEntryContextManager contextManager;
-    private final ErrorLogNotifier errorLogNotifier;
 
     public DefaultJobExecutionListener(
-        @Nullable LogNotifier logNotifier,
-        @Nullable MetricCollector<LogEntry> metricCollector,
         @Nullable TraceIdProvider traceIdProvider,
-        @Nullable LogEntryContextManager contextManager,
-        @Nullable ErrorLogNotifier errorLogNotifier
+        @Nullable LogEntryContextManager contextManager
     ) {
-        this.logNotifier = logNotifier;
-        this.metricCollector = metricCollector;
         this.traceIdProvider = traceIdProvider;
         this.contextManager = contextManager;
-        this.errorLogNotifier = errorLogNotifier;
     }
 
     @Override
@@ -52,8 +40,12 @@ public class DefaultJobExecutionListener implements JobExecutionListener {
     @Override
     public void afterJob(JobExecution jobExecution) {
         Instant start = jobExecution.getStartTime().toInstant(ZoneOffset.UTC);
-        Instant end = jobExecution.getEndTime() != null ? jobExecution.getEndTime().toInstant(ZoneOffset.UTC) : Instant.now();
+        Instant end = jobExecution.getEndTime() != null
+            ? jobExecution.getEndTime().toInstant(ZoneOffset.UTC)
+            : Instant.now();
+
         long executionTime = end.toEpochMilli() - start.toEpochMilli();
+        LogLevel level = resolveLogLevel(jobExecution.getStatus(), jobExecution.getExitStatus());
 
         BatchJobLog log = BatchJobLog.create(
             traceIdProvider.getTraceId(),
@@ -64,36 +56,42 @@ public class DefaultJobExecutionListener implements JobExecutionListener {
             jobExecution.getStatus().name(),
             jobExecution.getExitStatus().getExitCode(),
             jobExecution.getExitStatus().getExitDescription(),
-            LogLevel.INFO
+            level
         );
 
         contextManager.addLog(log);
-        safe(() -> logNotifier.notify(log));
-        safe(() -> metricCollector.record(log));
-
-        if (jobExecution.getStatus().isUnsuccessful()) {
-            safe(() -> errorLogNotifier.onErrorLogDetected(new ExceptionLog("",  null)));
-        }
-
         contextManager.flush();
         traceIdProvider.clear();
     }
 
     private String resolveTraceId(JobExecution jobExecution) {
         String param = jobExecution.getJobParameters().getString("traceId");
-
-        if(param != null && !param.isBlank()){
-            return param;
-        }else{
-            return UUID.randomUUID().toString();
-        }
-
+        return (param != null && !param.isBlank())
+            ? param
+            : UUID.randomUUID().toString();
     }
 
-    private void safe(Runnable r) {
-        try {
-            if (r != null) r.run();
-        } catch (Exception ignored) {}
+    private LogLevel resolveLogLevel(BatchStatus status, ExitStatus exitStatus) {
+        if (status == BatchStatus.FAILED || status == BatchStatus.STOPPED) {
+            return LogLevel.ERROR;
+        }
+
+        if (status == BatchStatus.UNKNOWN || status == BatchStatus.ABANDONED) {
+            return LogLevel.WARN;
+        }
+
+        String exitCode = exitStatus.getExitCode();
+
+        if (exitCode != null && (
+            exitCode.contains("EXCEPTION") ||
+                exitCode.contains("FAILURE") ||
+                exitCode.contains("ERROR") ||
+                exitCode.contains("TIMEOUT"))
+        ) {
+            return LogLevel.ERROR;
+        }
+
+        return LogLevel.INFO;
     }
 
 }

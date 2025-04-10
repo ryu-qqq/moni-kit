@@ -31,4 +31,5 @@ public class ExecutionLoggingAutoConfiguration {
                                                          TraceIdProvider traceIdProvider) {
         return new ExecutionLoggingAspect(logEntryContextManager, loggingProperties, traceIdProvider);
     }
+
 }

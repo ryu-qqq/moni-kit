@@ -1,7 +1,5 @@
 package com.monikit.starter.batch;
 
-import jakarta.annotation.Nullable;
-
 import java.time.Instant;
 import java.time.ZoneOffset;
 
@@ -11,29 +9,22 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.core.annotation.Order;
 
 import com.monikit.core.BatchStepLog;
-import com.monikit.core.LogEntry;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
-import com.monikit.core.LogNotifier;
-import com.monikit.core.MetricCollector;
 import com.monikit.core.TraceIdProvider;
 
-@Order(0)
-class DefaultStepExecutionListener implements StepExecutionListener {
+import jakarta.annotation.Nullable;
 
-    private final LogNotifier logNotifier;
-    private final MetricCollector<LogEntry> metricCollector;
+@Order(0)
+public class DefaultStepExecutionListener implements StepExecutionListener {
+
     private final TraceIdProvider traceIdProvider;
     private final LogEntryContextManager contextManager;
 
     public DefaultStepExecutionListener(
-        @Nullable LogNotifier logNotifier,
-        @Nullable MetricCollector<LogEntry> metricCollector,
         @Nullable TraceIdProvider traceIdProvider,
         @Nullable LogEntryContextManager contextManager
     ) {
-        this.logNotifier = logNotifier;
-        this.metricCollector = metricCollector;
         this.traceIdProvider = traceIdProvider;
         this.contextManager = contextManager;
     }
@@ -46,7 +37,11 @@ class DefaultStepExecutionListener implements StepExecutionListener {
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
         Instant start = stepExecution.getStartTime().toInstant(ZoneOffset.UTC);
-        Instant end = stepExecution.getEndTime() != null ? stepExecution.getEndTime().toInstant(ZoneOffset.UTC) : Instant.now();
+        Instant end = stepExecution.getEndTime() != null
+            ? stepExecution.getEndTime().toInstant(ZoneOffset.UTC)
+            : Instant.now();
+
+        LogLevel level = resolveLogLevel(stepExecution.getExitStatus());
 
         BatchStepLog log = BatchStepLog.create(
             traceIdProvider.getTraceId(),
@@ -59,20 +54,21 @@ class DefaultStepExecutionListener implements StepExecutionListener {
             stepExecution.getSkipCount(),
             stepExecution.getExitStatus().getExitCode(),
             stepExecution.getStatus().name(),
-            LogLevel.INFO
+            level
         );
 
         contextManager.addLog(log);
-        safe(() -> logNotifier.notify(log));
-        safe(() -> metricCollector.record(log));
-
         return stepExecution.getExitStatus();
     }
 
-    private void safe(Runnable r) {
-        try {
-            if (r != null) r.run();
-        } catch (Exception ignored) {}
+    private LogLevel resolveLogLevel(ExitStatus exitStatus) {
+        String code = exitStatus.getExitCode();
+        if (code.contains("FAILURE") || code.contains("EXCEPTION") || code.contains("ERROR") || code.contains("TIMEOUT")) {
+            return LogLevel.ERROR;
+        }
+        if (code.contains("WARNING") || code.contains("SKIP")) {
+            return LogLevel.WARN;
+        }
+        return LogLevel.INFO;
     }
 }
-

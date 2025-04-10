@@ -1,73 +1,100 @@
-# MoniKit Config 모듈
+# Monitoring Starter - Batch
 
-## 개요
-
-`monikit-config`는 MoniKit의 설정 구성 요소를 담고 있는 순수 Java 모듈입니다.  
-이 모듈은 어떤 실행 환경(Spring 포함)에도 의존하지 않으며,  
-다른 `starter` 모듈들이 `@EnableConfigurationProperties` 또는 `@AutoConfiguration`을 통해  
-필요한 설정 객체를 바인딩하도록 구성됩니다.
+> MoniKit의 `monitoring-starter-batch`는 Spring Batch 기반 애플리케이션에서  
+> **배치 Job/Step 실행 로그 및 메트릭을 구조화된 형태로 수집**할 수 있도록 지원하는 경량 스타터입니다.
 
 ---
 
-## 포함된 설정 클래스
+## 📦 주요 기능
 
-### `MoniKitLoggingProperties`
-
-```yaml
-monikit.logging:
-  log-enabled: true
-  trace-enabled: true
-  detailed-logging: false
-  summary-logging: true
-  threshold-millis: 300
-  slow-query-threshold-ms: 1000
-  critical-query-threshold-ms: 5000
-  datasource-logging-enabled: true
-```
-
-- `logEnabled`: 전체 로깅 기능 마스터 스위치
-- `traceEnabled`: traceId 기반 추적 로그 활성화
-- `detailedLogging`: SQL 파라미터, input/output 로깅 여부
-- `summaryLogging`: Execution 로그 요약 여부 (기본 true)
-- `thresholdMillis`: 상세 로그로 전환될 기준 시간 (ms)
-- `slowQueryThresholdMs`: 느린 쿼리 기준
-- `criticalQueryThresholdMs`: 매우 느린 쿼리 기준
-- `datasourceLoggingEnabled`: JDBC 쿼리 로깅 활성화
+- `JobExecutionListener`, `StepExecutionListener` 자동 등록
+- 실행 시간, 상태, 스킵 수 등 상세 로그 수집
+- `LogEntryContextManager` 기반 구조화 로깅
+- `MetricCollector`, `LogSink`, `Hook` 기반 확장 가능
+- `TraceIdProvider` 기반 trace 연동
+- `monikit.logging.log-enabled=true` 설정 시 활성화
 
 ---
 
-### `MoniKitMetricsProperties`
+## ✅ 자동 등록되는 컴포넌트
 
-```yaml
-monikit.metrics:
-  metrics-enabled: true
-  query-metrics-enabled: true
-  http-metrics-enabled: false
-  slow-query-threshold-ms: 2000
-  query-sampling-rate: 10
-```
-
-- `metricsEnabled`: 전체 메트릭 수집 마스터 스위치
-- `queryMetricsEnabled`: SQL 쿼리 메트릭 수집 여부
-- `httpMetricsEnabled`: HTTP 요청 메트릭 수집 여부
-- `slowQueryThresholdMs`: 느린 쿼리 기준 (ms)
-- `querySamplingRate`: 샘플링 비율 (%) — 100이면 전부 수집
-
----
-
-## 주의사항
-
-- 이 모듈은 어떤 Spring 구성도 자동 등록하지 않습니다.
-- 바인딩 및 빈 등록은 반드시 `monikit-starter-*`에서 수행해야 합니다.
-- 테스트나 다른 모듈에서도 설정 객체를 재사용할 수 있도록 **순수 Java 클래스만 포함**됩니다.
-
----
-
-## 사용 예시 (Spring Starter)
+| 컴포넌트 | 설명 |
+|----------|------|
+| `DefaultJobExecutionListener` | Job 실행 전후 로깅 및 메트릭 수집 |
+| `DefaultStepExecutionListener` | Step 실행 후 상세 로그 수집 |
 
 ```java
-@AutoConfiguration
-@EnableConfigurationProperties(MoniKitLoggingProperties.class)
-public class MoniKitLoggingAutoConfiguration {
+@Bean
+@ConditionalOnMissingBean(DefaultJobExecutionListener.class)
+@ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true")
+public JobExecutionListener jobExecutionListener(...)
+
+@Bean
+@ConditionalOnMissingBean(DefaultStepExecutionListener.class)
+@ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true")
+public StepExecutionListener stepExecutionListener(...)
+```
+
+---
+
+## 🧾 로그 예시
+
+```json
+{
+  "logType": "BATCH_STEP",
+  "traceId": "abc-1234",
+  "batchJobName": "productSyncJob",
+  "stepName": "fetchProductsStep",
+  "status": "COMPLETED",
+  "executionTime": "582ms",
+  "readCount": 100,
+  "writeCount": 98,
+  "skipCount": 2,
+  "logLevel": "INFO"
 }
 ```
+
+---
+
+## ⚙️ 설정 방법
+
+`application.yml` 또는 `application.properties`에 다음과 같이 설정합니다:
+
+```yaml
+monikit:
+  logging:
+    log-enabled: true
+```
+
+| 설정 | 설명 | 기본값 |
+|------|------|--------|
+| `monikit.logging.log-enabled` | 배치 로깅 전반을 켜거나 끄는 마스터 스위치 | `false` |
+
+---
+
+## 🧩 확장 지점
+
+| 대상 | 방법 |
+|------|------|
+| 로그 전송 방식 변경 | `LogSink` 구현체 등록 (예: `SlackSink`, `FileSink`) |
+| 메트릭 수집 방식 변경 | `MetricCollector` 구현체 등록 (예: `PrometheusCollector`) |
+| 로그 후처리 | `LogAddHook`, `LogFlushHook` 구현체 등록 |
+| Trace ID 전략 변경 | `TraceIdProvider` 구현체 등록 |
+
+---
+
+## 🧪 테스트 유닛
+
+- 모든 컴포넌트는 조건부 빈 등록 테스트 완료
+- `log-enabled=false` 시 리스너 미등록 검증 포함
+- `@Order(0)` 보장 → 사용자 리스너보다 우선 적용
+
+---
+
+## 📌 참고 모듈
+
+- [`monitoring-core`](../monitoring-core)
+- [`monitoring-config`](../monitoring-config)
+- [`monitoring-starter`](../monitoring-starter)
+
+---

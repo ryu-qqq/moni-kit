@@ -1,5 +1,6 @@
 package com.monikit.starter.config;
 
+import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.DisplayName;
@@ -8,29 +9,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.monikit.core.DefaultErrorLogNotifier;
 import com.monikit.core.DefaultLogEntryContextManager;
 import com.monikit.core.DefaultLogNotifier;
 import com.monikit.core.DefaultThreadContextHandler;
-import com.monikit.core.ErrorCategory;
-import com.monikit.core.ErrorLogNotifier;
+import com.monikit.core.LogAddHook;
 import com.monikit.core.LogEntry;
 import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.LogFlushHook;
 import com.monikit.core.LogNotifier;
 import com.monikit.core.ThreadContextHandler;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LogEntryContextManagerConfigTest {
-
 
     private final ApplicationContextRunner contextRunner =
         new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(LogEntryContextManagerConfig.class))
-            .withBean(LogNotifier.class, DefaultLogNotifier.class);
+            .withBean(LogNotifier.class, () -> new DefaultLogNotifier(Collections.emptyList()))
+            .withBean(LogAddHook.class, () -> log -> {})
+            .withBean(LogFlushHook.class, () -> logs -> {});
 
     @Nested
     @DisplayName("LogEntryContextManager 자동 등록 테스트")
@@ -54,19 +52,13 @@ class LogEntryContextManagerConfigTest {
             contextRunner
                 .withBean(LogEntryContextManager.class, () -> new LogEntryContextManager() {
                     @Override
-                    public void addLog(LogEntry logEntry) {
-
-                    }
+                    public void addLog(LogEntry logEntry) {}
 
                     @Override
-                    public void flush() {
-
-                    }
+                    public void flush() {}
 
                     @Override
-                    public void clear() {
-
-                    }
+                    public void clear() {}
                 })
                 .run(context -> {
                     assertTrue(context.containsBean("logEntryContextManager"));
@@ -111,9 +103,7 @@ class LogEntryContextManagerConfigTest {
                     }
 
                     @Override
-                    public void logException(String traceId, Throwable exception) {
-
-                    }
+                    public void logException(String traceId, Throwable exception) {}
                 })
                 .run(context -> {
                     assertTrue(context.containsBean("threadContextHandler"));
@@ -121,5 +111,4 @@ class LogEntryContextManagerConfigTest {
                 });
         }
     }
-
 }

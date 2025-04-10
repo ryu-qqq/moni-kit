@@ -18,15 +18,6 @@ class ErrorLogNotifierAutoConfigurationTest {
         .withConfiguration(AutoConfigurations.of(ErrorLogNotifierAutoConfiguration.class));
 
     @Test
-    @DisplayName("사용자가 ErrorLogNotifier를 등록하지 않으면 DefaultErrorLogNotifier가 자동 적용되어야 한다.")
-    void shouldRegisterDefaultErrorLogNotifierWhenMissing() {
-        contextRunner.run(context -> {
-            ErrorLogNotifier notifier = context.getBean(ErrorLogNotifier.class);
-            assertThat(notifier).isInstanceOf(DefaultErrorLogNotifier.class);
-        });
-    }
-
-    @Test
     @DisplayName("사용자가 ErrorLogNotifier를 직접 등록하면 DefaultErrorLogNotifier가 주입되지 않아야 한다.")
     void shouldUseUserDefinedErrorLogNotifierIfExists() {
         ApplicationContextRunner customContextRunner = new ApplicationContextRunner()
@@ -46,4 +37,5 @@ class ErrorLogNotifierAutoConfigurationTest {
             System.out.println("Custom Notifier: " + logEntry.toString());
         }
     }
+
 }

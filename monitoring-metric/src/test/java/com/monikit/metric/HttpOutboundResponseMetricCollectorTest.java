@@ -82,7 +82,7 @@ class HttpOutboundResponseMetricCollectorTest {
 
             // Then
             verify(mockHttpResponseMetricsRecorder)
-                .record(logEntry.getTargetUrl(), logEntry.getStatusCode(), logEntry.getExecutionTime());
+                .record(logEntry.getUri(), logEntry.getStatusCode(), logEntry.getExecutionTime());
         }
     }
 }

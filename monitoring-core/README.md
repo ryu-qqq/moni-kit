@@ -133,9 +133,9 @@ try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
 
 ## 더 알아보기
 
-- [monitoring-starter-batch](./monitoring-starter-batch)
-- [monitoring-starter-web](./monitoring-starter-web)
-- [monitoring-metric](./monitoring-metric)
+- [monitoring-starter-batch](../monitoring-starter-batch)
+- [monitoring-starter-web](../monitoring-starter-web)
+- [monitoring-metric](../monitoring-metric)
 
 ---
 

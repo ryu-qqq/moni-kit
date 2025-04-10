@@ -29,7 +29,7 @@ public class LogNotifierAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(LogNotifier.class)
     public LogNotifier defaultLogNotifier() {
-        logger.info("No custom LogNotifier found. Using DefaultLogNotifier.");
+        logger.info("[MoniKit] No custom LogNotifier found. Using DefaultLogNotifier.");
         return new DefaultLogNotifier(List.of());
     }
 

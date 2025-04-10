@@ -1,6 +1,7 @@
 package com.monikit.metric;
 
 import java.time.Instant;
+import java.util.Map;
 
 import com.monikit.core.BatchJobLog;
 import com.monikit.core.DatabaseQueryLog;
@@ -31,8 +32,6 @@ public class TestLogEntryProvider {
     private static final String METHOD_NAME = "testMethod";
     private static final String QUERY = "SELECT * FROM test_table";
     private static final long EXECUTION_TIME = 200;
-    private static final long LONG_EXECUTION_TIME = 20000;
-
     private static final String DATA_SOURCE = "test-db";
     private static final String TABLE_NAME = "test_table";
     private static final String PARAMETERS = "{}";
@@ -41,7 +40,7 @@ public class TestLogEntryProvider {
     private static final String HTTP_METHOD = "POST";
     private static final String URI = "/api/test";
     private static final String QUERY_PARAMS = "?id=1";
-    private static final String HEADERS = "{Authorization: Bearer test-token}";
+    private static final Map<String, String> HEADERS = Map.of("Authorization","Bearer test-token");
     private static final String REQUEST_BODY = "{\"name\":\"test\"}";
     private static final String CLIENT_IP = "127.0.0.1";
     private static final String USER_AGENT = "TestAgent/1.0";
@@ -57,43 +56,40 @@ public class TestLogEntryProvider {
     private static final String OUTPUT_VALUE = "{\"output\": \"result-value\"}";
 
     public static ExecutionLog executionTimeLog() {
-        return ExecutionLog.create(TRACE_ID, LOG_LEVEL, CLASS_NAME, METHOD_NAME, EXECUTION_TIME);
+        return ExecutionLog.create(TRACE_ID, CLASS_NAME, METHOD_NAME, EXECUTION_TIME);
     }
 
     public static DatabaseQueryLog databaseQueryLog() {
         return DatabaseQueryLog.create(TRACE_ID, QUERY, EXECUTION_TIME, DATA_SOURCE, TABLE_NAME, ROWS_AFFECTED, RESULT_SIZE, LOG_LEVEL);
     }
 
-    public static DatabaseQueryLog slowDatabaseQueryLog() {
-        return DatabaseQueryLog.create(TRACE_ID, QUERY, LONG_EXECUTION_TIME, DATA_SOURCE, TABLE_NAME, ROWS_AFFECTED, RESULT_SIZE, LOG_LEVEL);
-    }
-
     public static ExceptionLog exceptionLog() {
-        return ExceptionLog.create(TRACE_ID, new RuntimeException("Test Exception"), ErrorCategory.APPLICATION_ERROR);
+        return ExceptionLog.create(TRACE_ID, new RuntimeException("Test Exception"));
     }
 
     public static HttpInboundRequestLog httpInboundRequestLog() {
-        return HttpInboundRequestLog.create(TRACE_ID, HTTP_METHOD, URI, QUERY_PARAMS, HEADERS, REQUEST_BODY, CLIENT_IP, USER_AGENT, LOG_LEVEL);
+        return HttpInboundRequestLog.create(TRACE_ID, LOG_LEVEL, URI, HTTP_METHOD, QUERY_PARAMS, REQUEST_BODY, HEADERS, CLIENT_IP, USER_AGENT);
     }
 
     public static HttpInboundResponseLog httpInboundResponseLog() {
-        return HttpInboundResponseLog.create(TRACE_ID, HTTP_METHOD, URI, STATUS_CODE, HEADERS, RESPONSE_BODY, EXECUTION_TIME, LOG_LEVEL);
+        return HttpInboundResponseLog.create(TRACE_ID, LOG_LEVEL, HTTP_METHOD, TARGET_URL, STATUS_CODE, HEADERS, RESPONSE_BODY, EXECUTION_TIME);
     }
 
     public static BatchJobLog batchJobLog() {
-        return BatchJobLog.create(TRACE_ID, BATCH_JOB_NAME, START_TIME, END_TIME, EXECUTION_TIME, STATUS, ERROR_MESSAGE, LOG_LEVEL);
+        return BatchJobLog.create(TRACE_ID, BATCH_JOB_NAME, START_TIME, END_TIME, EXECUTION_TIME, STATUS, "SUCCESS", ERROR_MESSAGE, LOG_LEVEL);
     }
 
     public static HttpOutboundRequestLog httpOutboundRequestLog() {
-        return HttpOutboundRequestLog.create(TRACE_ID, HTTP_METHOD, TARGET_URL, HEADERS, REQUEST_BODY, EXECUTION_TIME, LOG_LEVEL);
+        return HttpOutboundRequestLog.create(TRACE_ID, LOG_LEVEL, TARGET_URL, HTTP_METHOD, HEADERS, QUERY_PARAMS, REQUEST_BODY);
     }
 
     public static HttpOutboundResponseLog httpOutboundResponseLog() {
-        return HttpOutboundResponseLog.create(TRACE_ID, TARGET_URL, STATUS_CODE, HEADERS, RESPONSE_BODY, EXECUTION_TIME, LOG_LEVEL);
+        return HttpOutboundResponseLog.create(TRACE_ID, LOG_LEVEL, HTTP_METHOD, TARGET_URL, STATUS_CODE, HEADERS, RESPONSE_BODY, EXECUTION_TIME);
     }
 
     public static ExecutionDetailLog executionDetailLog() {
-        return ExecutionDetailLog.create(TRACE_ID, CLASS_NAME, METHOD_NAME, EXECUTION_TIME, INPUT_PARAMS, OUTPUT_VALUE, LOG_LEVEL);
+        return ExecutionDetailLog.create(TRACE_ID, CLASS_NAME, METHOD_NAME, EXECUTION_TIME, INPUT_PARAMS, OUTPUT_VALUE, 1000);
     }
+
 
 }

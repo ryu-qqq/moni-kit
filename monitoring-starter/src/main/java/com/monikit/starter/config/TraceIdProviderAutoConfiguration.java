@@ -26,7 +26,8 @@ public class TraceIdProviderAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(TraceIdProvider.class)
     public TraceIdProvider traceIdProvider() {
-        logger.info("No custom TraceIdProvider found. Using DefaultTraceIdProvider.");
+        logger.info("[MoniKit] No custom TraceIdProvider found. Using DefaultTraceIdProvider.");
         return new DefaultTraceIdProvider();
     }
+
 }
