@@ -10,6 +10,7 @@ package com.monikit.core;
  * @since 1.0.0
  */
 
+@Deprecated
 public class DefaultErrorLogNotifier implements ErrorLogNotifier {
 
     private static final DefaultErrorLogNotifier INSTANCE = new DefaultErrorLogNotifier();

@@ -30,8 +30,7 @@ class LogEntryContextManagerConfigTest {
     private final ApplicationContextRunner contextRunner =
         new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(LogEntryContextManagerConfig.class))
-            .withBean(LogNotifier.class, DefaultLogNotifier::getInstance)
-            .withBean(ErrorLogNotifier.class, DefaultErrorLogNotifier::getInstance);
+            .withBean(LogNotifier.class, DefaultLogNotifier.class);
 
     @Nested
     @DisplayName("LogEntryContextManager 자동 등록 테스트")

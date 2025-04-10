@@ -3,38 +3,34 @@ package com.monikit.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-
-import jakarta.annotation.PostConstruct;
 
 /**
  * MoniKit의 로깅 기능을 제어하는 구성 프로퍼티 클래스.
  * <p>
- * 아래와 같은 기능들을 설정할 수 있습니다:
+ * 아래 설정 항목들을 통해 로그 출력 범위 및 상세 수준을 조절할 수 있습니다:
  * </p>
+ *
  * <ul>
- *     <li><b>detailedLogging</b>: SQL 파라미터 등 상세 정보 로깅 여부</li>
- *     <li><b>slowQueryThresholdMs</b>: 느린 쿼리로 간주할 임계값 (ms)</li>
- *     <li><b>criticalQueryThresholdMs</b>: 매우 느린 쿼리로 간주할 임계값 (ms)</li>
- *     <li><b>datasourceLoggingEnabled</b>: JDBC SQL 실행 로깅 활성화 여부</li>
- *     <li><b>traceEnabled</b>: Trace ID 기반 추적 로그 활성화 여부</li>
  *     <li><b>logEnabled</b>: 전체 로깅 기능의 마스터 스위치</li>
+ *     <li><b>traceEnabled</b>: Trace ID 기반 추적 로그 활성화 여부</li>
+ *     <li><b>detailedLogging</b>: SQL 파라미터, 메서드 인자 등 상세 정보 포함 여부</li>
+ *     <li><b>summaryLogging</b>: Execution 로그 요약 모드 활성화 여부 (기본값: true)</li>
+ *     <li><b>thresholdMillis</b>: 상세 로그로 전환할 실행 시간 임계값 (ms)</li>
+ *     <li><b>slowQueryThresholdMs</b>: 느린 쿼리로 간주할 기준 시간 (ms)</li>
+ *     <li><b>criticalQueryThresholdMs</b>: 매우 느린 쿼리로 간주할 기준 시간 (ms)</li>
+ *     <li><b>datasourceLoggingEnabled</b>: JDBC SQL 실행 로깅 활성화 여부</li>
  * </ul>
+ *
  * <p>
- * 설정 키 접두사는 <code>monikit.logging</code> 입니다.
+ * 설정 접두사는 <code>monikit.logging</code> 입니다.
  * </p>
  *
  * @author ryu-qqq
  * @since 1.1.0
  */
 
-@Primary
-@Configuration
 @ConfigurationProperties(prefix = "monikit.logging")
 public class MoniKitLoggingProperties {
-
-    private static final Logger logger = LoggerFactory.getLogger(MoniKitLoggingProperties.class);
 
     private boolean detailedLogging = false;
     private long slowQueryThresholdMs = 1000;
@@ -82,13 +78,6 @@ public class MoniKitLoggingProperties {
 
     public void setThresholdMillis(long thresholdMillis) {
         this.thresholdMillis = thresholdMillis;
-    }
-
-    @PostConstruct
-    public void validateLoggingConfiguration() {
-        if (!logEnabled && (datasourceLoggingEnabled || traceEnabled || detailedLogging)) {
-            logger.warn("logEnabled is disabled (false), but some logging settings (datasourceLoggingEnabled, traceEnabled, detailedLogging) are enabled. Logging may not be recorded.");
-        }
     }
 
 }

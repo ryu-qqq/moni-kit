@@ -1,109 +1,73 @@
+# MoniKit Config 모듈
 
-# Monitoring Config
+## 개요
 
-## **1. 로깅 설정**
-### MoniKitLoggingProperties (`monikit.logging`)
-
-`MoniKitLoggingProperties` 클래스는 **MoniKit의 로깅 관련 설정을 관리**하는 역할을 합니다.
-
-```java
-@ConfigurationProperties(prefix = "monikit.logging")
-public class MoniKitLoggingProperties {
-    private boolean detailedLogging = false;
-    private long slowQueryThresholdMs = 1000;
-    private long criticalQueryThresholdMs = 5000;
-    private boolean datasourceLoggingEnabled = true;
-    private boolean traceEnabled = true;
-    private boolean logEnabled = true;
-}
-```
-
-### **설정 옵션**
-| 옵션명 | 기본값 | 설명 |
-|--------|--------|------|
-| `monikit.logging.detailedLogging` | `false` | 세부 로그를 활성화할지 여부 |
-| `monikit.logging.slowQueryThresholdMs` | `1000ms` | SQL 실행 시간이 이 값보다 크면 WARN 로그로 기록 |
-| `monikit.logging.criticalQueryThresholdMs` | `5000ms` | SQL 실행 시간이 이 값보다 크면 ERROR 로그로 기록 |
-| `monikit.logging.datasourceLoggingEnabled` | `true` | 데이터베이스 쿼리 로깅 활성화 여부 |
-| `monikit.logging.traceEnabled` | `true` | Trace ID 로깅 활성화 여부 |
-| `monikit.logging.logEnabled` | `true` | MoniKit 로깅 전체 활성화 여부 |
-
-### **설정 예시 (application.yml)**
-```yaml
-monikit:
-  logging:
-    detailedLogging: true
-    slowQueryThresholdMs: 2000
-    criticalQueryThresholdMs: 7000
-    datasourceLoggingEnabled: false
-    traceEnabled: true
-    logEnabled: true
-```
+`monikit-config`는 MoniKit의 설정 구성 요소를 담고 있는 순수 Java 모듈입니다.  
+이 모듈은 어떤 실행 환경(Spring 포함)에도 의존하지 않으며,  
+다른 `starter` 모듈들이 `@EnableConfigurationProperties` 또는 `@AutoConfiguration`을 통해  
+필요한 설정 객체를 바인딩하도록 구성됩니다.
 
 ---
 
-## 2. 메트릭 수집 설정
-### MoniKitMetricsProperties (`monikit.metrics`)
+## 포함된 설정 클래스
 
-`MoniKitMetricsProperties` 클래스는 **HTTP 요청, SQL 쿼리 실행 시간, 외부몰 요청 메트릭 등을 수집할지 여부를 설정**합니다.
+### `MoniKitLoggingProperties`
 
-```java
-@ConfigurationProperties(prefix = "monikit.metrics")
-public class MoniKitMetricsProperties {
-    private boolean metricsEnabled = true;
-    private boolean queryMetricsEnabled = true;
-    private boolean httpMetricsEnabled = true;
-    private boolean externalMallMetricsEnabled = true;
-    private long slowQueryThresholdMs = 2000;
-    private int querySamplingRate = 10;
-
-}
-```
-
-### **설정 옵션**
-| 옵션명 | 기본값 | 설명 |
-|--------|--------|------|
-| `monikit.metrics.metricsEnabled` | `true` | 전체 메트릭 수집 활성화 여부 |
-| `monikit.metrics.queryMetricsEnabled` | `true` | SQL 쿼리 실행 메트릭 수집 활성화 여부 |
-| `monikit.metrics.httpMetricsEnabled` | `true` | HTTP 요청 메트릭 수집 활성화 여부 |
-| `monikit.metrics.externalMallMetricsEnabled` | `true` | 외부몰 요청 메트릭 수집 활성화 여부 |
-| `monikit.metrics.slowQueryThresholdMs` | `2000` | 슬로우 쿼리 감지 임계값 (ms) |
-| `monikit.metrics.querySamplingRate` | `10` | SQL 쿼리 샘플링 비율 (%) |
-
-### **설정 예시 (application.yml)**
 ```yaml
-monikit:
-  metrics:
-    metricsEnabled: true
-    queryMetricsEnabled: true
-    httpMetricsEnabled: true
-    externalMallMetricsEnabled: true
-    slowQueryThresholdMs: 3000
-    querySamplingRate: 20
+monikit.logging:
+  log-enabled: true
+  trace-enabled: true
+  detailed-logging: false
+  summary-logging: true
+  threshold-millis: 300
+  slow-query-threshold-ms: 1000
+  critical-query-threshold-ms: 5000
+  datasource-logging-enabled: true
 ```
 
-## **3. 설정 유효성 검사**
-### 🚨 `logEnabled`가 `false`일 때 개별 로깅 옵션이 활성화되어 있으면 경고 발생
-
-MoniKit Starter는 **잘못된 설정을 방지하기 위해 자동으로 유효성을 검사**합니다.  
-만약 **`logEnabled`가 `false`인데 개별 로깅 옵션이 `true`이면** 경고 로그가 출력됩니다.
-
-```java
-@PostConstruct
-public void validateLoggingConfiguration() {
-    if (!logEnabled && (datasourceLoggingEnabled || traceEnabled || detailedLogging)) {
-        logger.warn("logEnabled is disabled (false), but some logging settings (datasourceLoggingEnabled, traceEnabled, detailedLogging) are enabled. Logging may not be recorded.");
-    }
-}
-```
-
-### **예제: 잘못된 설정 (경고 발생)**
-```yaml
-monikit:
-  logging:
-    logEnabled: false
-    datasourceLoggingEnabled: true
-```
-➡ **경고 출력**: `"logEnabled is false, but datasourceLoggingEnabled is enabled. Logging may not be recorded."`
+- `logEnabled`: 전체 로깅 기능 마스터 스위치
+- `traceEnabled`: traceId 기반 추적 로그 활성화
+- `detailedLogging`: SQL 파라미터, input/output 로깅 여부
+- `summaryLogging`: Execution 로그 요약 여부 (기본 true)
+- `thresholdMillis`: 상세 로그로 전환될 기준 시간 (ms)
+- `slowQueryThresholdMs`: 느린 쿼리 기준
+- `criticalQueryThresholdMs`: 매우 느린 쿼리 기준
+- `datasourceLoggingEnabled`: JDBC 쿼리 로깅 활성화
 
 ---
+
+### `MoniKitMetricsProperties`
+
+```yaml
+monikit.metrics:
+  metrics-enabled: true
+  query-metrics-enabled: true
+  http-metrics-enabled: false
+  slow-query-threshold-ms: 2000
+  query-sampling-rate: 10
+```
+
+- `metricsEnabled`: 전체 메트릭 수집 마스터 스위치
+- `queryMetricsEnabled`: SQL 쿼리 메트릭 수집 여부
+- `httpMetricsEnabled`: HTTP 요청 메트릭 수집 여부
+- `slowQueryThresholdMs`: 느린 쿼리 기준 (ms)
+- `querySamplingRate`: 샘플링 비율 (%) — 100이면 전부 수집
+
+---
+
+## 주의사항
+
+- 이 모듈은 어떤 Spring 구성도 자동 등록하지 않습니다.
+- 바인딩 및 빈 등록은 반드시 `monikit-starter-*`에서 수행해야 합니다.
+- 테스트나 다른 모듈에서도 설정 객체를 재사용할 수 있도록 **순수 Java 클래스만 포함**됩니다.
+
+---
+
+## 사용 예시 (Spring Starter)
+
+```java
+@AutoConfiguration
+@EnableConfigurationProperties(MoniKitLoggingProperties.class)
+public class MoniKitLoggingAutoConfiguration {
+}
+```

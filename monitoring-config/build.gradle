@@ -5,14 +5,10 @@ plugins {
 }
 
 dependencies {
-    implementation "org.slf4j:slf4j-api"
-    implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
-    implementation "org.springframework.boot:spring-boot-autoconfigure"
-    testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    testImplementation 'org.springframework.boot:spring-boot-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
 }
-
 
 jar {
     enabled = true

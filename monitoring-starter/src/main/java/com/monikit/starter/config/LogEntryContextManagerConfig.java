@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 
 import com.monikit.core.DefaultLogEntryContextManager;
 import com.monikit.core.DefaultThreadContextHandler;
-import com.monikit.core.ErrorLogNotifier;
 import com.monikit.core.LogEntry;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogNotifier;
@@ -45,8 +44,8 @@ public class LogEntryContextManagerConfig {
      */
     @Bean
     @ConditionalOnMissingBean(LogEntryContextManager.class)
-    public LogEntryContextManager logEntryContextManager(LogNotifier logNotifier, ErrorLogNotifier errorLogNotifier, List<MetricCollector<? extends LogEntry>> metricCollectors) {
-        LogEntryContextManager logEntryContextManager = new DefaultLogEntryContextManager(logNotifier, errorLogNotifier, metricCollectors);
+    public LogEntryContextManager logEntryContextManager(LogNotifier logNotifier, List<MetricCollector<? extends LogEntry>> metricCollectors) {
+        LogEntryContextManager logEntryContextManager = new DefaultLogEntryContextManager(logNotifier, metricCollectors);
         logger.info("LogEntryContextManager Bean Registered: {}", logEntryContextManager.getClass().getSimpleName());
         logger.info("MetricCollectors Registered: {}",
             metricCollectors.stream().map(Object::getClass).map(Class::getSimpleName).toList());

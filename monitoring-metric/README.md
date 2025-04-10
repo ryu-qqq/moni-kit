@@ -1,43 +1,164 @@
-# MoniKit Metric
+# MoniKit Core (v1.1.0)
 
 ## 개요
-이 문서는 `monikit.metric` 패키지의 핵심 설정을 설명합니다.
+MoniKit은 서버의 다양한 이벤트와 성능을 효과적으로 기록할 수 있도록 설계된 경량 로깅 프레임워크입니다. 모든 로그는 구조화된 데이터를 생성하여 **ELK (Elasticsearch, Logstash, Kibana)** 및 **Prometheus**와 원활하게 연동될 수 있도록 설계되었습니다.
+
+이 문서는 `monikit-core` 패키지의 핵심 구성 요소를 설명하며, 커스텀 로그 정의 및 수집기 설계를 위한 기반 인터페이스를 안내합니다.
 
 ---
-## **1. 메트릭 자동 등록** (`MetricCollectorAutoConfiguration`)
 
-`MetricCollectorAutoConfiguration` 클래스는 **특정 메트릭 수집이 활성화된 경우, 자동으로 적절한 `MetricCollector` 빈을 등록**합니다.
+## 주요 변경 사항 (v1.1.0)
 
-### ✅ 주요 메트릭 자동 등록
-| 등록 대상 | 역할 | 활성화 설정 |
-|--------|------|------------|
-| `DatabaseQueryMetricCollector` | SQL 쿼리 실행 시간 및 총 실행 횟수를 기록 | `monikit.metrics.queryMetricsEnabled=true` |
-| `HttpInboundResponseMetricCollector` | HTTP 요청 응답 시간 및 상태 코드별 요청 수를 기록 | `monikit.metrics.httpMetricsEnabled=true` |
-| `HttpOutboundResponseMetricCollector` | 외부 API 호출 응답 시간 및 응답 코드 기록 | `monikit.metrics.externalMallMetricsEnabled=true` |
+- `ExecutionLog` 계층 도입: 요약/상세 로그 구조 통합 및 임계값 기반 필터링 지원
+- `HttpLogEntry` 인터페이스 도입: 모든 HTTP 로그 공통화
+- `ErrorCategoryClassifier` 폐기: `ExceptionLog` 단일 진입점으로 예외 추적 구조 단순화
+- `LogSink` 기반 구조화: `DefaultLogNotifier`에서 전략적 로그 분기 가능
+- `ErrorLogNotifier` 제거
+- `LogContextScope` 안정성 강화
+- ✅ **LogAddHook / LogFlushHook 도입**: 로그 수집 시점별 후처리 확장 구조 도입
+- ✅ **MetricCollectorLogAddHook**: Metric 수집 로직을 Hook 구조로 분리
 
-### 🔧 **설정 옵션**
-| 옵션명 | 기본값 | 설명 |
-|--------|--------|------|
-| `monikit.metrics.queryMetricsEnabled` | `true` | SQL 쿼리 메트릭 활성화 여부 |
-| `monikit.metrics.httpMetricsEnabled` | `true` | HTTP 응답 메트릭 활성화 여부 |
+---
 
-### **설정 예시 (application.yml)**
-```yaml
-monikit:
-  metrics:
-    queryMetricsEnabled: true
-    httpMetricsEnabled: true
+## 핵심 구성 요소
+
+### 1. `LogEntry` 인터페이스
+```java
+public interface LogEntry {
+    Instant getTimestamp();
+    String getTraceId();
+    LogType getLogType();
+    LogLevel getLogLevel();
+    String toString();
+}
+```
+모든 로그 클래스는 이 인터페이스를 구현하며, 로그 데이터는 JSON 형태로 직렬화되어 저장 및 분석됩니다.
+
+---
+
+### 2. 주요 로그 클래스
+
+| 카테고리 | 클래스 | 설명 |
+|----------|--------|------|
+| 실행 | `ExecutionLog`, `ExecutionDetailLog` | 메서드 실행 시간, input/output, 임계값 기반 분기 |
+| 예외 | `ExceptionLog` | 예외 정보 및 타입 추적 |
+| DB | `DatabaseQueryLog` | SQL 실행 정보 추적 |
+| 배치 | `BatchJobLog`, `BatchStepLog`, `BatchChunkLog` | Job/Step/Chunk 단위 실행 정보 |
+| HTTP | `HttpInboundRequestLog`, `HttpInboundResponseLog`, `HttpOutboundRequestLog`, `HttpOutboundResponseLog` | 모든 HTTP 요청/응답 흐름 추적 |
+
+---
+
+### 3. `HttpLogEntry` 인터페이스
+
+```java
+public interface HttpLogEntry extends LogEntry {
+    String getUri();
+    String getMethod();
+    int getStatusCode();
+    Map<String, String> getHeaders();
+}
 ```
 
+- 모든 HTTP 로그에 공통 필드 제공
+- `LogSink`나 필터에서 `instanceof` 검사로 쉽게 필터링 가능
+
 ---
 
+### 4. `LogEntryContextManager`
 
-## **2. 요약**
-| 설정 클래스 | 역할 | 관련 설정 prefix |
-|------------|------|----------------|
-| `DataSourceLoggingConfig` | 데이터소스 로깅 설정 자동 적용 | `monikit.logging` |
-| `ErrorLogNotifierAutoConfiguration` | 에러 로그 감지 및 처리 | 자동 빈 등록 |
-| `FilterAutoConfiguration` | HTTP 요청 관련 필터 자동 등록 | `monikit.logging.filters`, `monikit.metrics` |
+```java
+public interface LogEntryContextManager {
+    void addLog(LogEntry logEntry);
+    void flush();
+    void clear();
+}
+```
 
-🚀 **MoniKit Starter의 자동 설정 기능을 활용하면 복잡한 설정 없이 손쉽게 강력한 로깅 및 메트릭 기능을 사용할 수 있습니다!**
+- 요청 단위로 로그를 수집 및 전송
+- 기본 구현체: `DefaultLogEntryContextManager`
+- Hook 및 Notifier 구조와 연계되어 확장성 향상
 
+---
+
+### 5. `LogNotifier` + `LogSink`
+
+```java
+public interface LogNotifier {
+    void notify(LogLevel logLevel, String message);
+    void notify(LogEntry logEntry);
+}
+
+public interface LogSink {
+    boolean supports(LogType logType);
+    void send(LogEntry logEntry);
+}
+```
+
+- `DefaultLogNotifier`는 `LogSink` 리스트에 따라 로그 분기
+- 예: SlackSink, ConsoleSink, FileSink 등 확장 가능
+
+---
+
+### 6. `LogAddHook`, `LogFlushHook`
+
+```java
+public interface LogAddHook {
+    void onAdd(LogEntry entry);
+}
+
+public interface LogFlushHook {
+    void onFlush(List<LogEntry> entries);
+}
+```
+
+- 로그가 추가되거나 flush 되는 시점에 개입할 수 있는 구조
+- Slack 알림, 외부 연동, 통계 집계 등 확장 가능
+- `MetricCollectorLogAddHook`을 통해 Metric 수집도 Hook 기반으로 구성 가능
+
+---
+
+### 7. `TraceIdProvider`, `ThreadContextHandler`
+
+- 스레드 간 traceId 전달을 위한 유틸리티
+- 기본 구현체 외에 `MDCThreadContextHandler`로 확장 가능
+
+---
+
+### 8. `MetricCollector`
+
+```java
+public interface MetricCollector<T extends LogEntry> {
+    boolean supports(LogType type);
+    void record(T logEntry);
+}
+```
+
+- 로그에 대한 메트릭 측정 및 수집기 역할
+- Prometheus, Micrometer 등과 통합 가능
+- Hook 구조와 분리되어 SRP(단일 책임 원칙)에 기반한 확장 가능
+
+---
+
+## 사용 가이드 요약
+
+```java
+try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
+    // 실행 중 로그 수집
+    logEntryContextManager.addLog(new ExecutionLog(...));
+}
+```
+
+- 반드시 try-with-resources 사용
+- 수동 `flush()` 대신 `LogContextScope` 사용 권장
+
+---
+
+## 더 알아보기
+
+- [monitoring-starter-batch](./monitoring-starter-batch)
+- [monitoring-starter-web](./monitoring-starter-web)
+- [monitoring-metric](./monitoring-metric)
+
+---
+
+(c) 2024 Ryu-qqq. MoniKit 프로젝트

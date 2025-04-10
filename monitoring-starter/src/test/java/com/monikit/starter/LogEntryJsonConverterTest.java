@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monikit.core.DatabaseQueryLog;
 import com.monikit.core.LogEntry;
-import com.monikit.starter.utils.TestLogEntryProvider;
+import com.monikit.core.utils.TestLogEntryProvider;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;

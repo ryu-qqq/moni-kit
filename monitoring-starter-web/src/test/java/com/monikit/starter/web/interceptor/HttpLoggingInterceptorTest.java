@@ -62,9 +62,9 @@ class HttpLoggingInterceptorTest {
             verify(mockLogEntryContextManager, times(1)).addLog(captor.capture());
 
             HttpInboundRequestLog log = captor.getValue();
-            assertEquals("POST", log.getHttpMethod());
-            assertEquals("/api/test", log.getRequestUri());
-            assertEquals("param1=value1", log.getQueryParams());
+            assertEquals("POST", log.getMethod());
+            assertEquals("/api/test", log.getUri());
+            assertEquals("param1=value1", log.getQuery());
             assertEquals("TestAgent", log.getUserAgent());
             assertEquals("127.0.0.1", log.getClientIp());
         }
@@ -94,10 +94,10 @@ class HttpLoggingInterceptorTest {
             verify(mockLogEntryContextManager, times(1)).addLog(captor.capture());
 
             HttpInboundResponseLog log = captor.getValue();
-            assertEquals("GET", log.getHttpMethod());
-            assertEquals("/api/test", log.getRequestUri());
+            assertEquals("GET", log.getMethod());
+            assertEquals("/api/test", log.getUri());
             assertEquals(200, log.getStatusCode());
-            assertTrue(log.getHeaders().contains("Content-Type"));
+            assertNotNull(log.getHeaders().get("Content-Type"));
         }
 
         @Test

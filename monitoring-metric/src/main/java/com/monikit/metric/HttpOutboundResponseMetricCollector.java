@@ -39,7 +39,7 @@ public class HttpOutboundResponseMetricCollector implements MetricCollector<Http
             return;
         }
 
-        String path = logEntry.getTargetUrl();
+        String path = logEntry.getUri();
         int statusCode = logEntry.getStatusCode();
         long responseTime = logEntry.getExecutionTime();
 
