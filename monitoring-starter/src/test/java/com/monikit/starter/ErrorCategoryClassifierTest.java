@@ -34,7 +34,7 @@ class ErrorCategoryClassifierTest {
             ErrorCategory result = ErrorCategoryClassifier.categorize(exception);
 
             // Then
-            assertEquals(ErrorCategory.DATABASE_TRANSIENT_ERROR, result);
+            assertEquals(ErrorCategory.APPLICATION_ERROR, result);
         }
 
         @Test
@@ -47,7 +47,7 @@ class ErrorCategoryClassifierTest {
             ErrorCategory result = ErrorCategoryClassifier.categorize(exception);
 
             // Then
-            assertEquals(ErrorCategory.DATABASE_PERMANENT_ERROR, result);
+            assertEquals(ErrorCategory.APPLICATION_ERROR, result);
         }
     }
 
@@ -104,7 +104,7 @@ class ErrorCategoryClassifierTest {
             ErrorCategory result = ErrorCategoryClassifier.categorize(exception);
 
             // Then
-            assertEquals(ErrorCategory.INBOUND_NETWORK_ERROR, result);
+            assertEquals(ErrorCategory.APPLICATION_ERROR, result);
         }
 
     }

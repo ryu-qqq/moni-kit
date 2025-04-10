@@ -6,30 +6,26 @@ import java.util.Objects;
 /**
  * 예외 발생 시 스택 트레이스를 기록하는 로그 클래스.
  * <p>
- * 애플리케이션 내에서 발생한 예외를 기록하여 디버깅 및 장애 분석에 활용된다.
+ * - 애플리케이션 내에서 발생한 예외를 기록하여 디버깅 및 장애 분석에 활용됩니다.
+ * - {@code Throwable}을 받아, 내부적으로 예외 타입, 메시지, 스택 트레이스를 문자열로 저장합니다.
+ * - 별도의 ErrorCategory 없이, 예외 클래스명(exceptionType)을 통해 메트릭 분석 및 필터링이 가능합니다.
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class ExceptionLog extends AbstractLogEntry {
-    private final String sourceClass;
-    private final String sourceMethod;
-    private final ErrorCategory errorCategory;
 
-    private final String exceptionMessage;
+public class ExceptionLog extends AbstractLogEntry {
+
+    private final String exceptionType;
+    private final String message;
     private final String stackTrace;
 
-    protected ExceptionLog(String traceId, Throwable exception, ErrorCategory errorCategory) {
+    public ExceptionLog(String traceId, Throwable exception) {
         super(traceId, LogLevel.ERROR);
-        Throwable rootCause = getRootCause(exception);
-
-        StackTraceElement[] stackTraceElements = rootCause.getStackTrace();
-        this.sourceClass = stackTraceElements.length > 0 ? stackTraceElements[0].getClassName() : "Unknown";
-        this.sourceMethod = stackTraceElements.length > 0 ? stackTraceElements[0].getMethodName() : "Unknown";
-        this.errorCategory = errorCategory;
-        this.exceptionMessage = rootCause.getMessage();
-        this.stackTrace = getStackTraceAsString(rootCause);
+        this.exceptionType = exception.getClass().getSimpleName();
+        this.message = exception.getMessage();
+        this.stackTrace = getStackTraceAsString(exception);
     }
 
     @Override
@@ -39,24 +35,13 @@ public class ExceptionLog extends AbstractLogEntry {
 
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {
-        logMap.put("exceptionMessage", exceptionMessage);
+        logMap.put("exceptionType", exceptionType);
+        logMap.put("message", message);
         logMap.put("stackTrace", stackTrace);
     }
 
-    public String getExceptionMessage() {
-        return exceptionMessage;
-    }
-
-    public String getStackTrace() {
-        return stackTrace;
-    }
-
-    private static Throwable getRootCause(Throwable throwable) {
-        Throwable cause = throwable;
-        while (cause.getCause() != null) {
-            cause = cause.getCause();
-        }
-        return cause;
+    public static ExceptionLog create(String traceId, Throwable exception){
+        return new ExceptionLog(traceId, exception);
     }
 
     private String getStackTraceAsString(Throwable e) {
@@ -73,68 +58,27 @@ public class ExceptionLog extends AbstractLogEntry {
         return sb.toString();
     }
 
-
-    public String getSourceClass() {
-        return sourceClass;
-    }
-
-    public String getSourceMethod() {
-        return sourceMethod;
-    }
-
-    public ErrorCategory getErrorCategory() {
-        return errorCategory;
-    }
-
-    public static ExceptionLog create(String traceId, Throwable exception, ErrorCategory errorCategory) {
-        return new ExceptionLog(traceId, exception, errorCategory);
-    }
-
     @Override
-    public boolean equals(Object object) {
-        if (this
-            == object) return true;
-        if (object
-            == null
-            || getClass()
-            != object.getClass()) return false;
-        ExceptionLog that = (ExceptionLog) object;
-        return Objects.equals(sourceClass, that.sourceClass)
-            && Objects.equals(sourceMethod, that.sourceMethod)
-            && errorCategory
-            == that.errorCategory
-            && Objects.equals(exceptionMessage, that.exceptionMessage)
-            && Objects.equals(stackTrace, that.stackTrace);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExceptionLog that = (ExceptionLog) o;
+        return Objects.equals(exceptionType, that.exceptionType) &&
+            Objects.equals(message, that.message) &&
+            Objects.equals(stackTrace, that.stackTrace);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sourceClass, sourceMethod, errorCategory, exceptionMessage, stackTrace);
+        return Objects.hash(exceptionType, message, stackTrace);
     }
 
     @Override
     public String toString() {
-        return "ExceptionLog{"
-            +
-            "sourceClass='"
-            + sourceClass
-            + '\''
-            +
-            ", sourceMethod='"
-            + sourceMethod
-            + '\''
-            +
-            ", errorCategory="
-            + errorCategory
-            +
-            ", exceptionMessage='"
-            + exceptionMessage
-            + '\''
-            +
-            ", stackTrace='"
-            + stackTrace
-            + '\''
-            +
+        return "ExceptionLog{" +
+            "exceptionType='" + exceptionType + '\'' +
+            ", message='" + message + '\'' +
+            ", stackTrace='" + stackTrace + '\'' +
             '}';
     }
 }

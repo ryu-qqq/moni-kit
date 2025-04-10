@@ -165,7 +165,7 @@ class DefaultThreadContextHandlerTest {
             Exception exception = new RuntimeException("Test exception");
 
             // When
-            threadContextHandler.logException(traceId, exception, ErrorCategory.APPLICATION_ERROR);
+            threadContextHandler.logException(traceId, exception);
 
             // Then
             Queue<LogEntry> logs = LogEntryContext.getLogs();
@@ -183,8 +183,8 @@ class DefaultThreadContextHandlerTest {
             Exception secondException = new RuntimeException("Second exception");
 
             // When
-            threadContextHandler.logException(traceId, firstException, ErrorCategory.APPLICATION_ERROR);
-            threadContextHandler.logException(traceId, secondException, ErrorCategory.APPLICATION_ERROR);
+            threadContextHandler.logException(traceId, firstException);
+            threadContextHandler.logException(traceId, secondException);
 
             // Then
             Queue<LogEntry> logs = LogEntryContext.getLogs();

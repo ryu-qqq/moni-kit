@@ -42,6 +42,8 @@ public class MoniKitLoggingProperties {
     private boolean datasourceLoggingEnabled = true;
     private boolean traceEnabled = true;
     private boolean logEnabled = true;
+    private boolean summaryLogging = true;
+    private long thresholdMillis = 300;
 
     public boolean isDetailedLogging() { return detailedLogging; }
     public void setDetailedLogging(boolean detailedLogging) { this.detailedLogging = detailedLogging; }
@@ -64,6 +66,22 @@ public class MoniKitLoggingProperties {
 
     public void setLogEnabled(boolean logEnabled) {
         this.logEnabled = logEnabled;
+    }
+
+    public boolean isSummaryLogging() {
+        return summaryLogging;
+    }
+
+    public long getThresholdMillis() {
+        return thresholdMillis;
+    }
+
+    public void setSummaryLogging(boolean summaryLogging) {
+        this.summaryLogging = summaryLogging;
+    }
+
+    public void setThresholdMillis(long thresholdMillis) {
+        this.thresholdMillis = thresholdMillis;
     }
 
     @PostConstruct

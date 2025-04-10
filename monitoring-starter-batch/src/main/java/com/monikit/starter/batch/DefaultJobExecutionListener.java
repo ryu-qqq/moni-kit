@@ -3,12 +3,12 @@ package com.monikit.starter.batch;
 import jakarta.annotation.Nullable;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.core.annotation.Order;
-import org.springframework.util.StringUtils;
 
 import com.monikit.core.BatchJobLog;
 import com.monikit.core.ErrorLogNotifier;
@@ -21,7 +21,7 @@ import com.monikit.core.MetricCollector;
 import com.monikit.core.TraceIdProvider;
 
 @Order(0)
-public class MonikitJobExecutionListener implements JobExecutionListener {
+public class DefaultJobExecutionListener implements JobExecutionListener {
 
     private final LogNotifier logNotifier;
     private final MetricCollector<LogEntry> metricCollector;
@@ -29,7 +29,7 @@ public class MonikitJobExecutionListener implements JobExecutionListener {
     private final LogEntryContextManager contextManager;
     private final ErrorLogNotifier errorLogNotifier;
 
-    public MonikitJobExecutionListener(
+    public DefaultJobExecutionListener(
         @Nullable LogNotifier logNotifier,
         @Nullable MetricCollector<LogEntry> metricCollector,
         @Nullable TraceIdProvider traceIdProvider,
@@ -51,8 +51,8 @@ public class MonikitJobExecutionListener implements JobExecutionListener {
 
     @Override
     public void afterJob(JobExecution jobExecution) {
-        Instant start = jobExecution.getStartTime().toInstant();
-        Instant end = jobExecution.getEndTime() != null ? jobExecution.getEndTime().toInstant() : Instant.now();
+        Instant start = jobExecution.getStartTime().toInstant(ZoneOffset.UTC);
+        Instant end = jobExecution.getEndTime() != null ? jobExecution.getEndTime().toInstant(ZoneOffset.UTC) : Instant.now();
         long executionTime = end.toEpochMilli() - start.toEpochMilli();
 
         BatchJobLog log = BatchJobLog.create(
@@ -72,7 +72,7 @@ public class MonikitJobExecutionListener implements JobExecutionListener {
         safe(() -> metricCollector.record(log));
 
         if (jobExecution.getStatus().isUnsuccessful()) {
-            safe(() -> errorLogNotifier.onErrorLogDetected(new ExceptionLog(log)));
+            safe(() -> errorLogNotifier.onErrorLogDetected(new ExceptionLog("",  null)));
         }
 
         contextManager.flush();

@@ -7,7 +7,7 @@ import com.monikit.core.BatchJobLog;
 import com.monikit.core.DatabaseQueryLog;
 import com.monikit.core.ExceptionLog;
 import com.monikit.core.ExecutionDetailLog;
-import com.monikit.core.ExecutionTimeLog;
+import com.monikit.core.ExecutionLog;
 import com.monikit.core.HttpInboundRequestLog;
 import com.monikit.core.HttpInboundResponseLog;
 import com.monikit.core.HttpOutboundRequestLog;
@@ -53,8 +53,8 @@ public class TestLogEntryProvider {
     private static final String INPUT_PARAMS = "{\"input\": \"test-value\"}";
     private static final String OUTPUT_VALUE = "{\"output\": \"result-value\"}";
 
-    public static ExecutionTimeLog executionTimeLog() {
-        return ExecutionTimeLog.create(TRACE_ID, LOG_LEVEL, CLASS_NAME, METHOD_NAME, EXECUTION_TIME);
+    public static ExecutionLog executionTimeLog() {
+        return ExecutionLog.create(TRACE_ID, LOG_LEVEL, CLASS_NAME, METHOD_NAME, EXECUTION_TIME);
     }
 
     public static DatabaseQueryLog databaseQueryLog() {

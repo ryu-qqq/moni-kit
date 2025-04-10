@@ -10,20 +10,20 @@ import org.aspectj.lang.annotation.Pointcut;
 import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.core.ExceptionLog;
 import com.monikit.core.ExecutionDetailLog;
-import com.monikit.core.ExecutionTimeLog;
+import com.monikit.core.ExecutionLog;
 import com.monikit.core.LogEntryContextManager;
 import com.monikit.core.LogLevel;
 import com.monikit.core.TraceIdProvider;
 
 /**
- * @Service 및 @Repository 어노테이션이 붙은 메서드의 실행 시간을 자동으로 로깅하는 AOP.
+ * @Controller, @Service, @Repository 어노테이션이 붙은 메서드의 실행 시간을 자동으로 로깅하는 AOP.
  * <p>
- * - 메서드 실행 시간, 입력값, 출력값을 로깅함.
- * - 예외 발생 시에도 실행 시간을 로깅함.
+ * - 실행 시간이 설정된 임계값을 초과할 경우 상세 로그를 기록하고, 그렇지 않으면 요약 로그를 남깁니다.
+ * - 모든 계층 (Web → Service → Repository)의 trace 흐름을 완성하기 위해 Controller도 포함합니다.
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0.1
+ * @since 1.1.0
  */
 @Aspect
 public class ExecutionLoggingAspect {
@@ -39,17 +39,15 @@ public class ExecutionLoggingAspect {
         this.traceIdProvider = traceIdProvider;
     }
 
-    /**
-     * @Service 또는 @Repository가 붙은 클래스의 모든 메서드 타겟.
-     */
-    @Pointcut("within(@org.springframework.stereotype.Service *) || within(@org.springframework.stereotype.Repository *)")
-    public void serviceAndRepositoryMethods() {}
+    @Pointcut("within(@org.springframework.stereotype.Controller *) || " +
+        "within(@org.springframework.web.bind.annotation.RestController *) || " +
+        "within(@org.springframework.stereotype.Service *) || " +
+        "within(@org.springframework.stereotype.Repository *)")
+    public void controllerServiceRepositoryMethods() {}
 
-    /**
-     * 서비스 및 리포지토리 메서드의 실행 시간을 측정하고 로깅.
-     */
-    @Around("serviceAndRepositoryMethods()")
+    @Around("controllerServiceRepositoryMethods()")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+
         if (!loggingProperties.isLogEnabled()) {
             return joinPoint.proceed();
         }
@@ -58,28 +56,54 @@ public class ExecutionLoggingAspect {
         String traceId = traceIdProvider.getTraceId();
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
-        String inputParams = Arrays.toString(joinPoint.getArgs());
+        String inputParams = safeArgsToString(joinPoint.getArgs());
 
         Object result = null;
         try {
             result = joinPoint.proceed();
             return result;
         } catch (Exception e) {
-            logEntryContextManager.addLog(ExceptionLog.create(traceId, e, ErrorCategoryClassifier.categorize(e)));
+            logEntryContextManager.addLog(ExceptionLog.create(traceId, e));
             throw e;
         } finally {
             long executionTime = System.currentTimeMillis() - startTime;
-            String outputValue = result != null ? result.toString() : "null";
+            long threshold = loggingProperties.getThresholdMillis();
+            String outputValue = safeOutputToString(result);
 
-            if (loggingProperties.isDetailedLogging()) {
+            if (executionTime > threshold) {
                 logEntryContextManager.addLog(ExecutionDetailLog.create(
-                    traceId, className, methodName, executionTime, inputParams, outputValue, LogLevel.INFO
+                    traceId, className, methodName, executionTime, inputParams, outputValue, threshold
                 ));
-            } else {
-                logEntryContextManager.addLog(ExecutionTimeLog.create(
-                    traceId, LogLevel.INFO, className, methodName, executionTime
+            } else if (loggingProperties.isSummaryLogging()) {
+                logEntryContextManager.addLog(ExecutionLog.create(
+                    traceId, className, methodName, executionTime
                 ));
             }
         }
     }
+
+    private String safeArgsToString(Object[] args) {
+        return Arrays.stream(args)
+            .map(arg -> {
+                try {
+                    return String.valueOf(arg);
+                } catch (Exception e) {
+                    return "[unserializable:" + arg.getClass().getSimpleName() + "]";
+                }
+            })
+            .toList()
+            .toString();
+    }
+
+    private String safeOutputToString(Object output) {
+        if (output == null) return "null";
+        try {
+            return output.toString();
+        } catch (Exception e) {
+            return "[unserializable:" + output.getClass().getSimpleName() + "]";
+        }
+    }
+
+
+
 }

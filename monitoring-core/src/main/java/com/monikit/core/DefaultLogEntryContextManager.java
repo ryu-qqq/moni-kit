@@ -26,14 +26,10 @@ public class DefaultLogEntryContextManager implements LogEntryContextManager {
 
     private static final int MAX_LOG_SIZE = 300;
     private final LogNotifier logNotifier;
-    private final ErrorLogNotifier errorLogNotifier;
     private final Map<LogType, List<MetricCollector<? extends LogEntry>>> metricCollectorMap;
-    private final ThreadLocal<AtomicBoolean> errorAlert = ThreadLocal.withInitial(() -> new AtomicBoolean(false));
 
-    public DefaultLogEntryContextManager(LogNotifier logNotifier, ErrorLogNotifier errorLogNotifier,
-                                         List<MetricCollector<? extends LogEntry>> metricCollectors) {
+    public DefaultLogEntryContextManager(LogNotifier logNotifier, List<MetricCollector<? extends LogEntry>> metricCollectors) {
         this.logNotifier = logNotifier;
-        this.errorLogNotifier = errorLogNotifier;
         this.metricCollectorMap = Optional.ofNullable(metricCollectors)
             .orElse(Collections.emptyList())
             .stream()
@@ -61,17 +57,10 @@ public class DefaultLogEntryContextManager implements LogEntryContextManager {
 
     @Override
     public void flush() {
-        AtomicBoolean alertFlag = errorAlert.get();
-
-
         for (LogEntry log : LogEntryContext.getLogs()) {
             logNotifier.notify(log);
-            if (log.getLogLevel().isEmergency() && log instanceof ExceptionLog exceptionLog && alertFlag.compareAndSet(false, true)) {
-                errorLogNotifier.onErrorLogDetected(exceptionLog);
-            }
         }
         clear();
-        errorAlert.remove();
     }
 
     @Override

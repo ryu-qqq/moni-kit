@@ -1,24 +1,24 @@
 package com.monikit.core;
 
 import java.util.Map;
-import java.util.Objects;
+
 
 /**
- * 메서드 실행 시간을 기록하는 로그 클래스.
+ * 메서드 실행 정보를 기록하는 공통 Execution 로그 추상 클래스.
  * <p>
- * 특정 메서드가 실행되는 데 걸린 시간을 측정하여 성능 모니터링 및 최적화에 활용된다.
+ * ExecutionDetailLog 에서 공통으로 사용하는 필드 및 로직을 정의함.
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0
+ * @since 1.1.0
  */
-public abstract class ExecutionTimeLog extends AbstractLogEntry {
-    private final String className;
-    private final String methodName;
-    private final long executionTime;
 
+public class ExecutionLog extends AbstractLogEntry {
+    protected final String className;
+    protected final String methodName;
+    protected final long executionTime;
 
-    protected ExecutionTimeLog(String traceId, LogLevel logLevel, String className, String methodName, long executionTime) {
+    protected ExecutionLog(String traceId, LogLevel logLevel, String className, String methodName, long executionTime) {
         super(traceId, logLevel);
         this.className = className;
         this.methodName = methodName;
@@ -29,6 +29,13 @@ public abstract class ExecutionTimeLog extends AbstractLogEntry {
     public LogType getLogType() {
         return LogType.EXECUTION_TIME;
     }
+
+
+    public static ExecutionLog create(String traceId, String className, String methodName,
+                                            long executionTime) {
+        return new ExecutionLog(traceId, LogLevel.INFO, className, methodName, executionTime);
+    }
+
 
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {

@@ -1,5 +1,4 @@
 package com.monikit.core;
-
 /**
  * 요청 단위로 {@link LogEntryContextManager}를 사용하여 로그 컨텍스트를 자동으로 관리하는 클래스.
  * <p>
@@ -9,14 +8,12 @@ package com.monikit.core;
  *   요청이 끝날 때 {@code flush()} 메서드를 호출하여 로그를 저장한다.
  * </p>
  *
- * <p>
  * 사용 예시:
  * <pre>{@code
  * try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
  *     // 요청 처리 중 로그 컨텍스트가 자동으로 관리된다.
  * }
  * }</pre>
- * </p>
  *
  * @author ryu-qqq
  * @since 1.1.0
@@ -43,11 +40,16 @@ public class LogContextScope implements AutoCloseable {
      * {@link LogContextScope}가 종료될 때 호출되며, 로그를 플러시하여 요청에 대한 로그를 저장한다.
      * <p>
      * - {@link LogEntryContextManager#flush()}를 호출하여 로그를 저장한다.
+     * - flush() 실패 시 예외를 삼켜서 애플리케이션 흐름에 영향을 주지 않도록 안전하게 처리한다.
      * </p>
      */
     @Override
     public void close() {
-        logEntryContextManager.flush();
+        try {
+            logEntryContextManager.flush();
+        } catch (Exception e) {
+            System.err.println("[monikit] logContext flush failed: " + e.getMessage());
+        }
     }
 
 }

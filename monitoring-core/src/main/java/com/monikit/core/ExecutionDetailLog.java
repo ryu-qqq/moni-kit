@@ -4,30 +4,46 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 메서드 실행 시간과 함께 입력값 및 출력값을 기록하는 로그 클래스.
+ * 메서드 실행 시간과 함께 입력값 및 출력값을 기록하는 상세 로그 클래스.
  * <p>
- * 특정 메서드가 실행될 때, 어떤 입력값을 받았고 어떤 값을 반환했는지를 포함하여
- * 성능 분석 및 디버깅에 활용된다.
+ * 실행 시간이 설정된 임계값(threshold)을 초과한 경우에만 로깅되도록 설계됨.
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class ExecutionDetailLog extends AbstractLogEntry {
-    private final String className;
-    private final String methodName;
-    private final long executionTime;
-    private final String inputParams;
-    private final String outputValue;
 
-    protected ExecutionDetailLog(String traceId, String className, String methodName, long executionTime,
-                                 String inputParams, String outputValue, LogLevel logLevel) {
-        super(traceId, logLevel);
-        this.className = className;
-        this.methodName = methodName;
-        this.executionTime = executionTime;
-        this.inputParams = inputParams;
-        this.outputValue = outputValue;
+public class ExecutionDetailLog extends ExecutionLog {
+
+    private final String input;
+    private final String output;
+    private final boolean thresholdExceeded;
+    private final long threshold;
+
+    public ExecutionDetailLog(String traceId, String className, String methodName,
+                              long executionTime, String input, String output,
+                              LogLevel logLevel, boolean thresholdExceeded, long threshold) {
+        super(traceId, logLevel, className, methodName, executionTime);
+        this.input = input;
+        this.output = output;
+        this.thresholdExceeded = thresholdExceeded;
+        this.threshold = threshold;
+    }
+
+    public static ExecutionDetailLog create(String traceId, String className, String methodName,
+                                            long executionTime, String input, String output, long threshold) {
+        boolean exceeded = executionTime > threshold;
+        LogLevel level = exceeded ? LogLevel.WARN : LogLevel.INFO;
+        return new ExecutionDetailLog(traceId, className, methodName, executionTime, input, output, level, exceeded, threshold);
+    }
+
+    @Override
+    protected void addExtraFields(Map<String, Object> logMap) {
+        super.addExtraFields(logMap);
+        logMap.put("input", input);
+        logMap.put("output", output);
+        logMap.put("threshold", threshold + "ms");
+        logMap.put("thresholdExceeded", thresholdExceeded);
     }
 
     @Override
@@ -36,84 +52,34 @@ public class ExecutionDetailLog extends AbstractLogEntry {
     }
 
     @Override
-    protected void addExtraFields(Map<String, Object> logMap) {
-        logMap.put("className", className);
-        logMap.put("methodName", methodName);
-        logMap.put("executionTime", executionTime + "ms");
-        logMap.put("inputParams", inputParams);
-        logMap.put("outputValue", outputValue);
-    }
-
-    public String getClassName() {
-        return className;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public long getExecutionTime() {
-        return executionTime;
-    }
-
-    public String getInputParams() {
-        return inputParams;
-    }
-
-    public String getOutputValue() {
-        return outputValue;
-    }
-
-    public static ExecutionDetailLog create(String traceId, String className, String methodName,
-                                            long executionTime, String inputParams, String outputValue, LogLevel logLevel) {
-        return new ExecutionDetailLog(traceId, className, methodName, executionTime, inputParams, outputValue, logLevel);
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this
-            == object) return true;
-        if (object
-            == null
-            || getClass()
-            != object.getClass()) return false;
-        ExecutionDetailLog that = (ExecutionDetailLog) object;
-        return executionTime
-            == that.executionTime
-            && Objects.equals(className, that.className)
-            && Objects.equals(methodName, that.methodName)
-            && Objects.equals(inputParams, that.inputParams)
-            && Objects.equals(outputValue, that.outputValue);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExecutionDetailLog that = (ExecutionDetailLog) o;
+        return executionTime == that.executionTime &&
+            thresholdExceeded == that.thresholdExceeded &&
+            threshold == that.threshold &&
+            Objects.equals(className, that.className) &&
+            Objects.equals(methodName, that.methodName) &&
+            Objects.equals(input, that.input) &&
+            Objects.equals(output, that.output);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, methodName, executionTime, inputParams, outputValue);
+        return Objects.hash(className, methodName, executionTime, input, output, thresholdExceeded, threshold);
     }
 
     @Override
     public String toString() {
-        return "ExecutionDetailLog{"
-            +
-            "className='"
-            + className
-            + '\''
-            +
-            ", methodName='"
-            + methodName
-            + '\''
-            +
-            ", executionTime="
-            + executionTime
-            +
-            ", inputParams='"
-            + inputParams
-            + '\''
-            +
-            ", outputValue='"
-            + outputValue
-            + '\''
-            +
+        return "ExecutionDetailLog{" +
+            "className='" + className + '\'' +
+            ", methodName='" + methodName + '\'' +
+            ", executionTime=" + executionTime +
+            ", input='" + input + '\'' +
+            ", output='" + output + '\'' +
+            ", threshold=" + threshold +
+            ", thresholdExceeded=" + thresholdExceeded +
             '}';
     }
 }

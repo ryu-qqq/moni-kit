@@ -4,10 +4,9 @@ import java.time.Instant;
 
 import com.monikit.core.BatchJobLog;
 import com.monikit.core.DatabaseQueryLog;
-import com.monikit.core.ErrorCategory;
 import com.monikit.core.ExceptionLog;
 import com.monikit.core.ExecutionDetailLog;
-import com.monikit.core.ExecutionTimeLog;
+import com.monikit.core.ExecutionLog;
 import com.monikit.core.HttpInboundRequestLog;
 import com.monikit.core.HttpInboundResponseLog;
 import com.monikit.core.HttpOutboundRequestLog;
@@ -56,8 +55,8 @@ public class TestLogEntryProvider {
     private static final String INPUT_PARAMS = "{\"input\": \"test-value\"}";
     private static final String OUTPUT_VALUE = "{\"output\": \"result-value\"}";
 
-    public static ExecutionTimeLog executionTimeLog() {
-        return ExecutionTimeLog.create(TRACE_ID, LOG_LEVEL, CLASS_NAME, METHOD_NAME, EXECUTION_TIME);
+    public static ExecutionLog executionTimeLog() {
+        return ExecutionLog.create(TRACE_ID, LOG_LEVEL, CLASS_NAME, METHOD_NAME, EXECUTION_TIME);
     }
 
     public static DatabaseQueryLog databaseQueryLog() {
@@ -69,7 +68,7 @@ public class TestLogEntryProvider {
     }
 
     public static ExceptionLog exceptionLog() {
-        return ExceptionLog.create(TRACE_ID, new RuntimeException("Test Exception"), ErrorCategory.APPLICATION_ERROR);
+        return ExceptionLog.create(TRACE_ID, new RuntimeException("Test Exception"));
     }
 
     public static HttpInboundRequestLog httpInboundRequestLog() {
@@ -81,7 +80,7 @@ public class TestLogEntryProvider {
     }
 
     public static BatchJobLog batchJobLog() {
-        return BatchJobLog.create(TRACE_ID, BATCH_JOB_NAME, START_TIME, END_TIME, EXECUTION_TIME, STATUS, ERROR_MESSAGE, LOG_LEVEL);
+        return BatchJobLog.create(TRACE_ID, BATCH_JOB_NAME, START_TIME, END_TIME, EXECUTION_TIME, STATUS, ERROR_MESSAGE, "", LOG_LEVEL);
     }
 
     public static HttpOutboundRequestLog httpOutboundRequestLog() {

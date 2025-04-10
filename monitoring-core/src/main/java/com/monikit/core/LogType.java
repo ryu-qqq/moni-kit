@@ -19,6 +19,8 @@ public enum LogType {
     INBOUND_RESPONSE,
     OUTBOUND_REQUEST,
     OUTBOUND_RESPONSE,
-    BATCH_JOB
+    BATCH_JOB,
+    BATCH_STEP,
+    BATCH_CHUNK,
 
 }

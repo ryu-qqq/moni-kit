@@ -11,25 +11,26 @@ import java.util.Objects;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class HttpInboundRequestLog extends AbstractLogEntry {
-    private final String httpMethod;
-    private final String requestUri;
-    private final String queryParams;
-    private final String headers;
-    private final String requestBody;
+public class HttpInboundRequestLog extends AbstractLogEntry implements HttpLogEntry {
+
+    private final String uri;
+    private final String method;
+    private final Map<String, String> headers;
+    private final String query;
+    private final String body;
     private final String clientIp;
     private final String userAgent;
 
-    protected HttpInboundRequestLog(String traceId, String httpMethod, String requestUri, String queryParams,
-                                    String headers, String requestBody, String clientIp, String userAgent, LogLevel logLevel) {
+    public HttpInboundRequestLog(String traceId, LogLevel logLevel, String uri, String method, String query, String body,
+                                 Map<String, String> headers, String clientIp, String userAgent) {
         super(traceId, logLevel);
-        this.httpMethod = httpMethod;
-        this.requestUri = requestUri;
-        this.queryParams = queryParams;
+        this.uri = uri;
+        this.method = method;
+        this.query = query;
+        this.body = body;
         this.headers = headers;
-        this.requestBody = requestBody;
         this.clientIp = clientIp;
         this.userAgent = userAgent;
     }
@@ -41,39 +42,46 @@ public class HttpInboundRequestLog extends AbstractLogEntry {
 
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {
-        logMap.put("httpMethod", httpMethod);
-        logMap.put("requestUri", requestUri);
-        logMap.put("queryParams", queryParams);
+        logMap.put("uri", uri);
+        logMap.put("method", method);
+        logMap.put("query", query);
+        logMap.put("body", body);
         logMap.put("headers", headers);
-        logMap.put("requestBody", requestBody);
         logMap.put("clientIp", clientIp);
         logMap.put("userAgent", userAgent);
     }
 
-    public static HttpInboundRequestLog create(String traceId, String httpMethod, String uri, String queryParams,
-                                               String headers, String requestBody, String clientIp, String userAgent, LogLevel logLevel) {
-        return new HttpInboundRequestLog(traceId, httpMethod, uri, queryParams, headers, requestBody, clientIp, userAgent, logLevel);
+    public static HttpInboundRequestLog create(String traceId, LogLevel logLevel, String uri, String method, String query, String body,
+                                               Map<String, String> headers, String clientIp, String userAgent) {
+        return new HttpInboundRequestLog(traceId, logLevel, uri, method, query, body, headers, clientIp, userAgent);
     }
 
-
-    public String getHttpMethod() {
-        return httpMethod;
+    @Override
+    public String getUri() {
+        return uri;
     }
 
-    public String getRequestUri() {
-        return requestUri;
+    @Override
+    public String getMethod() {
+        return method;
     }
 
-    public String getQueryParams() {
-        return queryParams;
+    @Override
+    public int getStatusCode() {
+        return -1; // 요청은 상태 코드가 없음
     }
 
-    public String getHeaders() {
+    @Override
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
-    public String getRequestBody() {
-        return requestBody;
+    public String getQuery() {
+        return query;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     public String getClientIp() {
@@ -85,60 +93,34 @@ public class HttpInboundRequestLog extends AbstractLogEntry {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this
-            == object) return true;
-        if (object
-            == null
-            || getClass()
-            != object.getClass()) return false;
-        HttpInboundRequestLog that = (HttpInboundRequestLog) object;
-        return Objects.equals(httpMethod, that.httpMethod)
-            && Objects.equals(requestUri, that.requestUri)
-            && Objects.equals(queryParams, that.queryParams)
-            && Objects.equals(headers, that.headers)
-            && Objects.equals(requestBody, that.requestBody)
-            && Objects.equals(clientIp, that.clientIp)
-            && Objects.equals(userAgent, that.userAgent);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HttpInboundRequestLog that = (HttpInboundRequestLog) o;
+        return Objects.equals(uri, that.uri) &&
+            Objects.equals(method, that.method) &&
+            Objects.equals(query, that.query) &&
+            Objects.equals(body, that.body) &&
+            Objects.equals(headers, that.headers) &&
+            Objects.equals(clientIp, that.clientIp) &&
+            Objects.equals(userAgent, that.userAgent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(httpMethod, requestUri, queryParams, headers, requestBody, clientIp, userAgent);
+        return Objects.hash(uri, method, query, body, headers, clientIp, userAgent);
     }
 
     @Override
     public String toString() {
-        return "HttpInboundRequestLog{"
-            +
-            "httpMethod='"
-            + httpMethod
-            + '\''
-            +
-            ", requestUri='"
-            + requestUri
-            + '\''
-            +
-            ", queryParams='"
-            + queryParams
-            + '\''
-            +
-            ", headers='"
-            + headers
-            + '\''
-            +
-            ", requestBody='"
-            + requestBody
-            + '\''
-            +
-            ", clientIp='"
-            + clientIp
-            + '\''
-            +
-            ", userAgent='"
-            + userAgent
-            + '\''
-            +
+        return "HttpInboundRequestLog{" +
+            "uri='" + uri + '\'' +
+            ", method='" + method + '\'' +
+            ", query='" + query + '\'' +
+            ", body='" + body + '\'' +
+            ", headers=" + headers +
+            ", clientIp='" + clientIp + '\'' +
+            ", userAgent='" + userAgent + '\'' +
             '}';
     }
 }

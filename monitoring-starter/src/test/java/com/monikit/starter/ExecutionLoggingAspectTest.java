@@ -62,7 +62,7 @@ class ExecutionLoggingAspectTest {
 
             // Then
             assertEquals("Mocked Result", result);
-            verify(mockLogEntryContextManager, atLeastOnce()).addLog(any(ExecutionTimeLog.class));
+            verify(mockLogEntryContextManager, atLeastOnce()).addLog(any(ExecutionLog.class));
             verify(mockLogEntryContextManager, never()).addLog(any(ExecutionDetailLog.class));
         }
 
@@ -86,7 +86,7 @@ class ExecutionLoggingAspectTest {
             // Then
             assertEquals("Mocked Result", result);
             verify(mockLogEntryContextManager, atLeastOnce()).addLog(any(ExecutionDetailLog.class));
-            verify(mockLogEntryContextManager, never()).addLog(any(ExecutionTimeLog.class));
+            verify(mockLogEntryContextManager, never()).addLog(any(ExecutionLog.class));
         }
 
         @Test

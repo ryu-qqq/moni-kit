@@ -112,7 +112,7 @@ class LogEntryContextManagerConfigTest {
                     }
 
                     @Override
-                    public void logException(String traceId, Throwable exception, ErrorCategory errorCategory) {
+                    public void logException(String traceId, Throwable exception) {
 
                     }
                 })
