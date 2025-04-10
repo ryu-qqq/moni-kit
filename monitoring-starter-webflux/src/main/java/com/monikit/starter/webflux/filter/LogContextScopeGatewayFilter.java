@@ -2,6 +2,10 @@ package com.monikit.starter.webflux.filter;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -19,6 +23,8 @@ import com.monikit.core.LogLevel;
 import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.webflux.ExcludePathConstant;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import reactor.core.publisher.Mono;
 
 /**
@@ -68,20 +74,20 @@ public class LogContextScopeGatewayFilter implements GatewayFilter {
         String method = request.getMethod().name();
         String uri = request.getURI().getPath();
         String query = request.getURI().getQuery();
-        String headers = extractHeaders(request.getHeaders());
+        Map<String, String> headers = extractHeaders(request.getHeaders());
         String body = exchange.getAttribute("cachedRequestBody");
         InetSocketAddress remoteAddress = request.getRemoteAddress();
 
         logEntryContextManager.addLog(HttpInboundRequestLog.create(
             traceId,
-            method,
+            LogLevel.INFO,
             uri,
+            method,
             query,
-            headers,
             body != null ? body : "[EMPTY]",
+            headers,
             remoteAddress != null ? remoteAddress.getAddress().getHostAddress() : "unknown",
-            request.getHeaders().getFirst("User-Agent"),
-            LogLevel.INFO
+            request.getHeaders().getFirst("User-Agent")
         ));
     }
 
@@ -91,25 +97,45 @@ public class LogContextScopeGatewayFilter implements GatewayFilter {
         String method = request.getMethod().name();
         String uri = request.getURI().getPath();
         int status = response.getStatusCode() != null ? response.getStatusCode().value() : 0;
-        String headers = extractHeaders(response.getHeaders());
+        Map<String, String> headers = extractHeaders(response.getHeaders());
         String body = exchange.getAttribute("cachedResponseBody");
 
         logEntryContextManager.addLog(HttpInboundResponseLog.create(
             traceId,
+            LogLevel.INFO,
             method,
             uri,
             status,
             headers,
             body != null ? body : "[EMPTY]",
-            executionTime,
-            LogLevel.INFO
+            executionTime
         ));
     }
 
-    private String extractHeaders(HttpHeaders headers) {
-        return headers.entrySet().stream()
-            .map(entry -> entry.getKey() + ": " + String.join(", ", entry.getValue()))
-            .collect(Collectors.joining("; "));
+
+
+    /**
+     * 헤더를 추출하여 Map 형태로 반환한다.
+     *
+     * @param httpHeaders HTTP 헤더객체
+     * @return 응답 헤더를 Map<String, String>으로 반환
+     */
+
+    private Map<String, String> extractHeaders(HttpHeaders httpHeaders) {
+        Map<String, String> headers = new LinkedHashMap<>();
+
+        for (Map.Entry<String, List<String>> entry : httpHeaders.entrySet()) {
+            String headerName = entry.getKey();
+            List<String> values = entry.getValue();
+            if (values != null && !values.isEmpty()) {
+                headers.put(headerName, values.getFirst());
+            }
+        }
+
+        return headers;
     }
+
+
+
 
 }

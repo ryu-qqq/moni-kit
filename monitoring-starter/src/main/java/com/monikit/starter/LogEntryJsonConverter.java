@@ -1,8 +1,6 @@
 package com.monikit.starter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import com.monikit.core.LogEntry;
 
 /**
@@ -15,11 +13,9 @@ import com.monikit.core.LogEntry;
  * @since 1.0.0
  */
 
+@Deprecated
 public class LogEntryJsonConverter {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 
     private LogEntryJsonConverter() {
@@ -34,10 +30,12 @@ public class LogEntryJsonConverter {
      */
     public static String toJson(LogEntry logEntry) {
         try {
-            return OBJECT_MAPPER.writeValueAsString(logEntry);
+            return logEntry.toString();
         } catch (Exception e) {
             throw new RuntimeException("Failed to serialize LogEntry to JSON", e);
         }
     }
+
+
 
 }

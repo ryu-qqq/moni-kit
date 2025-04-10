@@ -1,7 +1,5 @@
 package com.monikit.starter;
 
-import java.util.Arrays;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -12,7 +10,6 @@ import com.monikit.core.ExceptionLog;
 import com.monikit.core.ExecutionDetailLog;
 import com.monikit.core.ExecutionLog;
 import com.monikit.core.LogEntryContextManager;
-import com.monikit.core.LogLevel;
 import com.monikit.core.TraceIdProvider;
 
 /**
@@ -39,9 +36,7 @@ public class ExecutionLoggingAspect {
         this.traceIdProvider = traceIdProvider;
     }
 
-    @Pointcut("within(@org.springframework.stereotype.Controller *) || " +
-        "within(@org.springframework.web.bind.annotation.RestController *) || " +
-        "within(@org.springframework.stereotype.Service *) || " +
+    @Pointcut("within(@org.springframework.stereotype.Service *) || " +
         "within(@org.springframework.stereotype.Repository *)")
     public void controllerServiceRepositoryMethods() {}
 
@@ -83,17 +78,19 @@ public class ExecutionLoggingAspect {
     }
 
     private String safeArgsToString(Object[] args) {
-        return Arrays.stream(args)
-            .map(arg -> {
-                try {
-                    return String.valueOf(arg);
-                } catch (Exception e) {
-                    return "[unserializable:" + arg.getClass().getSimpleName() + "]";
-                }
-            })
-            .toList()
-            .toString();
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < args.length; i++) {
+            sb.append("arg").append(i).append("=");
+            try {
+                sb.append(args[i]);
+            } catch (Exception e) {
+                sb.append("[unserializable:").append(args[i].getClass().getSimpleName()).append("]");
+            }
+            if (i < args.length - 1) sb.append(", ");
+        }
+        return sb.append("]").toString();
     }
+
 
     private String safeOutputToString(Object output) {
         if (output == null) return "null";

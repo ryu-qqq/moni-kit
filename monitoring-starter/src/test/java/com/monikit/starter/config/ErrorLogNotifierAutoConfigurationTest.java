@@ -1,6 +1,5 @@
 package com.monikit.starter.config;
 
-import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,10 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import com.monikit.core.DefaultErrorLogNotifier;
 import com.monikit.core.ErrorLogNotifier;
 import com.monikit.core.ExceptionLog;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ErrorLogNotifierAutoConfiguration 테스트")
 class ErrorLogNotifierAutoConfigurationTest {
@@ -26,8 +29,9 @@ class ErrorLogNotifierAutoConfigurationTest {
 
         customContextRunner.run(context -> {
             ErrorLogNotifier notifier = context.getBean(ErrorLogNotifier.class);
-            assertThat(notifier).isInstanceOf(CustomErrorLogNotifier.class);
-            assertThat(notifier).isNotInstanceOf(DefaultErrorLogNotifier.class);
+            assertNotNull(notifier);
+            assertTrue(notifier instanceof CustomErrorLogNotifier);
+            assertFalse(notifier instanceof DefaultErrorLogNotifier);
         });
     }
 

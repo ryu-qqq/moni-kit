@@ -3,6 +3,7 @@ package com.monikit.starter.config;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -11,7 +12,9 @@ import com.monikit.core.LogEntry;
 import com.monikit.core.LogType;
 import com.monikit.core.MetricCollector;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +40,8 @@ class MetricCollectorHookAutoConfigurationTest {
             baseRunner
                 .withPropertyValues("monikit.metrics.metrics-enabled=true")
                 .run(context -> {
-                    assertThat(context).hasSingleBean(LogAddHook.class);
+                    LogAddHook hook = context.getBean(LogAddHook.class);
+                    assertNotNull(hook, "LogAddHook 빈이 등록되어야 한다");
                 });
         }
     }
@@ -51,7 +55,9 @@ class MetricCollectorHookAutoConfigurationTest {
             baseRunner
                 .withPropertyValues("monikit.metrics.metrics-enabled=false")
                 .run(context -> {
-                    assertThat(context).doesNotHaveBean(LogAddHook.class);
+                    assertThrows(NoSuchBeanDefinitionException.class, () -> {
+                        context.getBean(LogAddHook.class);
+                    }, "LogAddHook 빈이 존재하지 않아야 한다");
                 });
         }
     }
@@ -64,7 +70,8 @@ class MetricCollectorHookAutoConfigurationTest {
         void shouldRegisterHookByDefault() {
             baseRunner
                 .run(context -> {
-                    assertThat(context).hasSingleBean(LogAddHook.class);
+                    assertInstanceOf(LogAddHook.class,
+                        context.getBean(LogAddHook.class));
                 });
         }
     }
