@@ -1,33 +1,42 @@
 package com.monikit.core;
 
+import java.util.List;
 
 /**
- * 기본 로그 노티파이어 (System.out.println() 기반).
+ * LogNotifier의 기본 구현체.
  * <p>
- * monitoring-starter가 없을 때 기본적으로 사용된다.
+ * 사용자 정의 LogNotifier 빈이 없을 경우 기본으로 동작하며,
+ * 등록된 {@link LogSink} 리스트를 기반으로 로그를 분기 전송합니다.
+ * - 별도 LogSink가 없으면 System.out 으로 출력합니다.
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0
+ * @since 1.1.0
  */
 public class DefaultLogNotifier implements LogNotifier {
 
-    private static final DefaultLogNotifier INSTANCE = new DefaultLogNotifier();
+    private final List<LogSink> sinks;
 
-    private DefaultLogNotifier() {}
-
-    public static DefaultLogNotifier getInstance() {
-        return INSTANCE;
+    public DefaultLogNotifier(List<LogSink> sinks) {
+        this.sinks = sinks;
     }
 
     @Override
     public void notify(LogLevel logLevel, String message) {
-        System.out.println(message);
+        System.out.println("[" + logLevel + "] " + message);
     }
 
     @Override
     public void notify(LogEntry logEntry) {
-        System.out.println(logEntry.toString());
-    }
+        if (sinks == null || sinks.isEmpty()) {
+            System.out.println("[monikit] " + logEntry);
+            return;
+        }
 
+        for (LogSink sink : sinks) {
+            if (sink.supports(logEntry.getLogType())) {
+                sink.send(logEntry);
+            }
+        }
+    }
 }

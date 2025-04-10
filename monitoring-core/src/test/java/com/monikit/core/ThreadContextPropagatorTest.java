@@ -2,12 +2,16 @@ package com.monikit.core;
 
 import java.util.Queue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import com.monikit.core.utils.TestLogEntryProvider;
@@ -15,6 +19,7 @@ import com.monikit.core.utils.TestLogEntryProvider;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ThreadContextPropagator 테스트")
@@ -140,4 +145,109 @@ class ThreadContextPropagatorTest {
             assertTrue(LogEntryContext.hasError());
         }
     }
+
+    @Nested
+    @DisplayName("ConcurrentLinkedQueue 레이스 컨딕션 테스트")
+    class ConcurrentLinkedQueueRaceTest {
+        @Test
+        void testRaceConditionOnConcurrentLinkedQueue() throws InterruptedException {
+            Queue<Integer> queue = new ConcurrentLinkedQueue<>();
+            AtomicInteger pollCount = new AtomicInteger(0);
+            CountDownLatch latch = new CountDownLatch(1);
+            int itemCount = 10000;
+
+            for (int i = 0; i < itemCount; i++) {
+                queue.offer(i);
+            }
+
+            Runnable poller = () -> {
+                try {
+                    latch.await();
+                    for (int i = 0; i < itemCount / 2; i++) {
+                        // 비원자적 복합 연산
+                        if (!queue.isEmpty()) {
+                            Integer item = queue.poll();
+                            if (item != null) {
+                                pollCount.incrementAndGet();
+                            }
+                        }
+                    }
+                } catch (InterruptedException ignored) {
+                }
+            };
+
+            Thread t1 = new Thread(poller);
+            Thread t2 = new Thread(poller);
+
+            t1.start();
+            t2.start();
+
+            latch.countDown();
+
+            t1.join();
+            t2.join();
+
+            System.out.println("Expected <= " + itemCount + ", Actual: " + pollCount.get());
+
+            assertTrue(pollCount.get() <= itemCount);
+        }
+    }
+
+    // @Nested
+    // @DisplayName("ConcurrentLinkedQueue Race Condition Stress Test")
+    // class ConcurrentLinkedQueueRaceStressTest {
+    //
+    //     @RepeatedTest(50)
+    //     @DisplayName("복합 연산의 경쟁 조건이 실제로 발생하는지 반복 테스트")
+    //     void shouldTriggerRaceConditionWithStress() throws InterruptedException {
+    //         Queue<Integer> queue = new ConcurrentLinkedQueue<>();
+    //         AtomicInteger pollCount = new AtomicInteger(0);
+    //         CountDownLatch latch = new CountDownLatch(1);
+    //         int itemCount = 100_000;
+    //         int threadCount = 16;
+    //
+    //         for (int i = 0; i < itemCount; i++) {
+    //             queue.offer(i);
+    //         }
+    //
+    //         Runnable poller = () -> {
+    //             try {
+    //                 latch.await();
+    //                 for (int i = 0; i < itemCount / threadCount; i++) {
+    //                     if (!queue.isEmpty()) {
+    //                         Thread.sleep(1);
+    //                         Integer item = queue.poll();
+    //                         if (item != null) {
+    //                             pollCount.incrementAndGet();
+    //                         }
+    //                     }
+    //                 }
+    //             } catch (InterruptedException ignored) {
+    //             }
+    //         };
+    //
+    //         Thread[] threads = new Thread[threadCount];
+    //         for (int i = 0; i < threadCount; i++) {
+    //             threads[i] = new Thread(poller);
+    //             threads[i].start();
+    //         }
+    //
+    //         latch.countDown();
+    //
+    //         for (Thread t : threads) {
+    //             t.join();
+    //         }
+    //
+    //         int result = pollCount.get();
+    //         if (result < itemCount) {
+    //             System.out.println("Race condition 재현됨! Expected: " + itemCount + ", Actual: " + result);
+    //         } else {
+    //             System.out.println("정상 처리: " + result);
+    //         }
+    //
+    //         assertTrue(result <= itemCount);
+    //     }
+    // }
+
+
 }

@@ -1,12 +1,26 @@
-# Monitoring-Core
+# MoniKit Core (v1.1.0)
 
 ## 개요
-MoniKit은 서버의 다양한 이벤트와 성능을 효과적으로 기록할 수 있도록 설계된 로깅 라이브러리입니다. 모든 로그는 구조화된 데이터를 생성하여 **ELK (Elasticsearch, Logstash, Kibana) 및 Prometheus**와 원활하게 연동될 수 있도록 설계되었습니다.
+MoniKit은 서버의 다양한 이벤트와 성능을 효과적으로 기록할 수 있도록 설계된 경량 로깅 프레임워크입니다. 모든 로그는 구조화된 데이터를 생성하여 **ELK (Elasticsearch, Logstash, Kibana)** 및 **Prometheus**와 원활하게 연동될 수 있도록 설계되었습니다.
 
-이 문서는 `monikit.core` 패키지의 핵심 구성 요소를 설명하며, 사용자가 직접 커스텀 로그 포맷을 정의할 수 있도록 가이드합니다.
+이 문서는 `monikit-core` 패키지의 핵심 구성 요소를 설명하며, 커스텀 로그 정의 및 수집기 설계를 위한 기반 인터페이스를 안내합니다.
 
-### **로그**
-### 1. LogEntry 인터페이스
+---
+
+## 주요 변경 사항 (v1.1.0)
+
+- `ExecutionLog` 계층 도입: 요약/상세 로그 구조 통합 및 임계값 기반 필터링 지원
+- `HttpLogEntry` 인터페이스 도입: 모든 HTTP 로그 공통화
+- `ErrorCategoryClassifier` 폐기: `ExceptionLog` 단일 진입점으로 예외 추적 구조 단순화
+- `LogSink` 기반 구조화: `DefaultLogNotifier`에서 전략적 로그 분기 가능
+- `ErrorLogNotifier` 제거
+- `LogContextScope` 안정성 강화
+
+---
+
+## 핵심 구성 요소
+
+### 1. `LogEntry` 인터페이스
 ```java
 public interface LogEntry {
     Instant getTimestamp();
@@ -16,44 +30,39 @@ public interface LogEntry {
     String toString();
 }
 ```
-모든 로그 엔트리는 `LogEntry` 인터페이스를 구현해야 합니다. 이는 **로그의 일관성을 유지하고, 검색 필터링을 용이하게 하도록 설계**되었습니다.
-
-- `getTimestamp()`: 로그가 생성된 시간 (UTC 기준)
-- `getTraceId()`: 동일한 요청 내에서 발생한 로그를 추적하기 위한 ID
-- `getLogType()`: 로그 유형 (예: EXECUTION_TIME, BUSINESS_EVENT, EXCEPTION 등)
-- `getLogLevel()`: 로그의 심각도 (TRACE, DEBUG, INFO, WARN, ERROR)
-- `toString()`: JSON 형태의 문자열 변환
-
-사용자는 이 인터페이스를 직접 구현하여 **커스텀 로그 타입을 정의**할 수도 있습니다.
-
-`LogEntry` 인터페이스는 MoniKit의 핵심이며, 모든 로그는 이를 기반으로 작성됩니다. 인터페이스를 확장하여 새로운 로그 타입을 정의할 수도 있으며, 기본적으로 제공되는 여러 로그 클래스가 존재합니다.
+모든 로그 클래스는 이 인터페이스를 구현하며, 로그 데이터는 JSON 형태로 직렬화되어 저장 및 분석됩니다.
 
 ---
 
+### 2. 주요 로그 클래스
 
-
-### 2. 기본 제공되는 로그 클래스
-MoniKit은 다양한 로깅 요구 사항을 충족하기 위해 몇 가지 표준 로그 클래스를 제공합니다. 다음은 기본 제공되는 로그 클래스 목록입니다.
-
-- `BatchJobLog`: 배치 작업 실행 정보를 기록
-- `DatabaseQueryLog`: 데이터베이스 쿼리 실행 정보를 기록
-- `ExceptionLog`: 애플리케이션 내에서 발생한 예외를 기록 **ErrorCategory** 을 활용하여 에러의 내용을 카테고리화 가능 
-- `ExecutionDetailLog`: 메서드 실행 상세 정보를 기록
-- `ExecutionTimeLog`: 메서드 실행 시간을 기록
-- `HttpInboundRequestLog`: 외부에서 들어오는 HTTP 요청을 기록
-- `HttpInboundResponseLog`: 외부에서 들어오는 HTTP 요청의 응답을 기록
-- `HttpOutboundRequestLog`: 내부에서 나가는 HTTP 요청을 기록
-- `HttpOutboundResponseLog`: 내부에서 나가는 HTTP 요청의 응답 기록
-
-이들 클래스는 `AbstractLogEntry`를 확장하여 구현되었으며, 필요한 경우 직접 커스텀 로그 클래스를 만들어 사용할 수도 있습니다.
-
-더 자세한 사항이 궁금하다면 코드에서 직접 구현체를 확인해보세요
+| 카테고리 | 클래스 | 설명 |
+|----------|--------|------|
+| 실행 | `ExecutionLog`, `ExecutionDetailLog` | 메서드 실행 시간, input/output, 임계값 기반 분기 |
+| 예외 | `ExceptionLog` | 예외 정보 및 타입 추적 |
+| DB | `DatabaseQueryLog` | SQL 실행 정보 추적 |
+| 배치 | `BatchJobLog`, `BatchStepLog`, `BatchChunkLog` | Job/Step/Chunk 단위 실행 정보 |
+| HTTP | `HttpInboundRequestLog`, `HttpInboundResponseLog`, `HttpOutboundRequestLog`, `HttpOutboundResponseLog` | 모든 HTTP 요청/응답 흐름 추적 |
 
 ---
 
+### 3. `HttpLogEntry` 인터페이스
 
-### 3. LogEntryContextManager (로그 컨텍스트 관리)
-`LogEntryContextManager`는 `LogEntryContext`를 관리하는 인터페이스로, 로그를 추가, 조회, 삭제하는 기능을 제공합니다.
+```java
+public interface HttpLogEntry extends LogEntry {
+    String getUri();
+    String getMethod();
+    int getStatusCode();
+    Map<String, String> getHeaders();
+}
+```
+
+- 모든 HTTP 로그에 공통 필드 제공
+- `LogSink`나 필터에서 `instanceof` 검사로 쉽게 필터링 가능
+
+---
+
+### 4. `LogEntryContextManager`
 
 ```java
 public interface LogEntryContextManager {
@@ -62,234 +71,72 @@ public interface LogEntryContextManager {
     void clear();
 }
 ```
-### 기본 구현체: `DefaultLogEntryContextManager`
-기본적으로 `DefaultLogEntryContextManager`가 빈으로 등록됩니다.
 
-```java
-public class DefaultLogEntryContextManager implements LogEntryContextManager {
-    private static final int MAX_LOG_SIZE = 300;
-    private final LogNotifier logNotifier;
-    private final ErrorLogNotifier errorLogNotifier;
-    private final Map<LogType, List<MetricCollector<? extends LogEntry>>> metricCollectorMap;
-
-    public DefaultLogEntryContextManager(LogNotifier logNotifier, ErrorLogNotifier errorLogNotifier,
-                                         List<MetricCollector<? extends LogEntry>> metricCollectors) {
-        this.logNotifier = logNotifier;
-        this.errorLogNotifier = errorLogNotifier;
-        this.metricCollectorMap = Optional.ofNullable(metricCollectors)
-            .orElse(Collections.emptyList())
-            .stream()
-            .flatMap(collector -> Arrays.stream(LogType.values())
-                .filter(collector::supports)
-                .map(type -> Map.entry(type, collector)))
-            .collect(Collectors.groupingBy(Map.Entry::getKey,
-                Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
-    }
-
-    @Override
-    public void addLog(LogEntry logEntry) {
-        if (LogEntryContext.size() >= MAX_LOG_SIZE) {
-            logNotifier.notify(LogLevel.WARN, "LogEntryContext cleared due to size limit");
-            flush();
-        }
-        LogEntryContext.addLog(logEntry);
-
-        List<MetricCollector<LogEntry>> collectors = (List<MetricCollector<LogEntry>>)
-            (List<?>) metricCollectorMap.getOrDefault(logEntry.getLogType(), Collections.emptyList());
-
-        collectors.forEach(collector -> collector.record(logEntry));
-    }
-
-    @Override
-    public void flush() {
-        for (LogEntry log : LogEntryContext.getLogs()) {
-            logNotifier.notify(log);
-            if (log.getLogLevel().isEmergency() && log instanceof ExceptionLog exceptionLog) {
-                errorLogNotifier.onErrorLogDetected(exceptionLog);
-            }
-        }
-        clear();
-    }
-
-    @Override
-    public void clear() {
-        LogEntryContext.clear();
-    }
-}
-```
-### 주요 특징
-- 요청 단위로 로그를 관리하며, 일정 크기(`MAX_LOG_SIZE`) 이상이 되면 자동으로 `flush()` 호출
-- `flush()`를 통해 수집된 로그를 저장소 또는 모니터링 시스템으로 전송
-- `ErrorLogNotifier`를 활용하여 긴급 오류 발생 시 추가 조치 수행 가능
--  `metricCollectorMap` 을 활용하여 `LogType` 별로 등록된 `MetricCollector` 를 빠르게 조회할 수 있도록 최적화되었습니다.
-사용자가 별도로 설정하지 않으면 `DefaultLogEntryContextManager`가 자동으로 빈으로 등록됩니다. 필요하면 `LogEntryContextManager`를 구현하여 커스텀 로깅 관리를 설정할 수 있습니다.
-
-
+- 요청 단위로 로그를 수집 및 전송
+- 기본 구현체: `DefaultLogEntryContextManager`
 
 ---
 
-## 4. LogNotifier & ErrorLogNotifier
-MoniKit은 로그를 출력하고, 에러 로그를 감지하는 두 개의 주요 인터페이스를 제공합니다.
+### 5. `LogNotifier` + `LogSink`
 
-### LogNotifier (로그 출력)
 ```java
 public interface LogNotifier {
     void notify(LogLevel logLevel, String message);
     void notify(LogEntry logEntry);
 }
-```
-로그를 외부 시스템에 전달하거나, 저장하는 역할을 합니다.
-사용자가 직접 구현할 수 있으며, 기본적으로 제공되는 구현체는 `DefaultLogNotifier`입니다.
 
-#### DefaultLogNotifier (기본 구현체)
-```java
-public class DefaultLogNotifier implements LogNotifier {
-    @Override
-    public void notify(LogLevel logLevel, String message) {
-        System.out.println(message);
-    }
-    @Override
-    public void notify(LogEntry logEntry) {
-        System.out.println(logEntry.toString());
-    }
-}
-```
-기본적으로 `System.out.println()`을 사용하여 로그를 출력합니다.
-
-### ErrorLogNotifier (에러 로그 감지)
-```java
-public interface ErrorLogNotifier {
-    void onErrorLogDetected(ExceptionLog logEntry);
-}
-```
-예외 로그를 감지하고 추가적인 처리를 수행하는 역할을 합니다.
-기본적으로 제공되는 구현체는 `DefaultErrorLogNotifier`입니다.
-
-#### DefaultErrorLogNotifier (기본 구현체)
-```java
-public class DefaultErrorLogNotifier implements ErrorLogNotifier {
-    @Override
-    public void onErrorLogDetected(ExceptionLog logEntry) {
-        System.out.printf("Error, %s%n", logEntry.toString());
-    }
-}
-```
-에러 로그가 감지되면 `System.out.printf()`를 사용하여 출력합니다.
-
----
-
-
-## 5. ThreadContextHandler (스레드 컨텍스트 전파)
-멀티스레드 환경에서 로그 컨텍스트를 유지하려면 `ThreadContextHandler`를 사용해야 합니다.
-
-```java
-public interface ThreadContextHandler {
-    Runnable propagateToChildThread(Runnable task);
-    <T> Callable<T> propagateToChildThread(Callable<T> task);
-    <T> ThrowingCallable<T> propagateToChildThreadThrowable(ThrowingCallable<T> task);
-}
-```
-### 기본 구현체: `DefaultThreadContextHandler`
-기본적으로 `DefaultThreadContextHandler`가 빈으로 등록됩니다. 이 클래스는 부모 스레드의 컨텍스트를 자식 스레드로 복사하여 유지하는 역할을 합니다.
-
-```java
-public class DefaultThreadContextHandler implements ThreadContextHandler {
-    @Override
-    public Runnable propagateToChildThread(Runnable task) {
-        return ThreadContextPropagator.propagateToChildThread(task);
-    }
-    @Override
-    public <T> Callable<T> propagateToChildThread(Callable<T> task) {
-        return ThreadContextPropagator.propagateToChildThread(task);
-    }
-}
-```
-
-### 사용자 정의 구현 예제 (MDC 연동 & 자동 플러시)
-`MDCThreadContextHandler`는 기본 구현체와 다르게 **스레드 컨텍스트를 복사하지 않고 유지하면서 `AutoCloseable`을 활용하여 자동으로 로그를 플러시**합니다.
-
-```java
-@Component
-@Primary
-public class MDCThreadContextHandler extends DefaultThreadContextHandler {
-    private final LogEntryContextManager logEntryContextManager;
-
-    public MDCThreadContextHandler(LogEntryContextManager logEntryContextManager) {
-        this.logEntryContextManager = logEntryContextManager;
-    }
-
-   public Runnable propagateToChildThread(Runnable task) {
-      Map<String, String> contextMap = MDC.getCopyOfContextMap();
-
-      return () -> {
-         try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
-            if (contextMap != null) {
-               MDC.setContextMap(contextMap);
-            }
-            try {
-               task.run();
-            } finally {
-               MDC.clear();
-            }
-         }
-      };
-   }
-
-   public <T> Callable<T> propagateToChildThread(Callable<T> task) {
-      Map<String, String> contextMap = MDC.getCopyOfContextMap();
-
-      return () -> {
-         try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
-            if (contextMap != null) {
-               MDC.setContextMap(contextMap);
-            }
-            try {
-               return task.call();
-            } finally {
-               MDC.clear();
-            }
-         }
-      };
-   }
-}
-```
-
----
-
-## 주의 사항
-MoniKit을 사용할 때 **반드시 `LogContextScope`를 활용하여 로그 컨텍스트를 관리**해야 합니다. 그렇지 않으면 **스레드 로컬 변수 관리의 어려움으로 인해 휴먼 에러가 발생할 수 있습니다.**
-
-### ✅ 올바른 사용 예시
-```java
-try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
-    // 로그 추가 및 컨텍스트 유지
-    task.run();
-} // 자동으로 flush() 호출
-```
-
-### ❌ 잘못된 사용 예시
-```java
-// LogContextScope 없이 실행 -> 컨텍스트가 유지되지 않음
-logEntryContextManager.clear();
-task.run();
-logEntryContextManager.flush(); // 수동 호출 필요 (휴먼 에러 위험)
-```
-
----
-
-
-## 6. MetricCollector
-`MetricCollector`는 모든 메트릭 수집기를 위한 공통 인터페이스로, 다양한 메트릭 시스템과 연동할 수 있도록 설계되었습니다. HTTP 요청, SQL 쿼리 실행 등 다양한 유형의 로그 데이터를 수집할 수 있습니다.
-
-### 주요 기능
-- `LogType`에 따라 특정 메트릭 수집기 지원 여부를 확인합니다.
-- 메트릭 데이터를 기록하는 `record` 메서드를 제공합니다.
-- 사용자가 직접 구현하여 Prometheus, OpenTelemetry 등의 메트릭 시스템과 연동할 수 있습니다.
-
-```java
-public interface MetricCollector <T extends LogEntry>{
+public interface LogSink {
     boolean supports(LogType logType);
+    void send(LogEntry logEntry);
+}
+```
+
+- `DefaultLogNotifier`는 `LogSink` 리스트에 따라 로그 분기
+- 예: SlackSink, ConsoleSink, FileSink 등 확장 가능
+
+---
+
+### 6. `TraceIdProvider`, `ThreadContextHandler`
+
+- 스레드 간 traceId 전달을 위한 유틸리티
+- 기본 구현체 외에 `MDCThreadContextHandler`로 확장 가능
+
+---
+
+### 7. `MetricCollector`
+
+```java
+public interface MetricCollector<T extends LogEntry> {
+    boolean supports(LogType type);
     void record(T logEntry);
 }
-
 ```
+
+- 로그에 대한 메트릭 측정 및 수집기 역할
+- Prometheus, Micrometer 등과 통합 가능
+
+---
+
+## 사용 가이드 요약
+
+```java
+try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
+    // 실행 중 로그 수집
+    logEntryContextManager.addLog(new ExecutionLog(...));
+}
+```
+
+- 반드시 try-with-resources 사용
+- 수동 `flush()` 대신 `LogContextScope` 사용 권장
+
+---
+
+## 더 알아보기
+
+- [monitoring-starter-batch](../monitoring-starter-batch)
+- [monitoring-starter-web](../monitoring-starter-web)
+- [monitoring-metric](../monitoring-metric)
+
+---
+
+(c) 2024 Ryu-qqq. MoniKit 프로젝트

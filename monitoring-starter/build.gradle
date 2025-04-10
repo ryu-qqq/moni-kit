@@ -10,16 +10,14 @@ dependencies {
     implementation project(':monitoring-config')
 
     // Spring Boot 기본 의존성
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation "org.springframework.boot:spring-boot-starter-aop"
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
+    implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
 
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
-
-    // 테스트 의존성
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation "org.springframework:spring-web"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+
 }
 
 jar {

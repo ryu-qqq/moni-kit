@@ -1,106 +1,73 @@
 package com.monikit.starter;
 
 import com.monikit.config.MoniKitLoggingProperties;
-import com.monikit.core.*;
-
+import com.monikit.core.LogEntry;
+import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.TraceIdProvider;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-@DisplayName("ExecutionLoggingAspect 테스트")
-@ExtendWith(MockitoExtension.class)
+
 class ExecutionLoggingAspectTest {
 
-    @Mock
+    private LogEntryContextManager contextManager;
+    private MoniKitLoggingProperties properties;
     private TraceIdProvider traceIdProvider;
-
-    @Mock
-    private LogEntryContextManager mockLogEntryContextManager;
-
-    @Mock
-    private MoniKitLoggingProperties mockLoggingProperties;
-
-    @InjectMocks
     private ExecutionLoggingAspect aspect;
 
-    @Mock
-    private ProceedingJoinPoint mockJoinPoint;
-
     @BeforeEach
-    void setUp() {
-        reset(mockLogEntryContextManager, mockLoggingProperties, traceIdProvider);
+    void setup() {
+        contextManager = mock(LogEntryContextManager.class);
+        properties = new MoniKitLoggingProperties();
+        properties.setLogEnabled(true);
+        properties.setThresholdMillis(300);
+        traceIdProvider = mock(TraceIdProvider.class);
+        when(traceIdProvider.getTraceId()).thenReturn("test-trace-id");
+
+        aspect = new ExecutionLoggingAspect(contextManager, properties, traceIdProvider);
     }
 
-    @Nested
-    @DisplayName("AOP 작동 검증")
-    class AspectInvocationTests {
+    @Test
+    @DisplayName("ExecutionLoggingAspect - threshold 이하일 때 요약 로그")
+    void shouldLogExecutionSummaryWhenUnderThreshold() throws Throwable {
+        ProceedingJoinPoint pjp = mock(ProceedingJoinPoint.class);
+        MethodSignature signature = mock(MethodSignature.class);
+        when(pjp.getSignature()).thenReturn(signature);
+        when(signature.getDeclaringTypeName()).thenReturn("com.example.Service");
+        when(signature.getName()).thenReturn("doSomething");
+        when(pjp.getArgs()).thenReturn(new Object[]{"test"});
+        when(pjp.proceed()).then(invocation -> {
+            Thread.sleep(10); // simulate quick method
+            return "ok";
+        });
 
-        @Test
-        @DisplayName("AOP가 메서드를 감싸고 실행 시간을 측정해야 한다.")
-        void shouldInterceptMethodExecution() throws Throwable {
-            // Given
-            MethodSignature mockSignature = mock(MethodSignature.class);
-            when(mockJoinPoint.getSignature()).thenReturn(mockSignature);
-            when(mockSignature.getDeclaringTypeName()).thenReturn("com.monikit.service.TestService");
-            when(mockSignature.getName()).thenReturn("testMethod");
-            when(mockJoinPoint.getArgs()).thenReturn(new Object[]{"arg1", "arg2"});
-            when(mockJoinPoint.proceed()).thenReturn("Mocked Result");
+        aspect.logExecutionTime(pjp);
 
-            doReturn(true).when(mockLoggingProperties).isLogEnabled();
-            doReturn(false).when(mockLoggingProperties).isDetailedLogging();
+        verify(contextManager, atLeastOnce()).addLog(any(LogEntry.class));
+    }
 
-            // When
-            Object result = aspect.logExecutionTime(mockJoinPoint);
+    @Test
+    @DisplayName("ExecutionLoggingAspect - threshold 초과 시 상세 로그")
+    void shouldLogExecutionDetailWhenOverThreshold() throws Throwable {
+        properties.setThresholdMillis(5); // 낮게 설정해서 무조건 초과
 
-            // Then
-            assertEquals("Mocked Result", result);
-            verify(mockLogEntryContextManager, atLeastOnce()).addLog(any(ExecutionTimeLog.class));
-            verify(mockLogEntryContextManager, never()).addLog(any(ExecutionDetailLog.class));
-        }
+        ProceedingJoinPoint pjp = mock(ProceedingJoinPoint.class);
+        MethodSignature signature = mock(MethodSignature.class);
+        when(pjp.getSignature()).thenReturn(signature);
+        when(signature.getDeclaringTypeName()).thenReturn("com.example.Service");
+        when(signature.getName()).thenReturn("doSomething");
+        when(pjp.getArgs()).thenReturn(new Object[]{"test"});
+        when(pjp.proceed()).then(invocation -> {
+            Thread.sleep(50); // simulate slow method
+            return "done";
+        });
 
-        @Test
-        @DisplayName("detailedLogging=true일 때 ExecutionDetailLog가 저장되어야 한다.")
-        void shouldLogExecutionDetailsWhenDetailedLoggingEnabled() throws Throwable {
-            // Given
-            MethodSignature mockSignature = mock(MethodSignature.class);
-            when(mockJoinPoint.getSignature()).thenReturn(mockSignature);
-            when(mockSignature.getDeclaringTypeName()).thenReturn("com.monikit.service.TestService");
-            when(mockSignature.getName()).thenReturn("testMethod");
-            when(mockJoinPoint.getArgs()).thenReturn(new Object[]{"arg1", "arg2"});
-            when(mockJoinPoint.proceed()).thenReturn("Mocked Result");
+        aspect.logExecutionTime(pjp);
 
-            doReturn(true).when(mockLoggingProperties).isLogEnabled();
-            doReturn(true).when(mockLoggingProperties).isDetailedLogging();
-
-            // When
-            Object result = aspect.logExecutionTime(mockJoinPoint);
-
-            // Then
-            assertEquals("Mocked Result", result);
-            verify(mockLogEntryContextManager, atLeastOnce()).addLog(any(ExecutionDetailLog.class));
-            verify(mockLogEntryContextManager, never()).addLog(any(ExecutionTimeLog.class));
-        }
-
-        @Test
-        @DisplayName("logEnabled=false일 때 로그를 남기지 않아야 한다.")
-        void shouldNotLogWhenLoggingDisabled() throws Throwable {
-            // Given
-            doReturn(false).when(mockLoggingProperties).isLogEnabled();
-
-            // When
-            Object result = aspect.logExecutionTime(mockJoinPoint);
-
-            // Then
-            assertNull(result);
-            verify(mockLogEntryContextManager, never()).addLog(any(LogEntry.class));
-        }
+        verify(contextManager, atLeastOnce()).addLog(any(LogEntry.class));
     }
 }

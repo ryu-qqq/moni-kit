@@ -11,23 +11,25 @@ import java.util.Objects;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class HttpOutboundRequestLog extends AbstractLogEntry {
-    private final String httpMethod;
-    private final String targetUrl;
-    private final String headers;
-    private final String requestBody;
-    private final long executionTime;
+public class HttpOutboundRequestLog extends AbstractLogEntry implements HttpLogEntry {
 
-    protected HttpOutboundRequestLog(String traceId, String httpMethod, String targetUrl, String headers,
-                                     String requestBody, long executionTime, LogLevel logLevel) {
+    private final String uri;
+    private final String method;
+    private final Map<String, String> headers;
+    private final String query;
+    private final String body;
+
+    protected HttpOutboundRequestLog(String traceId, LogLevel logLevel, String uri, String method,
+                                  Map<String, String> headers,
+                                  String query, String body) {
         super(traceId, logLevel);
-        this.httpMethod = httpMethod;
-        this.targetUrl = targetUrl;
+        this.uri = uri;
+        this.method = method;
         this.headers = headers;
-        this.requestBody = requestBody;
-        this.executionTime = executionTime;
+        this.query = query;
+        this.body = body;
     }
 
     @Override
@@ -37,36 +39,45 @@ public class HttpOutboundRequestLog extends AbstractLogEntry {
 
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {
-        logMap.put("httpMethod", httpMethod);
-        logMap.put("targetUrl", targetUrl);
+        logMap.put("uri", uri);
+        logMap.put("method", method);
+        logMap.put("query", query);
+        logMap.put("body", body);
         logMap.put("headers", headers);
-        logMap.put("requestBody", requestBody);
-        logMap.put("executionTime", executionTime + "ms");
     }
 
-    public String getHttpMethod() {
-        return httpMethod;
+    @Override
+    public String getUri() {
+        return uri;
     }
 
-    public String getTargetUrl() {
-        return targetUrl;
+    @Override
+    public String getMethod() {
+        return method;
     }
 
-    public String getHeaders() {
+    @Override
+    public int getStatusCode() {
+        return -1;
+    }
+
+    @Override
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
-    public String getRequestBody() {
-        return requestBody;
+    public String getQuery() {
+        return query;
     }
 
-    public long getExecutionTime() {
-        return executionTime;
+    public String getBody() {
+        return body;
     }
 
-    public static HttpOutboundRequestLog create(String traceId, String httpMethod, String targetUrl, String headers,
-                                                String requestBody, long executionTime, LogLevel logLevel) {
-        return new HttpOutboundRequestLog(traceId, httpMethod, targetUrl, headers, requestBody, executionTime, logLevel);
+    public static HttpOutboundRequestLog create(String traceId, LogLevel logLevel, String uri, String method,
+                                                Map<String, String> headers,
+                                                String query, String body) {
+        return new HttpOutboundRequestLog(traceId, logLevel, uri, method, headers, query, body);
     }
 
     @Override
@@ -78,41 +89,40 @@ public class HttpOutboundRequestLog extends AbstractLogEntry {
             || getClass()
             != object.getClass()) return false;
         HttpOutboundRequestLog that = (HttpOutboundRequestLog) object;
-        return executionTime
-            == that.executionTime
-            && Objects.equals(httpMethod, that.httpMethod)
-            && Objects.equals(targetUrl, that.targetUrl)
+        return Objects.equals(uri, that.uri)
+            && Objects.equals(method, that.method)
             && Objects.equals(headers, that.headers)
-            && Objects.equals(requestBody, that.requestBody);
+            && Objects.equals(query, that.query)
+            && Objects.equals(body, that.body);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(httpMethod, targetUrl, headers, requestBody, executionTime);
+        return Objects.hash(uri, method, headers, query, body);
     }
 
     @Override
     public String toString() {
         return "HttpOutboundRequestLog{"
             +
-            "httpMethod='"
-            + httpMethod
+            "uri='"
+            + uri
             + '\''
             +
-            ", targetUrl='"
-            + targetUrl
+            ", method='"
+            + method
             + '\''
             +
-            ", headers='"
+            ", headers="
             + headers
+            +
+            ", query='"
+            + query
             + '\''
             +
-            ", requestBody='"
-            + requestBody
+            ", body='"
+            + body
             + '\''
-            +
-            ", executionTime="
-            + executionTime
             +
             '}';
     }

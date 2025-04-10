@@ -6,11 +6,13 @@ import java.util.concurrent.Callable;
  * 기본 스레드 컨텍스트 전파 구현체.
  * <p>
  * - 부모 스레드의 로그 컨텍스트를 자식 스레드로 전달하는 기능을 제공한다.
+ * - logException 의 코드에서 {@link ErrorCategory} 를 제거했다.
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.1
+ * @since 1.1.0
  */
+
 public class DefaultThreadContextHandler implements ThreadContextHandler {
 
     @Override
@@ -45,11 +47,11 @@ public class DefaultThreadContextHandler implements ThreadContextHandler {
     }
 
     @Override
-    public void logException(String traceId, Throwable exception, ErrorCategory errorCategory) {
+    public void logException(String traceId, Throwable exception) {
         if (LogEntryContext.hasError()) {
             return;
         }
-        LogEntryContext.addLog(ExceptionLog.create(traceId, exception, errorCategory));
+        LogEntryContext.addLog(ExceptionLog.create(traceId, exception));
         LogEntryContext.setErrorOccurred(true);
     }
 

@@ -10,19 +10,22 @@ import java.util.Objects;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class HttpOutboundResponseLog extends AbstractLogEntry {
-    private final String targetUrl;
+public class HttpOutboundResponseLog extends AbstractLogEntry implements HttpLogEntry {
+
+    private final String method;
+    private final String uri;
     private final int statusCode;
-    private final String headers;
+    private final Map<String, String> headers;
     private final String responseBody;
     private final long executionTime;
 
-    protected HttpOutboundResponseLog(String traceId, String targetUrl, int statusCode, String headers,
-                                      String responseBody, long executionTime, LogLevel logLevel) {
+    protected HttpOutboundResponseLog(String traceId, LogLevel logLevel, String method, String uri, int statusCode,
+                                   Map<String, String> headers, String responseBody, long executionTime) {
         super(traceId, logLevel);
-        this.targetUrl = targetUrl;
+        this.method = method;
+        this.uri = uri;
         this.statusCode = statusCode;
         this.headers = headers;
         this.responseBody = responseBody;
@@ -36,22 +39,37 @@ public class HttpOutboundResponseLog extends AbstractLogEntry {
 
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {
-        logMap.put("targetUrl", targetUrl);
+        logMap.put("method", method);
+        logMap.put("uri", uri);
         logMap.put("statusCode", statusCode);
         logMap.put("headers", headers);
         logMap.put("responseBody", responseBody);
         logMap.put("executionTime", executionTime + "ms");
     }
 
-    public String getTargetUrl() {
-        return targetUrl;
+    public static HttpOutboundResponseLog create(String traceId, LogLevel logLevel, String method, String uri, int statusCode,
+                                                Map<String, String> headers, String responseBody, long executionTime) {
+        return new HttpOutboundResponseLog(traceId, logLevel, method, uri, statusCode, headers, responseBody, executionTime);
     }
 
+
+    @Override
+    public String getMethod() {
+        return method;
+    }
+
+    @Override
+    public String getUri() {
+        return uri;
+    }
+
+    @Override
     public int getStatusCode() {
         return statusCode;
     }
 
-    public String getHeaders() {
+    @Override
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
@@ -61,11 +79,6 @@ public class HttpOutboundResponseLog extends AbstractLogEntry {
 
     public long getExecutionTime() {
         return executionTime;
-    }
-
-    public static HttpOutboundResponseLog create(String traceId, String targetUrl, int statusCode, String headers,
-                                                 String responseBody, long executionTime, LogLevel logLevel) {
-        return new HttpOutboundResponseLog(traceId, targetUrl, statusCode, headers, responseBody, executionTime, logLevel);
     }
 
     @Override
@@ -81,30 +94,34 @@ public class HttpOutboundResponseLog extends AbstractLogEntry {
             == that.statusCode
             && executionTime
             == that.executionTime
-            && Objects.equals(targetUrl, that.targetUrl)
+            && Objects.equals(method, that.method)
+            && Objects.equals(uri, that.uri)
             && Objects.equals(headers, that.headers)
             && Objects.equals(responseBody, that.responseBody);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(targetUrl, statusCode, headers, responseBody, executionTime);
+        return Objects.hash(method, uri, statusCode, headers, responseBody, executionTime);
     }
 
     @Override
     public String toString() {
         return "HttpOutboundResponseLog{"
             +
-            "targetUrl='"
-            + targetUrl
+            "method='"
+            + method
+            + '\''
+            +
+            ", uri='"
+            + uri
             + '\''
             +
             ", statusCode="
             + statusCode
             +
-            ", headers='"
+            ", headers="
             + headers
-            + '\''
             +
             ", responseBody='"
             + responseBody

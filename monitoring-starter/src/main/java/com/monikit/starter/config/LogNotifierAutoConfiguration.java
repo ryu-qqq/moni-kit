@@ -1,5 +1,7 @@
 package com.monikit.starter.config;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -27,8 +29,8 @@ public class LogNotifierAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(LogNotifier.class)
     public LogNotifier defaultLogNotifier() {
-        logger.info("No custom LogNotifier found. Using DefaultLogNotifier.");
-        return DefaultLogNotifier.getInstance();
+        logger.info("[MoniKit] No custom LogNotifier found. Using DefaultLogNotifier.");
+        return new DefaultLogNotifier(List.of());
     }
 
 }

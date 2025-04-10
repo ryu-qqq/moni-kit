@@ -1,5 +1,7 @@
 package com.monikit.starter.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -18,17 +20,22 @@ import com.monikit.starter.ExecutionLoggingAspect;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.1
+ * @since 1.1.0
  */
 @Configuration
 @ConditionalOnProperty(name = "monikit.logging.detailed-logging", havingValue = "true", matchIfMissing = false)
 public class ExecutionLoggingAutoConfiguration {
+
+
+    private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
 
     @Bean
     @ConditionalOnMissingBean
     public ExecutionLoggingAspect executionLoggingAspect(LogEntryContextManager logEntryContextManager,
                                                          MoniKitLoggingProperties loggingProperties,
                                                          TraceIdProvider traceIdProvider) {
+        logger.info("[MoniKit] ExecutionLoggingAspect Registered");
         return new ExecutionLoggingAspect(logEntryContextManager, loggingProperties, traceIdProvider);
     }
+
 }

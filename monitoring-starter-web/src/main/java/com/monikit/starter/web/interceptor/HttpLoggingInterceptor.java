@@ -3,6 +3,8 @@ package com.monikit.starter.web.interceptor;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -77,14 +79,14 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
 
         logEntryContextManager.addLog(HttpInboundRequestLog.create(
             traceId,
-            request.getMethod(),
+            LogLevel.INFO,
             request.getRequestURI(),
+            request.getMethod(),
             request.getQueryString(),
-            extractHeaders(request),
             extractRequestBody(request),
+            extractHeaders(request),
             request.getRemoteAddr(),
-            request.getHeader("User-Agent"),
-            LogLevel.INFO
+            request.getHeader("User-Agent")
         ));
 
         return true;
@@ -111,47 +113,49 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
 
         logEntryContextManager.addLog(HttpInboundResponseLog.create(
             traceId,
+            LogLevel.INFO,
             request.getMethod(),
             request.getRequestURI(),
             response.getStatus(),
             extractHeaders(response),
             extractResponseBody(response),
-            executionTime,
-            LogLevel.INFO
+            executionTime
         ));
 
         requestStartTime.remove();
     }
 
     /**
-     * 요청 헤더를 추출하여 문자열로 반환한다.
+     * 요청 헤더를 추출하여 Map 형태로 반환한다.
      *
      * @param request HTTP 요청 객체
-     * @return 요청 헤더를 문자열로 연결한 값
+     * @return 요청 헤더를 Map<String, String>으로 반환
      */
-    private String extractHeaders(HttpServletRequest request) {
-        StringBuilder headers = new StringBuilder();
+    private Map<String, String> extractHeaders(HttpServletRequest request) {
+        Map<String, String> headers = new LinkedHashMap<>();
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
-            headers.append(headerName).append(": ").append(request.getHeader(headerName)).append("; ");
+            headers.put(headerName, request.getHeader(headerName));
         }
-        return headers.toString();
+        return headers;
     }
 
+
     /**
-     * 응답 헤더를 추출하여 문자열로 반환한다.
+     * 응답 헤더를 추출하여 Map 형태로 반환한다.
      *
      * @param response HTTP 응답 객체
-     * @return 응답 헤더를 문자열로 연결한 값
+     * @return 응답 헤더를 Map<String, String>으로 반환
      */
-    private String extractHeaders(HttpServletResponse response) {
-        StringBuilder headers = new StringBuilder();
+    private Map<String, String> extractHeaders(HttpServletResponse response) {
+        Map<String, String> headers = new LinkedHashMap<>();
         for (String headerName : response.getHeaderNames()) {
-            headers.append(headerName).append(": ").append(response.getHeader(headerName)).append("; ");
+            headers.put(headerName, response.getHeader(headerName));
         }
-        return headers.toString();
+        return headers;
     }
+
 
     /**
      * 요청 본문을 추출하여 문자열로 반환한다.

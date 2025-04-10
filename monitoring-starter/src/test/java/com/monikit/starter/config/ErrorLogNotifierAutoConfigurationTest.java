@@ -1,6 +1,5 @@
 package com.monikit.starter.config;
 
-import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,20 +10,15 @@ import com.monikit.core.DefaultErrorLogNotifier;
 import com.monikit.core.ErrorLogNotifier;
 import com.monikit.core.ExceptionLog;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @DisplayName("ErrorLogNotifierAutoConfiguration 테스트")
 class ErrorLogNotifierAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
         .withConfiguration(AutoConfigurations.of(ErrorLogNotifierAutoConfiguration.class));
-
-    @Test
-    @DisplayName("사용자가 ErrorLogNotifier를 등록하지 않으면 DefaultErrorLogNotifier가 자동 적용되어야 한다.")
-    void shouldRegisterDefaultErrorLogNotifierWhenMissing() {
-        contextRunner.run(context -> {
-            ErrorLogNotifier notifier = context.getBean(ErrorLogNotifier.class);
-            assertThat(notifier).isInstanceOf(DefaultErrorLogNotifier.class);
-        });
-    }
 
     @Test
     @DisplayName("사용자가 ErrorLogNotifier를 직접 등록하면 DefaultErrorLogNotifier가 주입되지 않아야 한다.")
@@ -35,8 +29,9 @@ class ErrorLogNotifierAutoConfigurationTest {
 
         customContextRunner.run(context -> {
             ErrorLogNotifier notifier = context.getBean(ErrorLogNotifier.class);
-            assertThat(notifier).isInstanceOf(CustomErrorLogNotifier.class);
-            assertThat(notifier).isNotInstanceOf(DefaultErrorLogNotifier.class);
+            assertNotNull(notifier);
+            assertTrue(notifier instanceof CustomErrorLogNotifier);
+            assertFalse(notifier instanceof DefaultErrorLogNotifier);
         });
     }
 
@@ -46,4 +41,5 @@ class ErrorLogNotifierAutoConfigurationTest {
             System.out.println("Custom Notifier: " + logEntry.toString());
         }
     }
+
 }

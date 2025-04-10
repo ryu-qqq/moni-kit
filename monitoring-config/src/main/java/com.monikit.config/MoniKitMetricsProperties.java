@@ -1,13 +1,11 @@
 package com.monikit.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 /**
  * MoniKit의 메트릭 수집 기능에 대한 설정을 정의하는 구성 클래스.
  * <p>
- * 이 클래스는 다음과 같은 메트릭 설정을 외부 설정 파일(application.yml/properties)과 바인딩합니다:
+ *  아래 설정 항목들을 통해 메트릭 수집 범위를 조절할 수 있습니다:
  * </p>
  *
  * <ul>
@@ -17,29 +15,15 @@ import org.springframework.context.annotation.Primary;
  *     <li><b>slowQueryThresholdMs</b> : 느린 쿼리로 간주할 기준 시간 (ms)</li>
  *     <li><b>querySamplingRate</b> : SQL 메트릭 수집 시 샘플링 비율 (%)</li>
  * </ul>
- *
- * <p><b>설정 접두사</b>: <code>monikit.metrics</code></p>
- *
- * 예시:
- * <pre>
- * monikit.metrics:
- *   metrics-enabled: true
- *   query-metrics-enabled: true
- *   http-metrics-enabled: false
- *   slow-query-threshold-ms: 1500
- *   query-sampling-rate: 10
- * </pre>
- *
  * <p>
- * 모든 설정은 Spring Boot의 <code>@ConfigurationProperties</code> 기능을 통해 자동으로 바인딩됩니다.
+ * 설정 접두사는 <code>monikit.metrics</code> 입니다.
  * </p>
  *
  * @author ryu-qqq
  * @since 1.1.0
  */
 
-@Primary
-@Configuration
+
 @ConfigurationProperties(prefix = "monikit.metrics")
 public class MoniKitMetricsProperties {
 

@@ -10,25 +10,31 @@ import java.util.Objects;
  * </p>
  *
  * @author ryu-qqq
- * @since 1.0.0
+ * @since 1.1.0
  */
-public class HttpInboundResponseLog extends AbstractLogEntry {
-    private final String httpMethod;
-    private final String requestUri;
+public class HttpInboundResponseLog extends AbstractLogEntry implements HttpLogEntry {
+
+    private final String method;
+    private final String uri;
     private final int statusCode;
-    private final String headers;
+    private final Map<String, String> headers;
     private final String responseBody;
     private final long executionTime;
 
-    protected HttpInboundResponseLog(String traceId, String httpMethod, String requestUri, int statusCode,
-                                     String headers, String responseBody, long executionTime, LogLevel logLevel) {
+    public HttpInboundResponseLog(String traceId, LogLevel logLevel, String method, String uri, int statusCode,
+                                  Map<String, String> headers, String responseBody, long executionTime) {
         super(traceId, logLevel);
-        this.httpMethod = httpMethod;
-        this.requestUri = requestUri;
+        this.method = method;
+        this.uri = uri;
         this.statusCode = statusCode;
         this.headers = headers;
         this.responseBody = responseBody;
         this.executionTime = executionTime;
+    }
+
+    public static HttpInboundResponseLog create(String traceId, LogLevel logLevel, String method, String uri, int statusCode,
+                                                Map<String, String> headers, String responseBody, long executionTime) {
+        return new HttpInboundResponseLog(traceId, logLevel, method, uri, statusCode, headers, responseBody, executionTime);
     }
 
     @Override
@@ -38,33 +44,31 @@ public class HttpInboundResponseLog extends AbstractLogEntry {
 
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {
-        logMap.put("httpMethod", httpMethod);
-        logMap.put("requestUri", requestUri);
+        logMap.put("method", method);
+        logMap.put("uri", uri);
         logMap.put("statusCode", statusCode);
         logMap.put("headers", headers);
         logMap.put("responseBody", responseBody);
         logMap.put("executionTime", executionTime + "ms");
     }
 
-
-    public static HttpInboundResponseLog create(String traceId, String httpMethod, String requestUri, int statusCode,
-                                                String headers, String responseBody, long executionTime, LogLevel logLevel) {
-        return new HttpInboundResponseLog(traceId, httpMethod, requestUri, statusCode, headers, responseBody, executionTime, logLevel);
+    @Override
+    public String getMethod() {
+        return method;
     }
 
-    public String getHttpMethod() {
-        return httpMethod;
+    @Override
+    public String getUri() {
+        return uri;
     }
 
-    public String getRequestUri() {
-        return requestUri;
-    }
-
+    @Override
     public int getStatusCode() {
         return statusCode;
     }
 
-    public String getHeaders() {
+    @Override
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
@@ -89,27 +93,27 @@ public class HttpInboundResponseLog extends AbstractLogEntry {
             == that.statusCode
             && executionTime
             == that.executionTime
-            && Objects.equals(httpMethod, that.httpMethod)
-            && Objects.equals(requestUri, that.requestUri)
+            && Objects.equals(method, that.method)
+            && Objects.equals(uri, that.uri)
             && Objects.equals(headers, that.headers)
             && Objects.equals(responseBody, that.responseBody);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(httpMethod, requestUri, statusCode, headers, responseBody, executionTime);
+        return Objects.hash(method, uri, statusCode, headers, responseBody, executionTime);
     }
 
     @Override
     public String toString() {
         return "HttpInboundResponseLog{"
             +
-            "httpMethod='"
-            + httpMethod
+            "method='"
+            + method
             + '\''
             +
-            ", requestUri='"
-            + requestUri
+            ", uri='"
+            + uri
             + '\''
             +
             ", statusCode="

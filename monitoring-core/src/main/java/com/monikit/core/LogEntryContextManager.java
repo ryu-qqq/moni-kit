@@ -5,7 +5,7 @@ package com.monikit.core;
  * <p>
  * - 로그를 추가, 조회, 삭제하는 기능을 제공하며, 요청 단위의 로깅을 관리한다.
  * - 기본 구현체는 {@link DefaultLogEntryContextManager}이며, 필요하면 커스텀 구현체를 등록하여 확장 가능하다.
- * - 멀티스레드 환경에서도 요청 컨텍스트를 유지할 수 있도록 {@code propagateToChildThread()} 메서드를 제공한다.
+ * - 멀티스레드 환경에서도 요청 컨텍스트를 유지할 수 있도록 {@link ThreadContextPropagator} 메서드를 제공한다.
  * </p>
  *
  * @author ryu-qqq

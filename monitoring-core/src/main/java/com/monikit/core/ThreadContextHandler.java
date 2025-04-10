@@ -55,9 +55,8 @@ public interface ThreadContextHandler {
      *
      * @param traceId   현재 요청의 트레이스 ID
      * @param exception 발생한 예외
-     * @param errorCategory 예외의 카테고리
      */
-    void logException(String traceId, Throwable exception, ErrorCategory errorCategory);
+    void logException(String traceId, Throwable exception);
 
     default void propagateAndRun(Runnable task) {
         propagateToChildThread(task).run();

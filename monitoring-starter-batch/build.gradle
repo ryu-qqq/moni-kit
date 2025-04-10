@@ -1,0 +1,33 @@
+plugins {
+    id 'maven-publish'
+    id 'org.springframework.boot' apply false
+    id 'io.spring.dependency-management'
+}
+
+
+dependencies {
+    implementation project(':monitoring-core')
+    implementation project(':monitoring-config')
+
+    // Spring Boot 기본 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+
+    // 테스트 의존성
+    testImplementation 'org.springframework.batch:spring-batch-test'
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+}
+
+jar {
+    enabled = true
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'monikit-starter-batch'
+        }
+    }
+}

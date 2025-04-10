@@ -15,22 +15,30 @@ import java.util.Objects;
  * @since 1.0.0
  */
 public class BatchJobLog extends AbstractLogEntry {
-    private final String batchJobName;
+    private final String jobName;
     private final Instant startTime;
     private final Instant endTime;
     private final long executionTime;
     private final String status;
+    private final String exitCode;
     private final String errorMessage;
 
-    protected BatchJobLog(String traceId, String batchJobName, Instant startTime, Instant endTime,
-                          long executionTime, String status, String errorMessage, LogLevel logLevel) {
+    protected BatchJobLog(String traceId, String jobName, Instant startTime, Instant endTime,
+                          long executionTime, String status, String exitCode, String errorMessage, LogLevel logLevel) {
         super(traceId, logLevel);
-        this.batchJobName = batchJobName;
+        this.jobName = jobName;
         this.startTime = startTime;
         this.endTime = endTime;
         this.executionTime = executionTime;
         this.status = status;
+        this.exitCode = exitCode;
         this.errorMessage = errorMessage;
+    }
+
+    public static BatchJobLog create(String traceId, String jobName, Instant startTime, Instant endTime,
+                                     long executionTime, String status, String exitCode,
+                                     String errorMessage, LogLevel logLevel) {
+        return new BatchJobLog(traceId, jobName, startTime, endTime, executionTime, status, exitCode, errorMessage, logLevel);
     }
 
     @Override
@@ -40,41 +48,13 @@ public class BatchJobLog extends AbstractLogEntry {
 
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {
-        logMap.put("batchJobName", batchJobName);
+        logMap.put("jobName", jobName);
         logMap.put("startTime", startTime.toString());
         logMap.put("endTime", endTime.toString());
         logMap.put("executionTime", executionTime + "ms");
         logMap.put("status", status);
+        logMap.put("exitCode", exitCode);
         logMap.put("errorMessage", errorMessage);
-    }
-
-    public String getBatchJobName() {
-        return batchJobName;
-    }
-
-    public Instant getStartTime() {
-        return startTime;
-    }
-
-    public Instant getEndTime() {
-        return endTime;
-    }
-
-    public long getExecutionTime() {
-        return executionTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public static BatchJobLog create(String traceId, String batchJobName, Instant startTime, Instant endTime,
-                                     long executionTime, String status, String errorMessage, LogLevel logLevel) {
-        return new BatchJobLog(traceId, batchJobName, startTime, endTime, executionTime, status, errorMessage, logLevel);
     }
 
     @Override
@@ -88,43 +68,16 @@ public class BatchJobLog extends AbstractLogEntry {
         BatchJobLog that = (BatchJobLog) object;
         return executionTime
             == that.executionTime
-            && Objects.equals(batchJobName, that.batchJobName)
+            && Objects.equals(jobName, that.jobName)
             && Objects.equals(startTime, that.startTime)
             && Objects.equals(endTime, that.endTime)
             && Objects.equals(status, that.status)
+            && Objects.equals(exitCode, that.exitCode)
             && Objects.equals(errorMessage, that.errorMessage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(batchJobName, startTime, endTime, executionTime, status, errorMessage);
-    }
-
-    @Override
-    public String toString() {
-        return "BatchJobLog{"
-            +
-            "batchJobName='"
-            + batchJobName
-            + '\''
-            +
-            ", startTime="
-            + startTime
-            +
-            ", endTime="
-            + endTime
-            +
-            ", executionTime="
-            + executionTime
-            +
-            ", status='"
-            + status
-            + '\''
-            +
-            ", errorMessage='"
-            + errorMessage
-            + '\''
-            +
-            '}';
+        return Objects.hash(jobName, startTime, endTime, executionTime, status, exitCode, errorMessage);
     }
 }

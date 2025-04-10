@@ -15,6 +15,7 @@ import com.monikit.core.MetricCollector;
  * @author ryu-qqq
  * @since 1.0.0.1
  */
+
 public class HttpInboundResponseMetricCollector implements MetricCollector<HttpInboundResponseLog> {
 
     private final MoniKitMetricsProperties metricsProperties;
@@ -38,7 +39,7 @@ public class HttpInboundResponseMetricCollector implements MetricCollector<HttpI
             return;
         }
 
-        String path = logEntry.getRequestUri();
+        String path = logEntry.getUri();
         int statusCode = logEntry.getStatusCode();
         long responseTime = logEntry.getExecutionTime();
 

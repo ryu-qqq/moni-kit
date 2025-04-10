@@ -14,6 +14,7 @@ pluginManagement {
 rootProject.name = 'moni-kit'
 include ':monitoring-core'
 include ':monitoring-starter'
+include ':monitoring-starter-batch'
 include ':monitoring-starter-jdbc'
 include ':monitoring-starter-web'
 include ':monitoring-starter-webflux'
