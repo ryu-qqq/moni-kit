@@ -33,7 +33,7 @@ public class FilterAutoConfiguration {
     @Bean
     @ConditionalOnProperty(name = "monikit.logging.trace-enabled", havingValue = "true", matchIfMissing = true)
     public TraceIdFilter traceIdFilter(TraceIdProvider traceIdProvider) {
-        logger.info("Initializing TraceIdFilter with traceEnabled={}", loggingProperties.isTraceEnabled());
+        logger.info("[MoniKit] Initializing TraceIdFilter with traceEnabled={}", loggingProperties.isTraceEnabled());
         return new TraceIdFilter(traceIdProvider);
     }
 
@@ -45,14 +45,14 @@ public class FilterAutoConfiguration {
         registrationBean.setOrder(1);
         registrationBean.addUrlPatterns("/*");
         registrationBean.setEnabled(loggingProperties.isTraceEnabled());
-        logger.info("TraceIdFilter active: {}", loggingProperties.isTraceEnabled());
+        logger.info("[MoniKit] TraceIdFilter active: {}", loggingProperties.isTraceEnabled());
         return registrationBean;
     }
 
     @Bean
     @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = true)
     public LogContextScopeFilter logContextScopeFilter(LogEntryContextManager logEntryContextManager) {
-        logger.info("Initializing LogContextScopeFilter with logEnabled={}", loggingProperties.isLogEnabled());
+        logger.info("[MoniKit] Initializing LogContextScopeFilter with logEnabled={}", loggingProperties.isLogEnabled());
         return new LogContextScopeFilter(logEntryContextManager);
     }
 
@@ -64,7 +64,7 @@ public class FilterAutoConfiguration {
         registrationBean.setOrder(2);
         registrationBean.addUrlPatterns("/*");
         registrationBean.setEnabled(loggingProperties.isLogEnabled());
-        logger.info("LogContextScopeFilter active: {}", loggingProperties.isLogEnabled());
+        logger.info("[MoniKit] LogContextScopeFilter active: {}", loggingProperties.isLogEnabled());
         return registrationBean;
     }
 

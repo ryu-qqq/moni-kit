@@ -52,10 +52,10 @@ public class QueryLoggingConfig {
         DataSourceProvider dataSourceProvider,
         MoniKitLoggingProperties moniKitLoggingProperties
     ) {
-        logger.info("Creating QueryLoggingService bean...");
-        logger.info("Using LogEntryContextManager: {}", logEntryContextManager.getClass().getSimpleName());
-        logger.info("Using DataSourceProvider: {}", dataSourceProvider.getClass().getSimpleName());
-        logger.info("MoniKit Logging Properties: SlowQueryThreshold={}, CriticalQueryThreshold={}",
+        logger.info("[MoniKit] Creating QueryLoggingService bean...");
+        logger.info("[MoniKit] Using LogEntryContextManager: {}", logEntryContextManager.getClass().getSimpleName());
+        logger.info("[MoniKit] Using DataSourceProvider: {}", dataSourceProvider.getClass().getSimpleName());
+        logger.info("[MoniKit] MoniKit Logging Properties: SlowQueryThreshold={}, CriticalQueryThreshold={}",
             moniKitLoggingProperties.getSlowQueryThresholdMs(),
             moniKitLoggingProperties.getCriticalQueryThresholdMs());
 

@@ -66,16 +66,16 @@ public class DataSourceLoggingConfig {
         MoniKitLoggingProperties loggingProperties) {
 
         if (!loggingProperties.isLogEnabled()) {
-            logger.warn("logEnabled is disabled. Returning original DataSource.");
+            logger.warn("[MoniKit] logEnabled is disabled. Returning original DataSource.");
             return originalDataSource;
         }
 
         if (!loggingProperties.isDatasourceLoggingEnabled()) {
-            logger.info("Datasource logging is disabled. Returning original DataSource.");
+            logger.info("[MoniKit] Datasource logging is disabled. Returning original DataSource.");
             return originalDataSource;
         }
 
-        logger.info("Datasource logging is enabled. Wrapping DataSource with LoggingDataSource.");
+        logger.info("[MoniKit] Datasource logging is enabled. Wrapping DataSource with LoggingDataSource.");
         return new LoggingDataSource(originalDataSource, preparedStatementFactory);
     }
 
@@ -88,7 +88,7 @@ public class DataSourceLoggingConfig {
     @Bean
     @ConditionalOnMissingBean(DataSourceProvider.class)
     public DataSourceProvider defaultDataSourceProvider(ObjectProvider<DataSource> dataSourceProvider) {
-        logger.info("No custom DataSourceProvider found. Using DefaultDataSourceProvider.");
+        logger.info("[MoniKit] No custom DataSourceProvider found. Using DefaultDataSourceProvider.");
         return new DefaultDataSourceProvider(dataSourceProvider);
     }
 

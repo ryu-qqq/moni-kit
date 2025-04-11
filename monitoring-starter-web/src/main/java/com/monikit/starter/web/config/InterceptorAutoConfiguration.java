@@ -37,11 +37,11 @@ public class InterceptorAutoConfiguration implements WebMvcConfigurer {
         logger.info("monikit.logging.log-enabled = {}", loggingProperties.isLogEnabled());
 
         if (!loggingProperties.isLogEnabled() || httpLoggingInterceptor == null) {
-            logger.info("HTTP Logging Interceptor active off");
+            logger.info("[MoniKit] HTTP Logging Interceptor active off");
             return;
         }
 
-        logger.info("HTTP Logging Interceptor active on");
+        logger.info("[MoniKit] HTTP Logging Interceptor active on");
         registry.addInterceptor(httpLoggingInterceptor).addPathPatterns("/**");
     }
 }

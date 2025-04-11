@@ -1,0 +1,2 @@
+com.monikit.metric.config.MetricCollectorAutoConfiguration
+com.monikit.metric.config.MoniKitMeterBinderAutoConfiguration

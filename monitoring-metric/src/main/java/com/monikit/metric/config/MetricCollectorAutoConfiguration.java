@@ -60,7 +60,7 @@ public class MetricCollectorAutoConfiguration {
     @ConditionalOnMissingBean
     public QueryMetricsRecorder queryMetricsRecorder(SqlQueryCountMetricsBinder countMetricsBinder,
                                                      SqlQueryDurationMetricsBinder durationMetricsBinder){
-        logger.info("Registered QueryMetricsRecorder: QueryMetricsRecorder");
+        logger.info("[MoniKit] Registered QueryMetricsRecorder: QueryMetricsRecorder");
         return new QueryMetricsRecorder(countMetricsBinder, durationMetricsBinder);
     }
 
@@ -74,7 +74,7 @@ public class MetricCollectorAutoConfiguration {
         MoniKitMetricsProperties metricsProperties,
         QueryMetricsRecorder queryMetricsRecorder
     ) {
-        logger.info("Registered MetricCollector: DatabaseQueryMetricCollector");
+        logger.info("[MoniKit] Registered MetricCollector: DatabaseQueryMetricCollector");
         return new DatabaseQueryMetricCollector(metricsProperties, queryMetricsRecorder);
     }
 
@@ -88,7 +88,7 @@ public class MetricCollectorAutoConfiguration {
         MoniKitMetricsProperties metricsProperties,
         HttpResponseMetricsRecorder httpResponseMetricsRecorder
     ) {
-        logger.info("Registered MetricCollector: HttpInboundResponseMetricCollector");
+        logger.info("[MoniKit] Registered MetricCollector: HttpInboundResponseMetricCollector");
         return new HttpInboundResponseMetricCollector(metricsProperties, httpResponseMetricsRecorder);
     }
 
@@ -102,7 +102,7 @@ public class MetricCollectorAutoConfiguration {
         MoniKitMetricsProperties metricsProperties,
         HttpResponseMetricsRecorder httpResponseMetricsRecorder
     ) {
-        logger.info("Registered MetricCollector: HttpOutboundResponseMetricCollector");
+        logger.info("[MoniKit] Registered MetricCollector: HttpOutboundResponseMetricCollector");
         return new HttpOutboundResponseMetricCollector(metricsProperties, httpResponseMetricsRecorder);
     }
 
@@ -112,7 +112,7 @@ public class MetricCollectorAutoConfiguration {
     @ConditionalOnMissingBean
     public HttpResponseMetricsRecorder httpResponseMetricsRecorder(HttpResponseCountMetricsBinder countMetricsBinder,
                                                                    HttpResponseDurationMetricsBinder durationMetricsBinder){
-        logger.info("Registered HttpResponseMetricsRecorder: HttpResponseMetricsRecorder");
+        logger.info("[MoniKit] Registered HttpResponseMetricsRecorder: HttpResponseMetricsRecorder");
         return new HttpResponseMetricsRecorder(countMetricsBinder, durationMetricsBinder);
     }
 

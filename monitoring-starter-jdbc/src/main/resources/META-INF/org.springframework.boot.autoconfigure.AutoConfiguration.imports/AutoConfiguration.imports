@@ -1,0 +1,3 @@
+com.monikit.starter.jdbc.config.DataSourceLoggingConfig
+com.monikit.starter.jdbc.config.QueryLoggingConfig
+

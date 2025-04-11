@@ -1,0 +1,8 @@
+com.monikit.starter.config.ExecutionLoggingAutoConfiguration
+com.monikit.starter.config.LogEntryContextManagerConfig
+com.monikit.starter.config.LogNotifierAutoConfiguration
+com.monikit.starter.config.MetricCollectorHookAutoConfiguration
+com.monikit.starter.config.MoniKitLoggingAutoConfiguration
+com.monikit.starter.config.MoniKitMetricsAutoConfiguration
+com.monikit.starter.config.TraceIdProviderAutoConfiguration
+
