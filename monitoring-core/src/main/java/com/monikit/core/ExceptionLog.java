@@ -16,16 +16,29 @@ import java.util.Objects;
  */
 
 public class ExceptionLog extends AbstractLogEntry {
-
+    private final String sourceClass;
+    private final String sourceMethod;
     private final String exceptionType;
     private final String message;
     private final String stackTrace;
 
     public ExceptionLog(String traceId, Throwable exception) {
         super(traceId, LogLevel.ERROR);
+        Throwable rootCause = getRootCause(exception);
+        StackTraceElement[] stackTraceElements = rootCause.getStackTrace();
+        this.sourceClass = stackTraceElements.length > 0 ? stackTraceElements[0].getClassName() : "Unknown";
+        this.sourceMethod = stackTraceElements.length > 0 ? stackTraceElements[0].getMethodName() : "Unknown";
         this.exceptionType = exception.getClass().getSimpleName();
         this.message = exception.getMessage();
         this.stackTrace = getStackTraceAsString(exception);
+    }
+
+    public String getSourceClass() {
+        return sourceClass;
+    }
+
+    public String getSourceMethod() {
+        return sourceMethod;
     }
 
     public String getExceptionType() {
@@ -38,6 +51,14 @@ public class ExceptionLog extends AbstractLogEntry {
 
     public String getStackTrace() {
         return stackTrace;
+    }
+
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause;
     }
 
     @Override
