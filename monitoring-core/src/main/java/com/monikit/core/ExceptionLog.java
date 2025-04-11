@@ -28,6 +28,18 @@ public class ExceptionLog extends AbstractLogEntry {
         this.stackTrace = getStackTraceAsString(exception);
     }
 
+    public String getExceptionType() {
+        return exceptionType;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getStackTrace() {
+        return stackTrace;
+    }
+
     @Override
     public LogType getLogType() {
         return LogType.EXCEPTION;

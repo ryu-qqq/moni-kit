@@ -51,6 +51,42 @@ public class BatchStepLog extends AbstractLogEntry {
             exitCode, status, logLevel);
     }
 
+    public String getJobName() {
+        return jobName;
+    }
+
+    public String getStepName() {
+        return stepName;
+    }
+
+    public Instant getStartTime() {
+        return startTime;
+    }
+
+    public Instant getEndTime() {
+        return endTime;
+    }
+
+    public long getReadCount() {
+        return readCount;
+    }
+
+    public long getWriteCount() {
+        return writeCount;
+    }
+
+    public long getSkipCount() {
+        return skipCount;
+    }
+
+    public String getExitCode() {
+        return exitCode;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
     @Override
     public LogType getLogType() {
         return LogType.BATCH_STEP;

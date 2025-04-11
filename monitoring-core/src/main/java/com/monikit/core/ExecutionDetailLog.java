@@ -37,6 +37,22 @@ public class ExecutionDetailLog extends ExecutionLog {
         return new ExecutionDetailLog(traceId, className, methodName, executionTime, input, output, level, exceeded, threshold);
     }
 
+    public String getInput() {
+        return input;
+    }
+
+    public String getOutput() {
+        return output;
+    }
+
+    public boolean isThresholdExceeded() {
+        return thresholdExceeded;
+    }
+
+    public long getThreshold() {
+        return threshold;
+    }
+
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {
         super.addExtraFields(logMap);

@@ -45,6 +45,34 @@ public class BatchChunkLog extends AbstractLogEntry {
         return new BatchChunkLog(traceId, jobName, stepName, chunkIndex, readCount, writeCount, failed, errorMessage, logLevel);
     }
 
+    public String getJobName() {
+        return jobName;
+    }
+
+    public String getStepName() {
+        return stepName;
+    }
+
+    public int getChunkIndex() {
+        return chunkIndex;
+    }
+
+    public long getReadCount() {
+        return readCount;
+    }
+
+    public long getWriteCount() {
+        return writeCount;
+    }
+
+    public boolean isFailed() {
+        return failed;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
     @Override
     public LogType getLogType() {
         return LogType.BATCH_CHUNK;

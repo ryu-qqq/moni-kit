@@ -41,6 +41,34 @@ public class BatchJobLog extends AbstractLogEntry {
         return new BatchJobLog(traceId, jobName, startTime, endTime, executionTime, status, exitCode, errorMessage, logLevel);
     }
 
+    public String getJobName() {
+        return jobName;
+    }
+
+    public Instant getStartTime() {
+        return startTime;
+    }
+
+    public Instant getEndTime() {
+        return endTime;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getExitCode() {
+        return exitCode;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
     @Override
     public LogType getLogType() {
         return LogType.BATCH_JOB;

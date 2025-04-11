@@ -32,6 +32,8 @@ public class DatabaseQueryLog extends AbstractLogEntry {
         this.resultSize = resultSize;
     }
 
+
+
     @Override
     public LogType getLogType() {
         return LogType.DATABASE_QUERY;

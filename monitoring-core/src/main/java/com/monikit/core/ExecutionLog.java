@@ -25,6 +25,18 @@ public class ExecutionLog extends AbstractLogEntry {
         this.executionTime = executionTime;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
     @Override
     public LogType getLogType() {
         return LogType.EXECUTION_TIME;
