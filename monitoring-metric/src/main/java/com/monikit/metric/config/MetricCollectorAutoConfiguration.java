@@ -2,6 +2,8 @@ package com.monikit.metric.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -51,74 +53,52 @@ public class MetricCollectorAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(MetricCollectorAutoConfiguration.class);
 
-
-    /**
-     * SQL 쿼리 실행 메트릭을 수집하는 `QueryMetricsRecorder` 빈 등록.
-     */
     @Bean
+    @ConditionalOnClass(QueryMetricsRecorder.class)
     @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(QueryMetricsRecorder.class)
     public QueryMetricsRecorder queryMetricsRecorder(SqlQueryCountMetricsBinder countMetricsBinder,
-                                                     SqlQueryDurationMetricsBinder durationMetricsBinder){
-        logger.info("[MoniKit] Registered QueryMetricsRecorder: QueryMetricsRecorder");
+                                                     SqlQueryDurationMetricsBinder durationMetricsBinder) {
+        logger.info("[MoniKit] Registered QueryMetricsRecorder");
         return new QueryMetricsRecorder(countMetricsBinder, durationMetricsBinder);
     }
 
-    /**
-     * SQL 쿼리 실행 메트릭을 수집하는 `DatabaseQueryMetricCollector` 빈 등록.
-     */
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean
-    public MetricCollector<?> databaseQueryMetricCollector(
-        MoniKitMetricsProperties metricsProperties,
-        QueryMetricsRecorder queryMetricsRecorder
-    ) {
+    @ConditionalOnBean(QueryMetricsRecorder.class)
+    public MetricCollector<?> databaseQueryMetricCollector(MoniKitMetricsProperties metricsProperties,
+                                                           QueryMetricsRecorder queryMetricsRecorder) {
         logger.info("[MoniKit] Registered MetricCollector: DatabaseQueryMetricCollector");
         return new DatabaseQueryMetricCollector(metricsProperties, queryMetricsRecorder);
     }
 
-    /**
-     * HTTP Inbound 응답 메트릭을 수집하는 `HttpInboundResponseMetricCollector` 빈 등록.
-     */
+    @Bean
+    @ConditionalOnClass(HttpResponseMetricsRecorder.class)
+    @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnMissingBean(HttpResponseMetricsRecorder.class)
+    public HttpResponseMetricsRecorder httpResponseMetricsRecorder(HttpResponseCountMetricsBinder countMetricsBinder,
+                                                                   HttpResponseDurationMetricsBinder durationMetricsBinder) {
+        logger.info("[MoniKit] Registered HttpResponseMetricsRecorder");
+        return new HttpResponseMetricsRecorder(countMetricsBinder, durationMetricsBinder);
+    }
+
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean
-    public MetricCollector<?> httpInboundResponseMetricCollector(
-        MoniKitMetricsProperties metricsProperties,
-        HttpResponseMetricsRecorder httpResponseMetricsRecorder
-    ) {
+    @ConditionalOnBean(HttpResponseMetricsRecorder.class)
+    public MetricCollector<?> httpInboundResponseMetricCollector(MoniKitMetricsProperties metricsProperties,
+                                                                 HttpResponseMetricsRecorder httpResponseMetricsRecorder) {
         logger.info("[MoniKit] Registered MetricCollector: HttpInboundResponseMetricCollector");
         return new HttpInboundResponseMetricCollector(metricsProperties, httpResponseMetricsRecorder);
     }
 
-    /**
-     * HTTP Outbound 응답 메트릭을 수집하는 `HttpOutboundResponseMetricCollector` 빈 등록.
-     */
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean
-    public MetricCollector<?> httpOutboundResponseMetricCollector(
-        MoniKitMetricsProperties metricsProperties,
-        HttpResponseMetricsRecorder httpResponseMetricsRecorder
-    ) {
+    @ConditionalOnBean(HttpResponseMetricsRecorder.class)
+    public MetricCollector<?> httpOutboundResponseMetricCollector(MoniKitMetricsProperties metricsProperties,
+                                                                  HttpResponseMetricsRecorder httpResponseMetricsRecorder) {
         logger.info("[MoniKit] Registered MetricCollector: HttpOutboundResponseMetricCollector");
         return new HttpOutboundResponseMetricCollector(metricsProperties, httpResponseMetricsRecorder);
     }
-
-
-    @Bean
-    @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean
-    public HttpResponseMetricsRecorder httpResponseMetricsRecorder(HttpResponseCountMetricsBinder countMetricsBinder,
-                                                                   HttpResponseDurationMetricsBinder durationMetricsBinder){
-        logger.info("[MoniKit] Registered HttpResponseMetricsRecorder: HttpResponseMetricsRecorder");
-        return new HttpResponseMetricsRecorder(countMetricsBinder, durationMetricsBinder);
-    }
-
-
-
-
 
 
 }
