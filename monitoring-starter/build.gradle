@@ -8,6 +8,7 @@ plugins {
 dependencies {
     implementation project(':monitoring-core')
     implementation project(':monitoring-config')
+    implementation project(':monitoring-metric')
 
     // Spring Boot 기본 의존성
     implementation "org.springframework.boot:spring-boot-autoconfigure"

@@ -27,7 +27,9 @@ import com.monikit.core.MetricCollectorLogAddHook;
  */
 
 @Configuration
-@AutoConfigureAfter
+@AutoConfigureAfter({
+    com.monikit.metric.config.MetricCollectorAutoConfiguration.class
+})
 public class MetricCollectorHookAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(MetricCollectorHookAutoConfiguration.class);
