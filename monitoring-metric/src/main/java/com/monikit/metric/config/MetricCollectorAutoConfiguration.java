@@ -2,6 +2,7 @@ package com.monikit.metric.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -49,6 +50,7 @@ import com.monikit.metric.SqlQueryDurationMetricsBinder;
  * @since 1.1.0
  */
 @Configuration
+@AutoConfigureAfter(MetricCollectorAutoConfiguration.class)
 public class MetricCollectorAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(MetricCollectorAutoConfiguration.class);
