@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -25,19 +26,22 @@ import com.monikit.core.MetricCollectorLogAddHook;
  * @since 1.1.0
  */
 
-@Configuration
+@AutoConfigureAfter
 public class MetricCollectorHookAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(MetricCollectorHookAutoConfiguration.class);
 
     @Bean
     @ConditionalOnMissingBean(MetricCollectorLogAddHook.class)
-    @ConditionalOnProperty(prefix = "monikit.metrics", name = "metrics-enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(
+        prefix = "monikit.metrics",
+        name = "metrics-enabled",
+        havingValue = "true",
+        matchIfMissing = true
+    )
     public LogAddHook metricCollectorLogAddHook(List<MetricCollector<? extends LogEntry>> collectors) {
         logger.info("[MoniKit] Registering MetricCollectorLogAddHook with {} collector(s)", collectors.size());
-        collectors.forEach(c ->
-            logger.info(" - Registered MetricCollector: {}", c.getClass().getSimpleName())
-        );
+        collectors.forEach(c -> logger.info(" - Registered MetricCollector: {}", c.getClass().getSimpleName()));
         return new MetricCollectorLogAddHook(collectors);
     }
 
