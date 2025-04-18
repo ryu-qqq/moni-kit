@@ -26,6 +26,7 @@ import com.monikit.core.MetricCollectorLogAddHook;
  * @since 1.1.0
  */
 
+@Configuration
 @AutoConfigureAfter
 public class MetricCollectorHookAutoConfiguration {
 
