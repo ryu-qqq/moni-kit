@@ -36,7 +36,8 @@ public class ExecutionLoggingAspect {
         this.traceIdProvider = traceIdProvider;
     }
 
-    @Pointcut("within(@org.springframework.stereotype.Service *) || " +
+    @Pointcut("within(@org.springframework.stereotype.Controller *) || "
+        + "within(@org.springframework.stereotype.Service *) || " +
         "within(@org.springframework.stereotype.Repository *)")
     public void controllerServiceRepositoryMethods() {}
 
