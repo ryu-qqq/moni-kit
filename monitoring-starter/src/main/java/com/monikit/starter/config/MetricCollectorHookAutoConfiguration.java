@@ -1,5 +1,7 @@
 package com.monikit.starter.config;
 
+import jakarta.annotation.Nullable;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import com.monikit.core.LogAddHook;
 import com.monikit.core.LogEntry;
 import com.monikit.core.MetricCollector;
+import com.monikit.core.MetricCollectorCustomizer;
 import com.monikit.core.MetricCollectorLogAddHook;
 
 /**
@@ -42,7 +45,15 @@ public class MetricCollectorHookAutoConfiguration {
         havingValue = "true",
         matchIfMissing = true
     )
-    public LogAddHook metricCollectorLogAddHook(List<MetricCollector<? extends LogEntry>> collectors) {
+    public LogAddHook metricCollectorLogAddHook(List<MetricCollector<? extends LogEntry>> collectors,
+                                                @Nullable List<MetricCollectorCustomizer> customizers
+                                                ) {
+        if (customizers != null) {
+            for (MetricCollectorCustomizer customizer : customizers) {
+                customizer.customize(collectors);
+            }
+        }
+
         logger.info("[MoniKit] Registering MetricCollectorLogAddHook with {} collector(s)", collectors.size());
         collectors.forEach(c -> logger.info(" - Registered MetricCollector: {}", c.getClass().getSimpleName()));
         return new MetricCollectorLogAddHook(collectors);

@@ -117,6 +117,21 @@ public interface MetricCollector<T extends LogEntry> {
 
 ---
 
+### 8. `MetricCollectorCustomizer`
+
+```java
+public interface MetricCollectorCustomizer {
+    void customize(List<MetricCollector<? extends LogEntry>> collectors);
+}
+```
+
+- MetricCollector 리스트에 사용자 정의 수집기를 동적으로 추가할 수 있는 확장 인터페이스
+- monikit 내부에서 자동 등록된 메트릭 수집기 외에도, 사용자가 직접 구현한 Collector를 후처리 단계에서 Hook에 포함시키기 위해 사용
+- Collector는 로그 유형별(LogType)로 동작하며, Prometheus, Micrometer 등과 연동되는 수집 로직을 자유롭게 추가 가능
+
+---
+
+
 ## 사용 가이드 요약
 
 ```java
