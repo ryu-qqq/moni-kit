@@ -12,8 +12,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *     <li><b>metricsEnabled</b> : 전체 메트릭 수집 기능의 마스터 스위치</li>
  *     <li><b>queryMetricsEnabled</b> : SQL 쿼리 실행 시간, 횟수 등의 메트릭 수집 여부</li>
  *     <li><b>httpMetricsEnabled</b> : HTTP 요청/응답 관련 메트릭 수집 여부</li>
- *     <li><b>slowQueryThresholdMs</b> : 느린 쿼리로 간주할 기준 시간 (ms)</li>
- *     <li><b>querySamplingRate</b> : SQL 메트릭 수집 시 샘플링 비율 (%)</li>
  * </ul>
  * <p>
  * 설정 접두사는 <code>monikit.metrics</code> 입니다.
@@ -31,10 +29,6 @@ public class MoniKitMetricsProperties {
     private boolean queryMetricsEnabled = true;
     private boolean httpMetricsEnabled = true;
 
-    private long slowQueryThresholdMs = 2000;
-    private int querySamplingRate = 10;
-
-
     public boolean isMetricsEnabled() { return metricsEnabled; }
     public void setMetricsEnabled(boolean metricsEnabled) { this.metricsEnabled = metricsEnabled; }
 
@@ -43,11 +37,5 @@ public class MoniKitMetricsProperties {
 
     public boolean isHttpMetricsEnabled() { return httpMetricsEnabled; }
     public void setHttpMetricsEnabled(boolean httpMetricsEnabled) { this.httpMetricsEnabled = httpMetricsEnabled; }
-
-    public long getSlowQueryThresholdMs() { return slowQueryThresholdMs; }
-    public void setSlowQueryThresholdMs(long slowQueryThresholdMs) { this.slowQueryThresholdMs = slowQueryThresholdMs; }
-
-    public int getQuerySamplingRate() { return querySamplingRate; }
-    public void setQuerySamplingRate(int querySamplingRate) { this.querySamplingRate = querySamplingRate; }
 
 }

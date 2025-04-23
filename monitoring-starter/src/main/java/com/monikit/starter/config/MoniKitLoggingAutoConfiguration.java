@@ -34,18 +34,11 @@ public class MoniKitLoggingAutoConfiguration {
     public void logConfiguration() {
         logger.info("[MoniKit] Logging Configuration Loaded:");
         logger.info(" - logEnabled: {}", props.isLogEnabled());
-        logger.info(" - traceEnabled: {}", props.isTraceEnabled());
-        logger.info(" - detailedLogging: {}", props.isDetailedLogging());
-        logger.info(" - summaryLogging: {}", props.isSummaryLogging());
-        logger.info(" - thresholdMillis: {}", props.getThresholdMillis());
         logger.info(" - datasourceLoggingEnabled: {}", props.isDatasourceLoggingEnabled());
         logger.info(" - slowQueryThresholdMs: {}", props.getSlowQueryThresholdMs());
         logger.info(" - criticalQueryThresholdMs: {}", props.getCriticalQueryThresholdMs());
-
-        if (!props.isLogEnabled() &&
-            (props.isTraceEnabled() || props.isDetailedLogging() || props.isDatasourceLoggingEnabled())) {
-            logger.warn("[MoniKit] logEnabled is disabled (false), but some logging settings (datasourceLoggingEnabled, traceEnabled, detailedLogging) are enabled. Logging may not be recorded.");
-        }
+        logger.info(" - dynamicMatching rules: {}개", props.getDynamicMatching().size());
+        logger.info(" - allowedPackages {}개", props.getAllowedPackages().size());
     }
 
 }

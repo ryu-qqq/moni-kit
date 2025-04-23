@@ -38,16 +38,6 @@ public class GatewayFilterAutoConfiguration {
         return new TraceIdGatewayFilter(traceIdProvider);
     }
 
-    /**
-     * TraceIdGatewayFilter 등록
-     * `monikit.logging.filters.trace-enabled`가 true일 때만 활성화.
-     */
-    @Bean
-    @ConditionalOnProperty(name = "monikit.logging.filters.trace-enabled", havingValue = "true", matchIfMissing = true)
-    public List<GatewayFilter> traceIdGatewayFilterRegistration(TraceIdGatewayFilter traceIdGatewayFilter) {
-        logger.info("TraceIdGatewayFilter active: {}", loggingProperties.isTraceEnabled());
-        return List.of(traceIdGatewayFilter);
-    }
 
     /**
      * LogContextScopeGatewayFilter 등록

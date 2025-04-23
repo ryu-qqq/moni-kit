@@ -4,24 +4,28 @@ import java.util.List;
 
 
 /**
- * 로그가 flush 될 때 호출되는 후처리 훅 인터페이스.
+ * 로그 컨텍스트가 flush될 때 호출되는 일괄 후처리 훅 인터페이스.
  * <p>
- * 로그 컨텍스트가 flush 될 때, 수집된 로그 전체에 대해
- * 추가 작업을 수행하고자 할 때 구현합니다.
- * - 로그 집계
- * - 외부 시스템 전송 (예: S3, DB)
- * - 통계 수집, 알림 등
+ * {@link LogEntryContextManager#flush()} 호출 시,
+ * **요청 단위 전체 로그 리스트**를 대상으로 후처리를 수행할 때 사용됩니다.
  * </p>
  *
+ * <h3>주요 사용처</h3>
+ * <ul>
+ *   <li>DB 또는 S3 등에 로그 일괄 저장</li>
+ *   <li>압축 후 전송, 로그 집계</li>
+ *   <li>요청 단위 통계 계산</li>
+ * </ul>
+ *
  * <p>
- * {@link LogEntryContextManager#flush()} 내부에서 호출되며,
- * 단일 요청 단위의 모든 로그를 대상으로 후처리 작업을 수행할 수 있습니다.
+ * <b>주의:</b> 로그는 이미 {@link LogNotifier}를 통해 전송되었을 수 있으며,
+ * 이 훅은 후속적인 저장/분석용으로 활용됩니다.
  * </p>
  *
- * @author ryu-qqq
+ * @see LogSink
+ * @see LogAddHook
  * @since 1.1.0
  */
-
 
 public interface LogFlushHook {
     /**

@@ -19,22 +19,24 @@ public class ExecutionDetailLog extends ExecutionLog {
     private final String output;
     private final boolean thresholdExceeded;
     private final long threshold;
+    private final String tag;
 
     public ExecutionDetailLog(String traceId, String className, String methodName,
                               long executionTime, String input, String output,
-                              LogLevel logLevel, boolean thresholdExceeded, long threshold) {
+                              LogLevel logLevel, boolean thresholdExceeded, long threshold, String tag) {
         super(traceId, logLevel, className, methodName, executionTime);
         this.input = input;
         this.output = output;
         this.thresholdExceeded = thresholdExceeded;
         this.threshold = threshold;
+        this.tag = tag;
     }
 
     public static ExecutionDetailLog create(String traceId, String className, String methodName,
-                                            long executionTime, String input, String output, long threshold) {
+                                            long executionTime, String input, String output, long threshold, String tag) {
         boolean exceeded = executionTime > threshold;
         LogLevel level = exceeded ? LogLevel.WARN : LogLevel.INFO;
-        return new ExecutionDetailLog(traceId, className, methodName, executionTime, input, output, level, exceeded, threshold);
+        return new ExecutionDetailLog(traceId, className, methodName, executionTime, input, output, level, exceeded, threshold, tag);
     }
 
     public String getInput() {
@@ -53,6 +55,10 @@ public class ExecutionDetailLog extends ExecutionLog {
         return threshold;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
     @Override
     protected void addExtraFields(Map<String, Object> logMap) {
         super.addExtraFields(logMap);
@@ -60,6 +66,8 @@ public class ExecutionDetailLog extends ExecutionLog {
         logMap.put("output", output);
         logMap.put("threshold", threshold + "ms");
         logMap.put("thresholdExceeded", thresholdExceeded);
+        logMap.put("tag", tag);
+
     }
 
     @Override
@@ -68,34 +76,50 @@ public class ExecutionDetailLog extends ExecutionLog {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ExecutionDetailLog that = (ExecutionDetailLog) o;
-        return executionTime == that.executionTime &&
-            thresholdExceeded == that.thresholdExceeded &&
-            threshold == that.threshold &&
-            Objects.equals(className, that.className) &&
-            Objects.equals(methodName, that.methodName) &&
-            Objects.equals(input, that.input) &&
-            Objects.equals(output, that.output);
+    public boolean equals(Object object) {
+        if (this
+            == object) return true;
+        if (object
+            == null
+            || getClass()
+            != object.getClass()) return false;
+        ExecutionDetailLog that = (ExecutionDetailLog) object;
+        return thresholdExceeded
+            == that.thresholdExceeded
+            && threshold
+            == that.threshold
+            && Objects.equals(input, that.input)
+            && Objects.equals(output, that.output)
+            && Objects.equals(tag, that.tag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, methodName, executionTime, input, output, thresholdExceeded, threshold);
+        return Objects.hash(input, output, thresholdExceeded, threshold, tag);
     }
 
     @Override
     public String toString() {
-        return "ExecutionDetailLog{" +
-            "className='" + className + '\'' +
-            ", methodName='" + methodName + '\'' +
-            ", executionTime=" + executionTime +
-            ", input='" + input + '\'' +
-            ", output='" + output + '\'' +
-            ", threshold=" + threshold +
-            ", thresholdExceeded=" + thresholdExceeded +
+        return "ExecutionDetailLog{"
+            +
+            "input='"
+            + input
+            + '\''
+            +
+            ", output='"
+            + output
+            + '\''
+            +
+            ", thresholdExceeded="
+            + thresholdExceeded
+            +
+            ", threshold="
+            + threshold
+            +
+            ", tag='"
+            + tag
+            + '\''
+            +
             '}';
     }
 }

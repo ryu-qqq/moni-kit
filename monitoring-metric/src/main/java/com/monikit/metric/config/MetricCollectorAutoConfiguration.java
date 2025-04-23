@@ -50,7 +50,6 @@ import com.monikit.metric.SqlQueryDurationMetricsBinder;
  * @since 1.1.0
  */
 @Configuration
-@AutoConfigureAfter(MetricCollectorAutoConfiguration.class)
 public class MetricCollectorAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(MetricCollectorAutoConfiguration.class);

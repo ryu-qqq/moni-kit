@@ -6,8 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.monikit.core.DefaultLogNotifier;
 import com.monikit.core.LogNotifier;
+import com.monikit.core.TraceIdProvider;
+import com.monikit.slf4j.Slf4jLogger;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -19,12 +20,11 @@ class LogNotifierAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner =
         new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(LogNotifierAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(Slf4jLoggerAutoConfiguration.class));
 
     @Nested
     @DisplayName("LogNotifier 자동 등록 테스트")
     class LogNotifierAutoConfigurationTests {
-
 
         @Test
         @DisplayName("사용자가 LogNotifier 빈을 직접 등록한 경우 해당 빈을 사용해야 한다")
@@ -34,7 +34,7 @@ class LogNotifierAutoConfigurationTest {
                 .run(context -> {
                     LogNotifier logNotifier = context.getBean(LogNotifier.class);
                     assertNotNull(logNotifier);
-                    assertFalse(logNotifier instanceof DefaultLogNotifier);
+                    assertFalse(logNotifier instanceof Slf4jLogger);
                 });
         }
 
@@ -42,13 +42,14 @@ class LogNotifierAutoConfigurationTest {
         @DisplayName("SLF4J가 없고 LogNotifier도 없는 경우 DefaultLogNotifier가 자동 등록되어야 한다")
         void shouldRegisterDefaultLogNotifierIfNoSlf4jAndNoCustomBean() {
             new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(LogNotifierAutoConfiguration.class))
+                .withConfiguration(AutoConfigurations.of(Slf4jLoggerAutoConfiguration.class))
+                .withBean(TraceIdProvider.class, () -> mock(TraceIdProvider.class))
                 .withClassLoader(new NoSlf4jClassLoader()) // SLF4J 제거
                 .run(context -> {
-                    assertTrue(context.containsBean("defaultLogNotifier"));
+                    assertTrue(context.containsBean("slf4jLogNotifier"));
                     LogNotifier logNotifier = context.getBean(LogNotifier.class);
                     assertNotNull(logNotifier);
-                    assertInstanceOf(DefaultLogNotifier.class, logNotifier);
+                    assertInstanceOf(Slf4jLogger.class, logNotifier);
                 });
         }
     }

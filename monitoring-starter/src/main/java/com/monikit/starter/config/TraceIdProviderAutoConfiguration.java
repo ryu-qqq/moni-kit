@@ -6,13 +6,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.monikit.core.DefaultTraceIdProvider;
 import com.monikit.core.TraceIdProvider;
+import com.monikit.starter.MDCTraceIdProvider;
 
 /**
  * `TraceIdProvider` 자동 구성 클래스.
  * <p>
- * - 사용자 정의 빈이 없을 경우, 기본 구현체인 {@link DefaultTraceIdProvider}를 자동으로 등록함.
+ * - 사용자 정의 빈이 없을 경우, 기본 구현체인 {@link MDCTraceIdProvider}를 자동으로 등록함.
  * </p>
  *
  * @author ryu-qqq
@@ -26,8 +26,8 @@ public class TraceIdProviderAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(TraceIdProvider.class)
     public TraceIdProvider traceIdProvider() {
-        logger.info("[MoniKit] No custom TraceIdProvider found. Using DefaultTraceIdProvider.");
-        return new DefaultTraceIdProvider();
+        logger.info("[MoniKit] No custom TraceIdProvider found. Using Default MDCTraceIdProvider.");
+        return new MDCTraceIdProvider();
     }
 
 }

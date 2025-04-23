@@ -4,7 +4,6 @@ plugins {
     id 'io.spring.dependency-management'
 }
 
-
 dependencies {
     implementation project(':monitoring-core')
     implementation "org.slf4j:slf4j-api:${slf4jVersion}"
