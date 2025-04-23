@@ -13,6 +13,12 @@ import java.util.List;
  * @author ryu-qqq
  * @since 1.1.0
  */
+
+/**
+ * @deprecated SLF4J 기반 로그 시스템이 기본값으로 전환되었습니다.
+ *             {@link com.monikit.slf4j.Slf4jLogger} 사용을 권장합니다.
+ */
+@Deprecated
 public class DefaultLogNotifier implements LogNotifier {
 
     private final List<LogSink> sinks;
