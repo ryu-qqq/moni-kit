@@ -11,6 +11,7 @@ package com.monikit.core;
  * @since 1.0.0
  */
 public enum LogType {
+    SIMPLE,
     EXECUTION_TIME,
     EXECUTION_DETAIL,
     EXCEPTION,

@@ -3,16 +3,23 @@ package com.monikit.core;
 /**
  * 로그 전송 채널(Sink)을 추상화한 인터페이스.
  * <p>
- * 각 로그 타입(LogType)에 따라 Slack, S3, Console 등 다양한 전송 채널로
- * 로그를 전달할 수 있도록 확장 가능한 전략 인터페이스입니다.
- * </p>
- * <p>
- * - 예: SlackSink는 EXCEPTION 타입만 처리하고,
- *   ConsoleSink는 모든 로그를 처리하도록 설정할 수 있습니다.
- * - {@link LogType} 기반 분기처리로 유연한 분산 로깅이 가능합니다.
+ * 로그가 실제 외부 시스템(예: Slack, S3, File, Kafka 등)으로 **전송되는 목적지**를 정의합니다.
+ * {@link LogNotifier}를 통해 전송되는 로그는 등록된 Sink들 중 {@link #supports(LogType)}가 true인 대상에게 전달됩니다.
  * </p>
  *
- * @author ryu-qqq
+ * <h3>책임</h3>
+ * <ul>
+ *   <li>로그의 최종 전송 처리 (I/O 포함)</li>
+ *   <li>{@link LogType} 기준으로 처리 여부 결정 (예: EXCEPTION만 전송)</li>
+ *   <li>단일 로그 단위로 동작</li>
+ * </ul>
+ *
+ * <p>
+ * <b>예시:</b> SlackSink는 ERROR/EXCEPTION 로그만 전송, ConsoleSink는 모든 로그 출력 등
+ * </p>
+ *
+ * @see LogAddHook
+ * @see LogFlushHook
  * @since 1.1.0
  */
 

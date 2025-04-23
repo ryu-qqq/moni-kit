@@ -5,10 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.monikit.core.DefaultTraceIdProvider;
 import com.monikit.core.TraceIdProvider;
+import com.monikit.starter.MDCTraceIdProvider;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TraceIdProviderAutoConfigurationTest {
 
@@ -21,7 +22,7 @@ class TraceIdProviderAutoConfigurationTest {
     void shouldRegisterDefaultTraceIdProviderWhenNoCustomBean() {
         contextRunner.run(context -> {
             assertNotNull(context.getBean(TraceIdProvider.class));
-            assertEquals(DefaultTraceIdProvider.class, context.getBean(TraceIdProvider.class).getClass());
+            assertEquals(MDCTraceIdProvider.class, context.getBean(TraceIdProvider.class).getClass());
         });
     }
 

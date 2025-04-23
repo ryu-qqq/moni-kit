@@ -33,7 +33,7 @@ public class FilterAutoConfiguration {
     @Bean
     @ConditionalOnProperty(name = "monikit.logging.trace-enabled", havingValue = "true", matchIfMissing = true)
     public TraceIdFilter traceIdFilter(TraceIdProvider traceIdProvider) {
-        logger.info("[MoniKit] Initializing TraceIdFilter with traceEnabled={}", loggingProperties.isTraceEnabled());
+        logger.info("[MoniKit] Initializing TraceIdFilter with traceEnabled={}", loggingProperties.isLogEnabled());
         return new TraceIdFilter(traceIdProvider);
     }
 
@@ -44,8 +44,8 @@ public class FilterAutoConfiguration {
         registrationBean.setFilter(traceIdFilter);
         registrationBean.setOrder(1);
         registrationBean.addUrlPatterns("/*");
-        registrationBean.setEnabled(loggingProperties.isTraceEnabled());
-        logger.info("[MoniKit] TraceIdFilter active: {}", loggingProperties.isTraceEnabled());
+        registrationBean.setEnabled(loggingProperties.isLogEnabled());
+        logger.info("[MoniKit] TraceIdFilter active: {}", loggingProperties.isLogEnabled());
         return registrationBean;
     }
 

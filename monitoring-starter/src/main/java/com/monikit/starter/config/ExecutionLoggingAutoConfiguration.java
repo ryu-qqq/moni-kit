@@ -22,8 +22,9 @@ import com.monikit.starter.ExecutionLoggingAspect;
  * @author ryu-qqq
  * @since 1.1.0
  */
+
 @Configuration
-@ConditionalOnProperty(name = "monikit.logging.detailed-logging", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "monikit.logging.logging-enabled", havingValue = "true", matchIfMissing = false)
 public class ExecutionLoggingAutoConfiguration {
 
 

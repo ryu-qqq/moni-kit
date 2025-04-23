@@ -31,7 +31,7 @@ class ExecutionLoggingAutoConfigurationTest {
     @DisplayName("shouldRegisterExecutionLoggingAspectWhenDetailedLoggingIsEnabled")
     void shouldRegisterExecutionLoggingAspectWhenDetailedLoggingIsEnabled() {
         contextRunner
-            .withPropertyValues("monikit.logging.detailed-logging=true")
+            .withPropertyValues("monikit.logging.logging-enabled=true")
             .run(context -> {
                 assertTrue(context.containsBean("executionLoggingAspect"));
                 assertNotNull(context.getBean(ExecutionLoggingAspect.class));
@@ -42,7 +42,7 @@ class ExecutionLoggingAutoConfigurationTest {
     @DisplayName("shouldNotRegisterExecutionLoggingAspectWhenDetailedLoggingIsDisabled")
     void shouldNotRegisterExecutionLoggingAspectWhenDetailedLoggingIsDisabled() {
         contextRunner
-            .withPropertyValues("monikit.logging.detailed-logging=false")
+            .withPropertyValues("monikit.logging.logging-enabled=false")
             .run(context -> assertFalse(context.containsBean("executionLoggingAspect")));
     }
 
@@ -56,7 +56,7 @@ class ExecutionLoggingAutoConfigurationTest {
     @DisplayName("shouldNotRegisterExecutionLoggingAspectWhenCustomBeanIsProvided")
     void shouldNotRegisterExecutionLoggingAspectWhenCustomBeanIsProvided() {
         contextRunner
-            .withPropertyValues("monikit.logging.detailed-logging=true")
+            .withPropertyValues("monikit.logging.logging-enabled=true")
             .withUserConfiguration(CustomExecutionLoggingAspectConfig.class)
             .run(context -> {
                 ExecutionLoggingAspect aspect = context.getBean(ExecutionLoggingAspect.class);

@@ -2,21 +2,26 @@ package com.monikit.core;
 
 
 /**
- * 로그가 컨텍스트에 추가될 때 호출되는 후처리 훅 인터페이스.
+ * 로그가 컨텍스트에 추가될 때 호출되는 실시간 후처리 훅 인터페이스.
  * <p>
- * 로그가 {@link LogEntryContextManager#addLog(LogEntry)}를 통해 추가되는 시점에
- * 개별 로그에 대한 후처리를 수행하고자 할 때 구현합니다.
- * - 에러 알림 전송 (Slack, SMS)
- * - 연동 상태 조정
- * - 로그 유형별 동적 대응
+ * {@link LogEntryContextManager#addLog(LogEntry)} 시점에
+ * 로그가 저장되자마자 실행되며, **단일 로그 단위로 후처리**가 필요할 때 사용됩니다.
  * </p>
  *
+ * <h3>주요 사용처</h3>
+ * <ul>
+ *   <li>특정 로그 레벨 감지 → 실시간 Slack 알림</li>
+ *   <li>에러 발생 시 상태 토글, Redis 연동</li>
+ *   <li>메트릭 수집 트리거 (예: Micrometer 카운터 증가)</li>
+ * </ul>
+ *
  * <p>
- * 이 훅은 로그가 저장될 때마다 호출되며, 실시간 대응이 필요한
- * 알림, 트리거, 모니터링 이벤트 처리에 적합합니다.
+ * <b>주의:</b> 로그 전송은 {@link LogSink}가 담당하며,
+ * 이 훅은 **전송 목적이 아닌 부가 처리**를 위한 용도입니다.
  * </p>
  *
- * @author ryu-qqq
+ * @see LogSink
+ * @see LogFlushHook
  * @since 1.1.0
  */
 

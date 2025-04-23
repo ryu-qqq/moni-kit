@@ -9,6 +9,9 @@ dependencies {
     implementation project(':monitoring-core')
     implementation project(':monitoring-config')
     implementation project(':monitoring-metric')
+    implementation project(':monitoring-slf4j')
+
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
 
     // Spring Boot 기본 의존성
     implementation "org.springframework.boot:spring-boot-autoconfigure"

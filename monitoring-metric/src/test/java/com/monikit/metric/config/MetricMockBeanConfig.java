@@ -40,7 +40,6 @@ public class MetricMockBeanConfig {
     @Primary
     public MoniKitLoggingProperties mockMoniKitLoggingProperties() {
         MoniKitLoggingProperties properties = mock(MoniKitLoggingProperties.class);
-        when(properties.isTraceEnabled()).thenReturn(true);
         when(properties.isLogEnabled()).thenReturn(true);
         return properties;
     }
@@ -87,19 +86,6 @@ public class MetricMockBeanConfig {
         return new QueryMetricsRecorder(sqlQueryCountMetricsBinder(), sqlQueryDurationMetricsBinder());
     }
 
-    @Bean
-    public HttpInboundResponseMetricCollector httpInboundResponseMetricCollector() {
-        return new HttpInboundResponseMetricCollector(moniKitMetricsProperties(), responseStatusCounter());
-    }
 
-    @Bean
-    public DatabaseQueryMetricCollector databaseQueryMetricCollector() {
-        return new DatabaseQueryMetricCollector(moniKitMetricsProperties(), queryMetricsRecorder());
-    }
-
-    @Bean
-    public HttpOutboundResponseMetricCollector httpOutboundResponseMetricCollector() {
-        return new HttpOutboundResponseMetricCollector(moniKitMetricsProperties(), responseStatusCounter());
-    }
 
 }

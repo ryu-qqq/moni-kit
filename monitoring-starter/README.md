@@ -1,112 +1,134 @@
-# monikit-starter
+# MoniKit Starter (v1.1.3)
 
-> 모니터링과 로깅을 위한 자동 설정 스타터  
-> `Spring Boot` 환경에서 AOP, TraceId, Metric, Filter, Batch 리스너를 자동으로 설정합니다.
+## 🧭 개요
 
----
-
-## ✅ 의존성 추가
-
-**Gradle**
-
-```groovy
-implementation "com.github.ryu-qqq.moni-kit:monikit-starter:1.1.0"
-```
-
-이 스타터 하나로 아래의 의존성이 자동 포함됩니다:
-- `monikit-core`
-- `monikit-config`
-- AOP, Servlet, WebMVC, Spring Boot Starter
+`monikit-starter`는 MoniKit Core의 구성 요소들을 Spring Boot 기반 프로젝트에 자동으로 통합해주는 모듈입니다.  
+자동 구성 클래스(@Configuration / @AutoConfiguration)를 통해 traceId, 로그 수집 컨텍스트, 로거, AOP, 메트릭 등 핵심 기능들을 손쉽게 등록할 수 있습니다.
 
 ---
 
-## ⚙️ 자동 구성되는 기능
+## ⚙️ 자동 구성 기능 요약
 
-### 1. Execution AOP (메서드 실행 로깅)
+### 1. `ExecutionLoggingAutoConfiguration`
+- 조건: `monikit.logging.log-enabled: true`
+- AOP를 활성화하여 모든 메서드의 실행 시간 측정
+- 설정된 DynamicLogRule 에 따라 로깅 결정
+
+### 2. `LogEntryContextManagerConfig`
+- `LogEntryContextManager` 등록
+- `LogAddHook`, `LogFlushHook` 확장 지점 주입
+- 기본 구현: `DefaultLogEntryContextManager`
+
+### 3. `MetricCollectorHookAutoConfiguration`
+- 조건: `monikit.metrics.metrics-enabled: true`
+- `MetricCollectorLogAddHook` 자동 등록
+- 커스터마이저 지원: `MetricCollectorCustomizer`
+
+### 4. `MoniKitLoggingAutoConfiguration`
+- `monikit.logging.*` 설정값 자동 바인딩
+- 로깅 설정값 로드 및 초기화 시 출력
+
+### 5. `MoniKitMetricsAutoConfiguration`
+- `monikit.metrics.*` 설정값 자동 바인딩
+- 메트릭 설정값 로드 및 초기화 시 출력
+
+### 6. `Slf4jLoggerAutoConfiguration`
+- SLF4J 기반 기본 `LogNotifier` 자동 등록
+- 등록된 `LogSink` 목록에 따라 메시지 전송
+- `Slf4jLogSink`가 없으면 기본값으로 포함시킴
+
+### 7. `TraceIdProviderAutoConfiguration`
+- 조건: `TraceIdProvider`가 미등록 시
+- `MDCTraceIdProvider` 자동 등록
+- SLF4J 기반 traceId MDC 연동
+
+### 8. `ThreadContextHandlerAutoConfiguration`
+- 조건: `ThreadContextHandler`가 미등록 시
+- `MDCThreadContextHandler` 자동 등록
+- MDC + LogEntryContextManager 스레드 전파 지원
+
+---
+
+## 🔁 기본 구현체
+
+### MDC 기반 Trace ID
 
 ```java
-@Aspect
-public class ExecutionLoggingAspect { ... }
+public class MDCTraceIdProvider implements TraceIdProvider {
+  private static final String TRACE_ID_KEY = "traceId";
+
+  @Override
+  public String getTraceId() {
+    return Optional.ofNullable(MDC.get(TRACE_ID_KEY)).orElse("N/A");
+  }
+
+  @Override
+  public void setTraceId(String traceId) {
+    MDC.put(TRACE_ID_KEY, traceId);
+  }
+
+  @Override
+  public void clear() {
+    MDC.remove(TRACE_ID_KEY);
+  }
+}
 ```
-
-- `@Service`, `@Repository`, `@Controller`, `@RestController` 대상
-- 실행 시간 측정 → 설정된 임계값 초과 시 상세 로그
-- 정상/에러 흐름 모두 `LogEntryContextManager`에 기록
-
-> ⛔ 비활성화하려면 `monikit.logging.detailed-logging=false`
 
 ---
 
-### 2. Filter 등록 (Servlet)
+### MDC 기반 스레드 컨텍스트 전파
 
-- `TraceIdFilter`: 요청에 traceId 삽입 및 전달
-- `LogContextScopeFilter`: 요청 단위로 로그 컨텍스트 관리
+```java
+public class MDCThreadContextHandler extends DefaultThreadContextHandler {
+  public Runnable propagateToChildThread(Runnable task) {
+    Map<String, String> contextMap = MDC.getCopyOfContextMap();
+    return () -> {
+      try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
+        if (contextMap != null) MDC.setContextMap(contextMap);
+        try { task.run(); } finally { MDC.clear(); }
+      }
+    };
+  }
 
-```yaml
+  public <T> Callable<T> propagateToChildThread(Callable<T> task) {
+    Map<String, String> contextMap = MDC.getCopyOfContextMap();
+    return () -> {
+      try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
+        if (contextMap != null) MDC.setContextMap(contextMap);
+        try { return task.call(); } finally { MDC.clear(); }
+      }
+    };
+  }
+}
+```
+
+
+### 동적 로깅 규칙(DynamicLogRule)에 기반한 실행 시간 측정 AOP
+`ExecutionLoggingAspect는` **동적 로깅 규칙(DynamicLogRule)** 에 기반하여 메서드의 실행 시간을 측정하고 조건에 맞는 경우 로그를 기록하는 AOP입니다.
+
+주요 기능:
+- 설정 파일(`monikit.logging.dynamic-matching`)에서 정의된 조건에 따라 로깅 여부 결정.
+- SpEL을 사용하여 클래스명, 메서드명, 실행 시간에 기반한 조건을 동적으로 설정 가능.
+- 예외 발생 시 `ExceptionLog` 자동 기록.
+- 실행 시간 기준으로 `ExecutionDetailLog` 기록.
+
+```yml
+
 monikit.logging:
-  trace-enabled: true
-  log-enabled: true
+    dynamic-matching:
+    - classNamePattern: ".*Service"
+    methodNamePattern: ".*Create"
+    when: "#executionTime > 200"
+    thresholdMillis: 200
+    tag: "service-create-logging"
 ```
 
----
-
-### 3. MetricCollector 자동 Hook
-
-- `MetricCollectorLogAddHook` 자동 등록
-- `monikit.metrics.metrics-enabled=true` 조건에서만 작동
-
----
-
-### 4. LogEntryContextManager 자동 등록
-
-- `DefaultLogEntryContextManager` 제공
-- `LogNotifier`, `TraceIdProvider`, `LogAddHook`, `LogFlushHook` 등 필요한 기본 컴포넌트 자동 주입
+- `classNamePattern`: 클래스 이름 정규식
+- `methodNamePattern`: 메서드 이름 정규식
+- `when`: SpEL 조건식으로 실행 시간 기반 로깅 여부 결정
+- `thresholdMillis`: 실행 시간이 이 값보다 길면 로깅
+- `tag`: 로그에 태그를 추가
 
 ---
 
-### 5. 설정 클래스 자동 등록
-
-- `MoniKitLoggingProperties`
-- `MoniKitMetricsProperties`
-
----
-
-## 🧩 확장 포인트
-
-### LogSink
-- 로그 타입별 전송 전략 커스터마이징
-
-### LogAddHook / LogFlushHook
-- 로그가 추가/플러시될 때 후처리 커스터마이징
-
-### MetricCollector
-- Prometheus, StatsD 등 연동용 커스텀 수집기 정의 가능
-
----
-
-## 🔌 관련 스타터
-
-- `monikit-starter-web`: Web 로그 수집 필터
-- `monikit-starter-batch`: Spring Batch Job/Step 리스너 자동 설정
-- `monikit-starter-jdbc`: SQL 실행 시간, 슬로우 쿼리 메트릭
-
----
-
-## 📜 설정 예시 (application.yml)
-
-```yaml
-monikit:
-  logging:
-    log-enabled: true
-    trace-enabled: true
-    detailed-logging: true
-    summary-logging: true
-    threshold-millis: 300
-  metrics:
-    metrics-enabled: true
-    query-metrics-enabled: true
-    http-metrics-enabled: true
-    slow-query-threshold-ms: 1500
-```
-
----
+(c) 2024 Ryu Sangwon. MoniKit 프로젝트

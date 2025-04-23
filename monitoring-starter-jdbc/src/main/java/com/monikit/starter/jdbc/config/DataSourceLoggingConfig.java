@@ -18,6 +18,7 @@ import com.monikit.starter.jdbc.DefaultDataSourceProvider;
 import com.monikit.starter.jdbc.LoggingDataSource;
 import com.monikit.starter.jdbc.proxy.LoggingPreparedStatementFactory;
 
+
 /**
  * {@link LoggingDataSource} 및 {@link DataSourceProvider}를 자동 구성하는 Spring Boot 설정 클래스.
  *
@@ -41,7 +42,7 @@ import com.monikit.starter.jdbc.proxy.LoggingPreparedStatementFactory;
 @Configuration
 public class DataSourceLoggingConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceLoggingConfig.class);
+    private static final Logger logger =  LoggerFactory.getLogger(QueryLoggingConfig.class);
 
     /**
      * 기존 {@code DataSource}를 {@link LoggingDataSource}로 감싸는 빈.

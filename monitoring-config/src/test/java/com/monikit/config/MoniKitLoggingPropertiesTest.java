@@ -90,5 +90,42 @@ class MoniKitLoggingPropertiesTest {
                     assertTrue(properties.getSlowQueryThresholdMs() == 2000, "설정값(slowQueryThresholdMs)이 2000으로 반영되어야 한다.");
                 });
         }
+
+        @Test
+        @DisplayName("criticalQueryThresholdMs가 기본값 5000으로 설정되어야 한다.")
+        void shouldApplyDefaultCriticalQueryThresholdMsValue() {
+            contextRunner.run(context -> {
+                MoniKitLoggingProperties properties = context.getBean(MoniKitLoggingProperties.class);
+                assertNotNull(properties);
+                assertTrue(properties.getCriticalQueryThresholdMs() == 5000, "기본값(criticalQueryThresholdMs)은 5000이어야 한다.");
+            });
+        }
+
+        @Test
+        @DisplayName("application.properties에서 설정한 값이 반영되어야 한다 (criticalQueryThresholdMs=8000)")
+        void shouldBindCriticalQueryThresholdMsProperty() {
+            contextRunner
+                .withPropertyValues("monikit.logging.critical-query-threshold-ms=8000")
+                .run(context -> {
+                    MoniKitLoggingProperties properties = context.getBean(MoniKitLoggingProperties.class);
+                    assertNotNull(properties);
+                    assertTrue(properties.getCriticalQueryThresholdMs() == 8000, "설정값(criticalQueryThresholdMs)이 8000으로 반영되어야 한다.");
+                });
+        }
+
+        @Test
+        @DisplayName("dynamicMatching이 빈 리스트로 초기화되어야 한다.")
+        void shouldInitializeDynamicMatchingAsEmptyList() {
+            contextRunner.run(context -> {
+                MoniKitLoggingProperties properties = context.getBean(MoniKitLoggingProperties.class);
+                assertNotNull(properties);
+                assertNotNull(properties.getDynamicMatching(), "dynamicMatching은 null이 아니어야 한다.");
+                assertTrue(properties.getDynamicMatching().isEmpty(), "기본값(dynamicMatching)은 빈 리스트여야 한다.");
+            });
+        }
+
+
+
     }
+
 }

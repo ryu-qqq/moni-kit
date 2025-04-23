@@ -87,7 +87,7 @@ public class TestLogEntryProvider {
     }
 
     public static ExecutionDetailLog executionDetailLog() {
-        return ExecutionDetailLog.create(TRACE_ID, CLASS_NAME, METHOD_NAME, EXECUTION_TIME, INPUT_PARAMS, OUTPUT_VALUE, 1000);
+        return ExecutionDetailLog.create(TRACE_ID, CLASS_NAME, METHOD_NAME, EXECUTION_TIME, INPUT_PARAMS, OUTPUT_VALUE, 1000, "TEST");
     }
 
 

@@ -8,6 +8,8 @@ dependencies {
     implementation project(':monitoring-core')
     implementation project(':monitoring-config')
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+
 
     compileOnly "io.micrometer:micrometer-core"
     compileOnly "org.springframework.boot:spring-boot-starter-actuator"

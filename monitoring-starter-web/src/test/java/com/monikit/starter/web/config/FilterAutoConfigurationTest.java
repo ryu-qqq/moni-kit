@@ -22,7 +22,6 @@ class FilterAutoConfigurationTest {
         .withConfiguration(AutoConfigurations.of(FilterAutoConfiguration.class))
         .withBean(MoniKitLoggingProperties.class, () -> {
             MoniKitLoggingProperties props = new MoniKitLoggingProperties();
-            props.setTraceEnabled(true);
             props.setLogEnabled(true);
             return props;
         })

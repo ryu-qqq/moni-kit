@@ -6,7 +6,7 @@ package com.monikit.metric;
  * `@Component`를 추가하여 Spring 빈으로 등록.
  *
  * @author ryu-qqq
- * @since 1.0.0.1
+ * @since 1.0.1
  */
 
 public class HttpResponseMetricsRecorder {
