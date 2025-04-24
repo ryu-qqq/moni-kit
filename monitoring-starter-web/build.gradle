@@ -30,6 +30,15 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifactId = 'monikit-starter-web'
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionResult()
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
         }
     }
 }

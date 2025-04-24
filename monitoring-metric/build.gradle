@@ -34,6 +34,16 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifactId = 'monikit-metric'
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionResult()
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+
         }
     }
 }

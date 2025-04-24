@@ -29,6 +29,16 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifactId = 'monikit-starter-jdbc'
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionResult()
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+
         }
     }
 }

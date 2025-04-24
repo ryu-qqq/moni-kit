@@ -18,6 +18,16 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifactId = 'monikit-slf4j'
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionResult()
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+
         }
     }
 }
