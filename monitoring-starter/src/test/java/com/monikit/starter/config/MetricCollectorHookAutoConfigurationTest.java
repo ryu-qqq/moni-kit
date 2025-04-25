@@ -7,10 +7,10 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.monikit.core.LogAddHook;
-import com.monikit.core.LogEntry;
+import com.monikit.core.hook.LogAddHook;
+import com.monikit.core.model.LogEntry;
 import com.monikit.core.LogType;
-import com.monikit.core.MetricCollector;
+import com.monikit.core.hook.MetricCollector;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

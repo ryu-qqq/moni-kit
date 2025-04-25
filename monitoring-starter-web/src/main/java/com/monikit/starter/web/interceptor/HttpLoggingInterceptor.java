@@ -9,9 +9,9 @@ import java.util.Map;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
-import com.monikit.core.HttpInboundRequestLog;
-import com.monikit.core.HttpInboundResponseLog;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.model.HttpInboundRequestLog;
+import com.monikit.core.model.HttpInboundResponseLog;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.LogLevel;
 import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.web.filter.RequestWrapper;
@@ -77,7 +77,7 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
         String traceId = traceIdProvider.getTraceId();
         requestStartTime.set(Instant.now());
 
-        logEntryContextManager.addLog(HttpInboundRequestLog.create(
+        logEntryContextManager.addLog(HttpInboundRequestLog.of(
             traceId,
             LogLevel.INFO,
             request.getRequestURI(),
@@ -111,7 +111,7 @@ public class HttpLoggingInterceptor implements HandlerInterceptor {
         Instant startTime = requestStartTime.get();
         long executionTime = startTime != null ? Instant.now().toEpochMilli() - startTime.toEpochMilli() : 0;
 
-        logEntryContextManager.addLog(HttpInboundResponseLog.create(
+        logEntryContextManager.addLog(HttpInboundResponseLog.of(
             traceId,
             LogLevel.INFO,
             request.getMethod(),

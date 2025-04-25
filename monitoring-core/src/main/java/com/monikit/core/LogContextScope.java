@@ -1,4 +1,7 @@
 package com.monikit.core;
+
+import com.monikit.core.context.LogEntryContextManager;
+
 /**
  * 요청 단위로 {@link LogEntryContextManager}를 사용하여 로그 컨텍스트를 자동으로 관리하는 클래스.
  * <p>

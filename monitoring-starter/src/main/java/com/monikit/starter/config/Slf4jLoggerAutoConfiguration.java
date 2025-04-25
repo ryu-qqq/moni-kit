@@ -11,9 +11,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.monikit.core.LogNotifier;
-import com.monikit.core.LogSink;
-import com.monikit.core.LogSinkCustomizer;
+import com.monikit.core.notifier.LogNotifier;
+import com.monikit.core.notifier.LogSink;
+import com.monikit.core.notifier.LogSinkCustomizer;
 import com.monikit.core.TraceIdProvider;
 import com.monikit.slf4j.Slf4jLogSink;
 import com.monikit.slf4j.Slf4jLogger;

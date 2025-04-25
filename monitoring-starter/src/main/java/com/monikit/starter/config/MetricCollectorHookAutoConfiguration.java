@@ -12,11 +12,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.monikit.core.LogAddHook;
-import com.monikit.core.LogEntry;
-import com.monikit.core.MetricCollector;
-import com.monikit.core.MetricCollectorCustomizer;
-import com.monikit.core.MetricCollectorLogAddHook;
+import com.monikit.core.hook.LogAddHook;
+import com.monikit.core.model.LogEntry;
+import com.monikit.core.hook.MetricCollector;
+import com.monikit.core.hook.MetricCollectorCustomizer;
+import com.monikit.core.hook.MetricCollectorLogAddHook;
 
 /**
  * MetricCollectorLogAddHook을 자동으로 등록하는 설정 클래스.

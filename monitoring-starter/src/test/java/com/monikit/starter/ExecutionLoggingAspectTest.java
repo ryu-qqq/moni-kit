@@ -9,9 +9,9 @@ import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import com.monikit.config.DynamicLogRule;
 import com.monikit.config.MoniKitLoggingProperties;
-import com.monikit.core.ExceptionLog;
-import com.monikit.core.ExecutionDetailLog;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.model.ExceptionLog;
+import com.monikit.core.model.ExecutionDetailLog;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

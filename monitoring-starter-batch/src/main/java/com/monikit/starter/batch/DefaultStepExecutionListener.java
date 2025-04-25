@@ -8,8 +8,8 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.core.annotation.Order;
 
-import com.monikit.core.BatchStepLog;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.model.BatchStepLog;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.LogLevel;
 import com.monikit.core.TraceIdProvider;
 
@@ -43,7 +43,7 @@ public class DefaultStepExecutionListener implements StepExecutionListener {
 
         LogLevel level = resolveLogLevel(stepExecution.getExitStatus());
 
-        BatchStepLog log = BatchStepLog.create(
+        BatchStepLog log = BatchStepLog.of(
             traceIdProvider.getTraceId(),
             stepExecution.getJobExecution().getJobInstance().getJobName(),
             stepExecution.getStepName(),

@@ -6,7 +6,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import com.monikit.core.LogContextScope;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.context.LogEntryContextManager;
 
 import static com.monikit.starter.web.ExcludePathConstant.EXCLUDED_PATHS;
 

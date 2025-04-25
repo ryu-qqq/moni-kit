@@ -9,9 +9,9 @@ import org.aspectj.lang.annotation.Pointcut;
 
 import com.monikit.config.DynamicLogRule;
 import com.monikit.config.MoniKitLoggingProperties;
-import com.monikit.core.ExceptionLog;
-import com.monikit.core.ExecutionDetailLog;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.model.ExceptionLog;
+import com.monikit.core.model.ExecutionDetailLog;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
 /**
  * 동적 로깅 규칙(DynamicLogRule)에 기반한 실행 시간 측정 AOP.
@@ -75,10 +75,10 @@ public class ExecutionLoggingAspect {
                 String methodName = joinPoint.getSignature().getName();
 
                 if (error != null) {
-                    logEntryContextManager.addLog(ExceptionLog.create(traceId, error));
+                    logEntryContextManager.addLog(ExceptionLog.of(traceId, error));
                 }
 
-                logEntryContextManager.addLog(ExecutionDetailLog.create(
+                logEntryContextManager.addLog(ExecutionDetailLog.of(
                     traceId,
                     className,
                     methodName,

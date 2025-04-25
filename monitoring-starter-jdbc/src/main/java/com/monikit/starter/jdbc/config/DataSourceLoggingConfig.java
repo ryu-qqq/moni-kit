@@ -5,9 +5,8 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -40,56 +39,61 @@ import com.monikit.starter.jdbc.proxy.LoggingPreparedStatementFactory;
  */
 
 @Configuration
+@ConditionalOnProperty(
+    prefix = "monikit.logging",
+    name = "datasource-logging-enabled",
+    havingValue = "true",
+    matchIfMissing = false
+)
 public class DataSourceLoggingConfig {
 
-    private static final Logger logger =  LoggerFactory.getLogger(QueryLoggingConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceLoggingConfig.class);
 
     /**
-     * 기존 {@code DataSource}를 {@link LoggingDataSource}로 감싸는 빈.
+     * {@code DataSource}를 {@link LoggingDataSource}로 감싸는 프록시 빈을 등록합니다.
      *
      * <p>
-     * - {@code "originalDataSource"}라는 이름으로 DataSource가 등록되어 있어야 함
-     * - {@code logEnabled=true} && {@code datasourceLoggingEnabled=true}일 경우에만 적용
+     * 단, {@code monikit.logging.log-enabled=true}일 때만 래핑이 적용되며,
+     * 그렇지 않으면 원본 {@code DataSource}를 그대로 반환합니다.
      * </p>
      *
-     * @param originalDataSource 원본 데이터소스
-     * @param preparedStatementFactory PreparedStatement 프록시 생성 팩토리
-     * @param loggingProperties 로깅 속성
-     * @return 로깅이 적용된 {@code DataSource} 또는 원본 {@code DataSource}
+     * @param dataSourceProvider {@code DataSource} 주입 제공자
+     * @param preparedStatementFactory 프록시 팩토리
+     * @param loggingProperties 설정
+     * @return 래핑된 또는 원본 {@code DataSource}
      */
-
     @Bean
     @Primary
-    @ConditionalOnBean(name = "originalDataSource")
     public DataSource loggingDataSource(
-        @Qualifier("originalDataSource") DataSource originalDataSource,
+        ObjectProvider<DataSource> dataSourceProvider,
         LoggingPreparedStatementFactory preparedStatementFactory,
-        MoniKitLoggingProperties loggingProperties) {
+        MoniKitLoggingProperties loggingProperties
+    ) {
+        DataSource original = dataSourceProvider.getIfAvailable();
+        if (original == null) {
+            logger.warn("[MoniKit] No DataSource found. Cannot wrap.");
+            return null;
+        }
 
         if (!loggingProperties.isLogEnabled()) {
-            logger.warn("[MoniKit] logEnabled is disabled. Returning original DataSource.");
-            return originalDataSource;
+            logger.info("[MoniKit] logEnabled is false. Returning original DataSource.");
+            return original;
         }
 
-        if (!loggingProperties.isDatasourceLoggingEnabled()) {
-            logger.info("[MoniKit] Datasource logging is disabled. Returning original DataSource.");
-            return originalDataSource;
-        }
-
-        logger.info("[MoniKit] Datasource logging is enabled. Wrapping DataSource with LoggingDataSource.");
-        return new LoggingDataSource(originalDataSource, preparedStatementFactory);
+        logger.info("[MoniKit] Wrapping DataSource with LoggingDataSource.");
+        return new LoggingDataSource(original, preparedStatementFactory);
     }
 
     /**
-     * {@link DataSourceProvider}가 없을 경우 기본 구현체를 등록한다.
+     * {@link DataSourceProvider}가 존재하지 않을 경우 기본 구현체를 등록합니다.
      *
-     * @param dataSourceProvider {@code DataSource}의 ObjectProvider
-     * @return 기본 {@link DefaultDataSourceProvider}
+     * @param dataSourceProvider {@code DataSource}의 Provider
+     * @return {@link DefaultDataSourceProvider}
      */
     @Bean
     @ConditionalOnMissingBean(DataSourceProvider.class)
     public DataSourceProvider defaultDataSourceProvider(ObjectProvider<DataSource> dataSourceProvider) {
-        logger.info("[MoniKit] No custom DataSourceProvider found. Using DefaultDataSourceProvider.");
+        logger.info("[MoniKit] Registering DefaultDataSourceProvider.");
         return new DefaultDataSourceProvider(dataSourceProvider);
     }
 

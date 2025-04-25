@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.monikit.config.MoniKitMetricsProperties;
-import com.monikit.core.HttpInboundResponseLog;
+import com.monikit.core.model.HttpInboundResponseLog;
 import com.monikit.core.LogType;
 
 

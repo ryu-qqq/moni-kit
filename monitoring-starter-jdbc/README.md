@@ -4,8 +4,15 @@
 
 `monikit-starter-jdbc`는 JDBC 기반의 SQL 실행을 **자동으로 감시하고**, **실행 로그 및 메트릭을 수집**할 수 있는 경량 로깅 모듈입니다.  
 이 스타터는 기존 `DataSource`를 감싸는 프록시 형태로 동작하며, 애플리케이션의 **쿼리 실행 시간**, **슬로우 쿼리 감지**, **Trace ID 기반의 추적**을 지원합니다.
-
+> 내부적으로 `ObjectProvider<DataSource>`를 통해 순환 참조를 방지하며,  
+> 이미 등록된 `@Primary` DataSource 가 감싸져도 무한 래핑은 발생하지 않습니다.
 ---
+
+## ✅ 지원 대상
+
+- Spring Boot 기본 JDBC (`JdbcTemplate`, `DataSource`)
+- HikariCP, Tomcat, DBCP 등 **커넥션 풀 사용 가능**
+- `javax.sql.DataSource`를 기반으로 작동
 
 ## ⚙️ 기본 기능
 
@@ -92,9 +99,6 @@ public Connection getConnection() {
 
 `DataSourceLoggingConfig`와 `QueryLoggingConfig`는 Spring Boot의 AutoConfiguration으로 등록됩니다.
 
-- `@ConditionalOnBean(name = "originalDataSource")`  
-  → 원본 데이터소스가 `originalDataSource` 이름으로 등록되어 있어야 로깅 활성화
-
 - `monikit.logging.log-enabled=true`
 - `monikit.logging.datasource-logging-enabled=true`  
   → 이 두 조건이 만족될 때만 `LoggingDataSource`가 적용됩니다.
@@ -108,10 +112,7 @@ monikit:
   logging:
     log-enabled: true
     datasource-logging-enabled: true
-    trace-enabled: true
-    detailed-logging: true
-    slow-query-threshold-ms: 1000
-    critical-query-threshold-ms: 5000
+
 ```
 
 ---
@@ -132,8 +133,6 @@ monikit:
 ---
 
 ## 🧪 테스트 팁
-
-- `@Qualifier("originalDataSource")`로 원본 DataSource를 명시해 등록할 것
 - 비활성화 테스트는 `log-enabled=false` 설정으로 확인 가능
 
 

@@ -1,9 +1,9 @@
 package com.monikit.metric;
 
 import com.monikit.config.MoniKitMetricsProperties;
-import com.monikit.core.HttpInboundResponseLog;
+import com.monikit.core.model.HttpInboundResponseLog;
 import com.monikit.core.LogType;
-import com.monikit.core.MetricCollector;
+import com.monikit.core.hook.MetricCollector;
 
 /**
  * 서버에서 나가는 HTTP 응답 메트릭을 수집하는 기본 구현체.

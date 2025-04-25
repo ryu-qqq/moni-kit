@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import com.monikit.starter.jdbc.DataSourceProvider;
-import com.monikit.core.DatabaseQueryLog;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.model.DatabaseQueryLog;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.LogLevel;
 
 import static org.junit.jupiter.api.Assertions.*;

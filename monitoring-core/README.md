@@ -1,26 +1,39 @@
 # MoniKit Core (v1.1.3)
 
-## 개요
-MoniKit은 서버의 다양한 이벤트와 성능을 효과적으로 기록할 수 있도록 설계된 경량 로깅 프레임워크입니다. 
-모든 로그는 구조화된 데이터를 생성하여 **ELK (Elasticsearch, Logstash, Kibana)** 및 **Prometheus**와 원활하게 연동될 수 있도록 설계되었습니다.
+## 📌 개요
+MoniKit은 서버의 다양한 이벤트와 성능을 효과적으로 기록할 수 있도록 설계된 **경량 구조화 로깅 프레임워크**입니다.
 
-이 문서는 `monikit-core` 패키지의 핵심 구성 요소를 설명하며, 커스텀 로그 정의, 메트릭 수집기, 로그 전송 채널 및 후처리 훅 설계를 위한 기반 인터페이스를 안내합니다.
+모든 로그는 `LogEntry` 인터페이스를 구현하는 구조화 객체로 표현되며,
+이는 **ELK (Elasticsearch, Logstash, Kibana)** 및 **Prometheus**와 자연스럽게 연동될 수 있도록 설계되었습니다.
 
----
-
-## 주요 변경 사항 (v1.1.3)
-
-- `SimpleLog` 클래스 추가: 단순 메시지를 구조화 로그로 출력 가능
-- `LogSinkCustomizer` 인터페이스 추가: 로그 전송 채널을 런타임에 커스터마이징 가능
-- `MetricCollectorLogAddHook` 클래스 기본 제공: 로그 추가 시 자동 메트릭 수집
-- `LogFlushHookCustomizer` 인터페이스 추가: 사용자 정의 flush 후처리를 손쉽게 확장 가능
-- `LogSink`, `LogAddHook`, `LogFlushHook`에 대한 책임 및 용도 명확화
+이 문서는 `monikit-core` 패키지의 아키텍처와 구성 요소, 그리고 도메인 계층 설계 철학을 설명합니다.
 
 ---
 
-## 핵심 구성 요소
+## 🚧 설계 철학
 
-### 1. `LogEntry` 인터페이스
+- `monikit-core`는 **어떠한 외부 프레임워크에도 의존하지 않는 순수 자바 코드로만 구성**되어 있습니다.
+- 스프링이나 마이크로서비스 환경에서 사용할 경우, 별도의 `starter-*` 모듈을 통해 확장됩니다.
+- **컨텍스트 전파, 로그 수집, 메트릭 기록, 전송 전략**을 모두 도메인 단위로 나누어 응집도 높은 설계를 따릅니다.
+- 모든 클래스는 **어디서든 임포트해서 사용할 수 있어야 하며**, 실행 주체(Runnable)는 core에 포함되지 않습니다.
+
+---
+
+## ✅ 디렉토리 구성 및 책임
+
+| 패키지 | 책임 |
+|--------|------|
+| `model/` | 구조화 로그 엔트리 (`LogEntry` 구현체) 정의 |
+| `context/` | 로그 수집 컨텍스트 관리 (`LogEntryContext`, `ContextManager`) |
+| `concurrent/` | ThreadLocal 기반 컨텍스트 전파 처리기 (`ThreadContextHandler`) |
+| `hook/` | 로그 수집 시점/flush 시점의 후처리 Hook 정의 및 확장 커스터마이저 |
+| `notifier/` | 로그 전송 오케스트레이터 (`LogNotifier`, `LogSink`) 및 Sink 확장 |
+
+---
+
+## 주요 클래스 요약
+
+### 🔹 LogEntry 인터페이스
 ```java
 public interface LogEntry {
     Instant getTimestamp();
@@ -30,134 +43,30 @@ public interface LogEntry {
     String toString();
 }
 ```
-- 모든 로그 클래스는 이 인터페이스를 구현
-- JSON 직렬화를 통해 로그 시스템에 전달
+- 모든 구조화 로그의 공통 구조
+- JSON 직렬화를 통해 로그 시스템 전송에 최적화
 
 ---
 
-### 2. 주요 로그 클래스
-
-| 카테고리 | 클래스 | 설명 |
-|----------|--------|------|
-| 실행 | `SimpleLog` | 일반 단순 메세지 로그 (traceId 포함) |
-| 실행 | `ExecutionLog`, `ExecutionDetailLog` | 메서드 실행 시간, input/output, 임계값 기반 필터링 |
-| 예외 | `ExceptionLog` | 예외 정보 및 타입 추적 |
-| DB | `DatabaseQueryLog` | SQL 실행 정보 추적 |
-| 배치 | `BatchJobLog`, `BatchStepLog`, `BatchChunkLog` | Spring Batch Job/Step/Chunk 실행 로그 |
-| HTTP | `HttpInboundRequestLog`, `HttpOutboundResponseLog`, 등 | HTTP 요청/응답 구조화 로그 |
-
----
-
-### 3. `LogSink`
-```java
-public interface LogSink {
-    boolean supports(LogType logType);
-    void send(LogEntry logEntry);
-}
-```
-- 로그의 전송 채널을 정의하는 인터페이스 (예: Console, Slack, S3, Kafka 등)
-- `supports(LogType)` 메서드로 전송 대상 필터링 가능
-- `LogNotifier`에서 사용됨
-
----
-
-### 4. `LogAddHook`
-```java
-public interface LogAddHook {
-    void onAdd(LogEntry logEntry);
-}
-```
-- `LogEntryContextManager.addLog()` 시점에 동작하는 실시간 후처리 훅
-- Slack 알림, 상태 업데이트, 메트릭 증가 등의 목적
-- LogSink와는 역할이 다르며, 부가처리에 최적화
-- 기본 제공 구현체: `MetricCollectorLogAddHook`
-
-#### 확장 방식: `LogAddHookCustomizer`
-```java
-public interface LogAddHookCustomizer {
-    void customize(List<LogAddHook> hooks);
-}
-```
-- LogAddHook 리스트를 동적으로 확장하거나 수정할 수 있도록 지원하는 커스터마이저 인터페이스
-- 사용자는 여러 Hook을 조합하거나 조건에 따라 적용할 수 있음
-- `LogEntryContextManager` 초기화 시점에 적용되며, 후처리 흐름을 조립할 때 유용함
-
-#### 예시
-```java
-@Component
-public class CustomLogAddHookCustomizer implements LogAddHookCustomizer {
-    @Override
-    public void customize(List<LogAddHook> hooks) {
-        hooks.add(new SlackAlertAddHook());
-    }
-}
-```
-- 기본 제공 구현체: `MetricCollectorLogAddHook`
-
----
-
-### 5. `LogFlushHook`
-```java
-public interface LogFlushHook {
-    void onFlush(List<LogEntry> logEntries);
-}
-```
-- `LogEntryContextManager.flush()` 시점에 전체 로그 목록 대상으로 실행되는 후처리 훅
-- DB 저장, 집계 처리, 압축 및 S3 업로드 등 배치성 로직에 최적
-- **MoniKit은 기본적으로 `LogFlushHook`을 등록하지 않으며**, flush 후처리가 필요한 경우 사용자가 `LogFlushHook`을 직접 구현하고, 해당 인스턴스를 `LogFlushHookCustomizer`를 통해 명시적으로 추가해야 합니다.
-- hook이 전혀 등록되지 않으면 flush 동작은 건너뛰어지며, 아무 작업도 수행하지 않습니다.
-
----
-
-### 6. `LogFlushHookCustomizer`
-```java
-public interface LogFlushHookCustomizer {
-    void customize(List<LogFlushHook> hooks);
-}
-```
-
-- flush 후처리 로직을 동적으로 조합하거나 추가할 수 있는 확장 포인트입니다.
-- MoniKit의 기본 DefaultLogEntryContextManager는 이 커스터마이저를 자동으로 인식하고, 내부적으로 초기화한 List<LogFlushHook>에 후처리 훅을 주입합니다.
-- 만약 flush 동작이 필요한데 직접 LogFlushHook을 빈으로 등록하지 않았다면, 이 커스터마이저를 활용해 필요한 훅을 등록할 수 있습니다.
-
-#### 사용 예시
-```java
-@Component
-public class SomethingFlushHookCustomizer implements LogFlushHookCustomizer {
-    @Override
-    public void customize(List<LogFlushHook> hooks) {
-        hooks.add(new SomethingFlushHook());
-    }
-}
-```
-
----
-
-### 7. `LogNotifier`
+### 🔹 LogNotifier & LogSink
 ```java
 public interface LogNotifier {
     void notify(LogLevel logLevel, String message);
     void notify(LogEntry logEntry);
 }
-```
-- 실제 로그 전송을 트리거하는 컴포넌트
-- 내부적으로 `LogSink`를 통해 전송 분기 처리
-- 기본 구현: `Slf4jLogger`
 
----
-
-### 8. `LogSinkCustomizer`
-```java
-public interface LogSinkCustomizer {
-    void customize(List<LogSink> sinks);
+public interface LogSink {
+    boolean supports(LogType logType);
+    void send(LogEntry logEntry);
 }
 ```
-- 사용자가 로그 전송 Sink를 동적으로 추가하거나 필터링할 수 있는 확장 포인트
-- Slf4jLoggerAutoConfiguration 에서 활용됨
+- `LogNotifier`는 여러 개의 `LogSink`를 가지고 타입 기준으로 분배
+- `LogSink`는 전송 전략(예: Slack, File, Console 등)
+- `LogSinkCustomizer`를 통해 확장 가능
 
 ---
 
-### 9. `LogEntryContextManager`
+### 🔹 LogEntryContextManager
 ```java
 public interface LogEntryContextManager {
     void addLog(LogEntry logEntry);
@@ -165,54 +74,47 @@ public interface LogEntryContextManager {
     void clear();
 }
 ```
-- 요청 단위의 로그 수집, 전송, 후처리를 관리하는 핵심 매니저
-- 기본 구현: `DefaultLogEntryContextManager`
-- 내부적으로 `LogAddHook`, `LogFlushHook`, `LogNotifier` 연동
+- 요청 단위 로그 저장 및 후처리 전송 담당
+- 내부적으로 Hook, Notifier 연동
 
 ---
 
-### 10. `TraceIdProvider`, `ThreadContextHandler`
-- TraceId를 스레드 간 안전하게 전파하는 유틸리티 인터페이스
-- MDC 기반 구현체 제공 (예: `MDCTraceIdProvider`, `MDCThreadContextHandler`)
+### 🔹 Hook 구조 (onAdd / onFlush)
+- `LogAddHook`: 로그 추가 시점 후처리
+- `LogFlushHook`: flush 시점 전체 로그 후처리
+- 각각 `HookCustomizer`로 동적 확장 가능
 
 ---
 
-### 11. `MetricCollector`, `MetricCollectorCustomizer`
+### 🔹 MetricCollector
 ```java
 public interface MetricCollector<T extends LogEntry> {
     boolean supports(LogType type);
     void record(T logEntry);
 }
-
-public interface MetricCollectorCustomizer {
-    void customize(List<MetricCollector<? extends LogEntry>> collectors);
-}
 ```
-- 로그 기반 메트릭 수집기 및 사용자 정의 확장 인터페이스
-- Prometheus, Micrometer 등과의 통합 용도
+- Prometheus, Micrometer 연동을 위한 메트릭 수집기
+- `MetricCollectorCustomizer`로 등록 가능
 
 ---
 
-## 사용 가이드 요약
-
+## 사용 예시
 ```java
 try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
     logEntryContextManager.addLog(new ExecutionLog(...));
-    }
+}
 ```
-
-- 반드시 try-with-resources 사용
-- 수동 `flush()` 대신 `LogContextScope` 사용을 권장
+- 로그는 Scope 단위로 수집
+- 종료 시점에 자동 flush()
 
 ---
 
-## 더 알아보기
+## 모듈 연계 안내
 
-- [monitoring-starter-batch](../monitoring-starter-batch)
-- [monitoring-starter-web](../monitoring-starter-web)
-- [monitoring-metric](../monitoring-metric)
+- `monitoring-starter-web` → Web 환경에서 AOP + 필터 기반 적용
+- `monitoring-starter-batch` → Spring Batch와 통합
+- `monitoring-metric` → Prometheus 기반 메트릭 바인딩
 
 ---
 
 (c) 2024 Ryu-qqq. MoniKit 프로젝트
-

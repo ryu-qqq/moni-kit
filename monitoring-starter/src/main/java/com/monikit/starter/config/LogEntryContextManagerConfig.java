@@ -9,13 +9,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.monikit.core.DefaultLogEntryContextManager;
-import com.monikit.core.LogAddHook;
-import com.monikit.core.LogAddHookCustomizer;
-import com.monikit.core.LogEntryContextManager;
-import com.monikit.core.LogFlushHook;
-import com.monikit.core.LogFlushHookCustomizer;
-import com.monikit.core.LogNotifier;
+import com.monikit.core.context.DefaultLogEntryContextManager;
+import com.monikit.core.hook.LogAddHook;
+import com.monikit.core.hook.LogAddHookCustomizer;
+import com.monikit.core.context.LogEntryContextManager;
+import com.monikit.core.hook.LogFlushHook;
+import com.monikit.core.hook.LogFlushHookCustomizer;
+import com.monikit.core.notifier.LogNotifier;
 
 import jakarta.annotation.Nullable;
 

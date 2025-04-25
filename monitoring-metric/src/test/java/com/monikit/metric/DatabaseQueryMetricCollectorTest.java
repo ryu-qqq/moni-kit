@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.monikit.config.MoniKitMetricsProperties;
-import com.monikit.core.DatabaseQueryLog;
+import com.monikit.core.model.DatabaseQueryLog;
 import com.monikit.core.LogType;
 
 

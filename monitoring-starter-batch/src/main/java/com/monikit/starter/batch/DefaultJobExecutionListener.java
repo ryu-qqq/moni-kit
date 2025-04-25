@@ -10,8 +10,8 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.core.annotation.Order;
 
-import com.monikit.core.BatchJobLog;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.model.BatchJobLog;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.LogLevel;
 import com.monikit.core.TraceIdProvider;
 
@@ -47,7 +47,7 @@ public class DefaultJobExecutionListener implements JobExecutionListener {
         long executionTime = end.toEpochMilli() - start.toEpochMilli();
         LogLevel level = resolveLogLevel(jobExecution.getStatus(), jobExecution.getExitStatus());
 
-        BatchJobLog log = BatchJobLog.create(
+        BatchJobLog log = BatchJobLog.of(
             traceIdProvider.getTraceId(),
             jobExecution.getJobInstance().getJobName(),
             start,

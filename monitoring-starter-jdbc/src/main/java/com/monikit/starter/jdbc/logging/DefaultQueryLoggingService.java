@@ -1,8 +1,8 @@
 package com.monikit.starter.jdbc.logging;
 
 import com.monikit.starter.jdbc.DataSourceProvider;
-import com.monikit.core.DatabaseQueryLog;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.model.DatabaseQueryLog;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.LogLevel;
 import com.monikit.starter.jdbc.QueryLoggingService;
 
@@ -75,7 +75,7 @@ public class DefaultQueryLoggingService implements QueryLoggingService {
             criticalQueryThresholdMs
         );
 
-        DatabaseQueryLog logEntry = DatabaseQueryLog.create(
+        DatabaseQueryLog logEntry = DatabaseQueryLog.of(
             traceId, sql, executionTime, dataSourceName,
             parameter, rowsAffected, -1, logLevel
         );

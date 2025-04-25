@@ -2,12 +2,12 @@ package com.monikit.slf4j;
 
 import java.util.List;
 
-import com.monikit.core.LogEntry;
 import com.monikit.core.LogLevel;
-import com.monikit.core.LogNotifier;
-import com.monikit.core.LogSink;
-import com.monikit.core.SimpleLog;
+import com.monikit.core.notifier.LogNotifier;
+import com.monikit.core.notifier.LogSink;
 import com.monikit.core.TraceIdProvider;
+import com.monikit.core.model.LogEntry;
+import com.monikit.core.model.SimpleLog;
 
 /**
  * SLF4J 기반 {@link LogNotifier} 기본 구현체.
@@ -22,8 +22,8 @@ import com.monikit.core.TraceIdProvider;
  * </p>
  *
  *
- * @see com.monikit.core.LogSink
- * @see com.monikit.core.SimpleLog
+ * @see LogSink
+ * @see SimpleLog
  * @see com.monikit.core.TraceIdProvider
  * @since 1.1.2
  */
@@ -55,7 +55,7 @@ public class Slf4jLogger implements LogNotifier {
 
     @Override
     public void notify(LogLevel logLevel, String message) {
-        SimpleLog simpleLog = SimpleLog.create(traceIdProvider.getTraceId(), logLevel, message);
+        SimpleLog simpleLog = SimpleLog.of(traceIdProvider.getTraceId(), logLevel, message);
         sinks.forEach(sink -> sink.send(simpleLog));
     }
 
