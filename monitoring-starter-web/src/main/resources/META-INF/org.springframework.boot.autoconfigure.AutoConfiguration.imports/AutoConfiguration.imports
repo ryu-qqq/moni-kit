@@ -1,3 +1,4 @@
 com.monikit.starter.web.config.FilterAutoConfiguration
 com.monikit.starter.web.config.HttpLoggingInterceptorConfiguration
 com.monikit.starter.web.config.InterceptorAutoConfiguration
+com.monikit.starter.web.config.MoniKitWebPropertiesAutoConfiguration

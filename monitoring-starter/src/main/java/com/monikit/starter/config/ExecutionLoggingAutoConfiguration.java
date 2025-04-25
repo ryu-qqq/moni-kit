@@ -27,7 +27,6 @@ import com.monikit.starter.ExecutionLoggingAspect;
 @ConditionalOnProperty(name = "monikit.logging.logging-enabled", havingValue = "true", matchIfMissing = false)
 public class ExecutionLoggingAutoConfiguration {
 
-
     private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
 
     @Bean

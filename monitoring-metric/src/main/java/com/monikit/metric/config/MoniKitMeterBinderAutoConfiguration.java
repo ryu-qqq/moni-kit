@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.monikit.metric.ExecutionDetailCountMetricsBinder;
+import com.monikit.metric.ExecutionDetailDurationMetricsBinder;
 import com.monikit.metric.HttpResponseCountMetricsBinder;
 import com.monikit.metric.HttpResponseDurationMetricsBinder;
 import com.monikit.metric.SqlQueryCountMetricsBinder;
@@ -78,5 +80,20 @@ public class MoniKitMeterBinderAutoConfiguration {
         logger.info("[MoniKit] Registered MeterBinder: HttpResponseDurationMetricsBinder");
         return new HttpResponseDurationMetricsBinder();
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ExecutionDetailCountMetricsBinder executionDetailCountMetricsBinder() {
+        logger.info("[MoniKit] Registered MeterBinder: ExecutionDetailCountMetricsBinder");
+        return new ExecutionDetailCountMetricsBinder();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ExecutionDetailDurationMetricsBinder executionDetailDurationMetricsBinder() {
+        logger.info("[MoniKit] Registered MeterBinder: ExecutionDetailDurationMetricsBinder");
+        return new ExecutionDetailDurationMetricsBinder();
+    }
+
 
 }

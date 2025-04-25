@@ -8,11 +8,13 @@ plugins {
 dependencies {
     implementation project(':monitoring-core')
     implementation project(':monitoring-config')
+    implementation project(':monitoring-starter')
+
     implementation "org.slf4j:slf4j-api:${slf4jVersion}"
 
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
     implementation "org.springframework:spring-webmvc"
-
+    implementation "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
     compileOnly "jakarta.servlet:jakarta.servlet-api:${jakartaServletVersion}"
 
     testImplementation "org.springframework.boot:spring-boot-starter-web"

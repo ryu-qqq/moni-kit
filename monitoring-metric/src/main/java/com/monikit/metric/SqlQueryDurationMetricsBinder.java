@@ -36,6 +36,7 @@ public class SqlQueryDurationMetricsBinder implements MeterBinder {
      * @param dataSource    데이터 소스 (DB 연결 정보)
      * @param executionTime 실행 시간 (ms)
      */
+
     public void record(String sql, String dataSource, long executionTime) {
         if (meterRegistry == null) return;
 

@@ -34,34 +34,40 @@ public class DefaultJobExecutionListener implements JobExecutionListener {
     @Override
     public void beforeJob(JobExecution jobExecution) {
         String traceId = resolveTraceId(jobExecution);
-        traceIdProvider.setTraceId(traceId);
+        if (traceIdProvider != null) {
+            traceIdProvider.setTraceId(traceId);
+        }
     }
 
     @Override
     public void afterJob(JobExecution jobExecution) {
-        Instant start = jobExecution.getStartTime().toInstant(ZoneOffset.UTC);
-        Instant end = jobExecution.getEndTime() != null
-            ? jobExecution.getEndTime().toInstant(ZoneOffset.UTC)
-            : Instant.now();
+        if (contextManager != null && traceIdProvider != null) {
 
-        long executionTime = end.toEpochMilli() - start.toEpochMilli();
-        LogLevel level = resolveLogLevel(jobExecution.getStatus(), jobExecution.getExitStatus());
+            Instant start = jobExecution.getStartTime().toInstant(ZoneOffset.UTC);
+            Instant end = jobExecution.getEndTime() != null
+                ? jobExecution.getEndTime().toInstant(ZoneOffset.UTC)
+                : Instant.now();
 
-        BatchJobLog log = BatchJobLog.of(
-            traceIdProvider.getTraceId(),
-            jobExecution.getJobInstance().getJobName(),
-            start,
-            end,
-            executionTime,
-            jobExecution.getStatus().name(),
-            jobExecution.getExitStatus().getExitCode(),
-            jobExecution.getExitStatus().getExitDescription(),
-            level
-        );
+            long executionTime = end.toEpochMilli() - start.toEpochMilli();
+            LogLevel level = BatchLogLevelResolver.resolveFromJob(jobExecution.getStatus(), jobExecution.getExitStatus());
 
-        contextManager.addLog(log);
-        contextManager.flush();
-        traceIdProvider.clear();
+            BatchJobLog log = BatchJobLog.of(
+                traceIdProvider.getTraceId(),
+                jobExecution.getJobInstance().getJobName(),
+                start,
+                end,
+                executionTime,
+                jobExecution.getStatus().name(),
+                jobExecution.getExitStatus().getExitCode(),
+                jobExecution.getExitStatus().getExitDescription(),
+                level
+            );
+
+            contextManager.addLog(log);
+            contextManager.flush();
+            traceIdProvider.clear();
+        }
+
     }
 
     private String resolveTraceId(JobExecution jobExecution) {
@@ -69,29 +75,6 @@ public class DefaultJobExecutionListener implements JobExecutionListener {
         return (param != null && !param.isBlank())
             ? param
             : UUID.randomUUID().toString();
-    }
-
-    private LogLevel resolveLogLevel(BatchStatus status, ExitStatus exitStatus) {
-        if (status == BatchStatus.FAILED || status == BatchStatus.STOPPED) {
-            return LogLevel.ERROR;
-        }
-
-        if (status == BatchStatus.UNKNOWN || status == BatchStatus.ABANDONED) {
-            return LogLevel.WARN;
-        }
-
-        String exitCode = exitStatus.getExitCode();
-
-        if (exitCode != null && (
-            exitCode.contains("EXCEPTION") ||
-                exitCode.contains("FAILURE") ||
-                exitCode.contains("ERROR") ||
-                exitCode.contains("TIMEOUT"))
-        ) {
-            return LogLevel.ERROR;
-        }
-
-        return LogLevel.INFO;
     }
 
 }

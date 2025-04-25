@@ -12,6 +12,10 @@ import org.springframework.context.annotation.Configuration;
 import com.monikit.config.MoniKitMetricsProperties;
 import com.monikit.core.hook.MetricCollector;
 import com.monikit.metric.DatabaseQueryMetricCollector;
+import com.monikit.metric.ExecutionDetailCountMetricsBinder;
+import com.monikit.metric.ExecutionDetailDurationMetricsBinder;
+import com.monikit.metric.ExecutionDetailMetricCollector;
+import com.monikit.metric.ExecutionMetricRecorder;
 import com.monikit.metric.HttpInboundResponseMetricCollector;
 import com.monikit.metric.HttpOutboundResponseMetricCollector;
 import com.monikit.metric.HttpResponseCountMetricsBinder;
@@ -83,6 +87,17 @@ public class MetricCollectorAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnClass(ExecutionMetricRecorder.class)
+    @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnMissingBean(HttpResponseMetricsRecorder.class)
+    public ExecutionMetricRecorder executionMetricRecorder(ExecutionDetailCountMetricsBinder executionDetailCountMetricsBinder,
+                                                           ExecutionDetailDurationMetricsBinder executionDetailDurationMetricsBinder) {
+        logger.info("[MoniKit] Registered ExecutionMetricRecorder");
+        return new ExecutionMetricRecorder(executionDetailCountMetricsBinder, executionDetailDurationMetricsBinder);
+    }
+
+
+    @Bean
     @ConditionalOnProperty(name = "monikit.metrics.httpMetricsEnabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnBean(HttpResponseMetricsRecorder.class)
     public MetricCollector<?> httpInboundResponseMetricCollector(MoniKitMetricsProperties metricsProperties,
@@ -99,6 +114,17 @@ public class MetricCollectorAutoConfiguration {
         logger.info("[MoniKit] Registered MetricCollector: HttpOutboundResponseMetricCollector");
         return new HttpOutboundResponseMetricCollector(metricsProperties, httpResponseMetricsRecorder);
     }
+
+
+    @Bean
+    @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnBean(HttpResponseMetricsRecorder.class)
+    public MetricCollector<?> httpOutboundResponseMetricCollector(MoniKitMetricsProperties metricsProperties,
+                                                                  ExecutionMetricRecorder executionMetricRecorder) {
+        logger.info("[MoniKit] Registered MetricCollector: ExecutionDetailMetricCollector");
+        return new ExecutionDetailMetricCollector(metricsProperties, executionMetricRecorder);
+    }
+
 
 
 }

@@ -1,4 +1,4 @@
-# MoniKit Slf4j (v1.1.3)
+# MoniKit Slf4j (v1.1.2)
 
 ## 🧭 개요
 

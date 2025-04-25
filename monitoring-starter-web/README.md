@@ -1,25 +1,45 @@
-
-# MoniKit Starter WEB
+# MoniKit Starter WEB (v1.1.3)
 
 ## 📌 개요
 
-`monikit-starter-web`은 Spring 웹 애플리케이션에서 **HTTP 요청을 자동 추적하고**, **로그 및 메트릭 수집**을 지원하는 경량 로깅 모듈입니다.  
-클라이언트 요청부터 응답까지의 흐름을 **Trace ID 기반으로 추적**하고, **슬로우 응답 감지**, **요청 본문 및 응답 본문 기록**, **예외 자동 로깅** 기능을 제공합니다.
+`monikit-starter-web`은 Spring 웹 애플리케이션에서 **HTTP 요청/응답을 자동 추적하고**,  
+**로그 및 메트릭 수집**, **Trace ID 기반 요청 흐름 추적**, **예외 자동 로깅**을 지원하는 경량 로깅 모듈입니다.
+
+> ✅ 이 모듈은 `monikit-starter`를 내부적으로 포함하고 있어,  
+> ✅ 의존성 하나만 추가하면 JDBC 감시, 메트릭 수집, 로깅 설정까지 전부 자동으로 적용됩니다.
 
 ---
 
-## ⚙️ 기본 기능
+## ⚙️ 포함 기능
 
-- `TraceIdFilter`: Trace ID 자동 생성 및 MDC에 설정
-- `LogContextScopeFilter`: 요청 단위 로깅 컨텍스트 생성 및 정리
-- `HttpLoggingInterceptor`: 요청/응답 정보 로깅
-- 요청/응답 본문 캡처 (`RequestWrapper`, `ContentCachingResponseWrapper`)
-- 메트릭 수집 및 커스텀 로깅 인터페이스 연동
-- 최소한의 설정으로 자동 구성 지원
+- Trace ID 기반 요청 흐름 추적 (`X-Trace-Id`)
+- 슬로우 응답 감지 및 구조화 로그 수집
+- HTTP 요청/응답 본문 캡처 및 로깅
+- Micrometer 기반 응답 시간/횟수 메트릭 수집
+- MDC 기반 컨텍스트 전파 및 범위 관리
+- AOP 기반 메서드 실행 시간 로깅 (Core 포함)
+- JDBC 쿼리 감시 자동 적용 (조건부)
 
 ---
 
-## 🧩 주요 흐름
+## ✅ 자동 포함 구성
+
+의존성 하나로 아래 모듈이 자동으로 포함됩니다:
+
+```
+monikit-starter-web
+├── monitoring-starter
+│   ├── monitoring-core
+│   ├── monitoring-config
+│   ├── monitoring-metric
+│   ├── monitoring-jdbc
+│   └── monitoring-slf4j
+└── web-specific filter/interceptor 설정
+```
+
+---
+
+## 🧩 요청 처리 흐름
 
 ```text
 [클라이언트 요청]
@@ -39,74 +59,62 @@
 
 ---
 
-## 🧱 주요 구성 요소
+## ⚙️ 자동 설정 클래스
 
-### 1. `TraceIdFilter`
-- 요청에 `X-Trace-Id` 헤더가 없으면 UUID 생성
-- `TraceIdProvider`를 통해 Trace ID를 MDC에 저장
-- 응답에도 동일한 `X-Trace-Id` 포함
-
-### 2. `LogContextScopeFilter`
-- 요청 시작 시 MDC Scope를 열고, 종료 시 자동 정리
-- 요청/응답 본문 캡처 가능 (`RequestWrapper`, `ContentCachingResponseWrapper` 사용)
-- 제외 경로(`EXCLUDED_PATHS`) 처리 지원
-
-### 3. `HttpLoggingInterceptor`
-- `HandlerInterceptor` 구현체
-- 요청 로그: 메서드, URI, 쿼리, 헤더, 바디, IP, User-Agent 등
-- 응답 로그: 상태코드, 헤더, 바디, 처리 시간
-- `TraceIdProvider` 및 `LogEntryContextManager` 사용
+| 클래스명 | 설명 |
+|----------|------|
+| `FilterAutoConfiguration` | TraceId, Scope 필터 자동 등록 |
+| `HttpLoggingInterceptorConfiguration` | Interceptor Bean 등록 |
+| `InterceptorAutoConfiguration` | Spring WebMvc에 인터셉터 적용 |
+| (포함) `DataSourceLoggingConfig` | JDBC 감시 자동 적용 (`log-enabled`, `datasource-logging-enabled` 조건) |
+| (포함) `MoniKitMeterBinderAutoConfiguration` | Micrometer 연동 메트릭 자동 등록 |
 
 ---
 
-## ⚙️ 자동 설정 구성
-
-### 1. `FilterAutoConfiguration`
-- `TraceIdFilter`, `LogContextScopeFilter` 자동 등록
-- 순서 지정 (`TraceIdFilter`: 1번, `LogContextScopeFilter`: 2번)
-- 조건부 등록 (`monikit.logging.filters.trace-enabled`, `log-enabled`)
-
-### 2. `HttpLoggingInterceptorConfiguration`
-- `HttpLoggingInterceptor` 빈 자동 등록
-- `log-enabled`이 `true`일 때만 활성화
-
-### 3. `InterceptorAutoConfiguration`
-- `WebMvcConfigurer`를 통해 `HttpLoggingInterceptor` 등록
-- `log-enabled=false`일 경우 등록 안함
-
----
-
-## 📄 관련 설정 (application.yml)
+## 🔧 설정 예시 (application.yml)
 
 ```yaml
 monikit:
   logging:
     log-enabled: true
-    trace-enabled: true
-    datasource-logging-enabled: false
-    filters:
-      trace-enabled: true
-      log-enabled: true
+    datasource-logging-enabled: true
+    dynamic-matching:
+      - classNamePattern: ".*Service"
+        methodNamePattern: ".*Create"
+        when: "#executionTime > 300"
+        thresholdMillis: 300
+        tag: "slow-service"
+
+
+  web:
+    excluded-paths:
+      - /actuator/health
+      - /actuator/prometheus
+      - /actuator/metrics
+      - /metrics
+      - /health
+      - /
 ```
+
+> `monikit.web.excluded-paths`를 통해 로그 수집에서 제외할 경로를 직접 정의할 수 있습니다.
 
 ---
 
-## 📌 참고할 클래스
+## 💡 사용자 확장성
 
-| 클래스명 | 설명 |
-|----------|------|
-| `TraceIdFilter` | Trace ID 설정 및 응답 포함 필터 |
-| `LogContextScopeFilter` | 요청 범위 MDC 관리 필터 |
-| `HttpLoggingInterceptor` | 요청 및 응답 자동 로깅 |
-| `FilterAutoConfiguration` | 필터 자동 설정 클래스 |
-| `HttpLoggingInterceptorConfiguration` | 인터셉터 빈 등록 |
-| `InterceptorAutoConfiguration` | WebMvc에 인터셉터 등록 |
+- `LogSink`, `TraceIdProvider`, `MetricCollector` 등은 `@ConditionalOnMissingBean`으로 선언되어 있어
+  직접 구현체를 주입하면 자동으로 교체됩니다.
+- 설정 기반만으로 대부분의 기능이 동작하며, 필터/인터셉터 비활성화도 용이합니다.
+- `excluded-paths`는 YAML 설정으로 손쉽게 조절할 수 있습니다.
 
 ---
 
 ## 🧪 테스트 팁
 
-- 필터/인터셉터 비활성화 테스트: `log-enabled=false` 설정
-- 요청 본문, 응답 본문 로그 확인: `ContentCachingResponseWrapper` 로그 확인
-- `EXCLUDED_PATHS` 정의로 특정 URI 로그 제외 가능
+- 필터/인터셉터 비활성화 테스트: `log-enabled=false`
+- 요청 본문, 응답 본문 확인: `ContentCachingResponseWrapper` 로그 확인
+- `excluded-paths` 설정을 변경해 특정 경로 로깅 제외 가능
 
+---
+
+(c) 2025 Ryu Sangwon. MoniKit 프로젝트

@@ -1,10 +1,10 @@
 package com.monikit.starter.web;
 
-import java.util.Set;
+import java.util.List;
 
 public class ExcludePathConstant {
 
-    public static final Set<String> EXCLUDED_PATHS = Set.of(
+    public static List<String> EXCLUDED_PATHS = List.of(
         "/actuator/health",
         "/actuator/prometheus",
         "/actuator/metrics",
