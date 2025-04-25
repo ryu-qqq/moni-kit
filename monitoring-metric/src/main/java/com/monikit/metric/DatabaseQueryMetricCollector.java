@@ -1,9 +1,9 @@
 package com.monikit.metric;
 
 import com.monikit.config.MoniKitMetricsProperties;
-import com.monikit.core.DatabaseQueryLog;
+import com.monikit.core.model.DatabaseQueryLog;
 import com.monikit.core.LogType;
-import com.monikit.core.MetricCollector;
+import com.monikit.core.hook.MetricCollector;
 
 /**
  * 기본 SQL 쿼리 실행 메트릭을 수집하는 구현체.

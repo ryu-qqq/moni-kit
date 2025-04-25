@@ -1,7 +1,7 @@
 package com.monikit.starter.web.config;
 
 import com.monikit.config.MoniKitLoggingProperties;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.web.filter.LogContextScopeFilter;
 import com.monikit.starter.web.filter.TraceIdFilter;

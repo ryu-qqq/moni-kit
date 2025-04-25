@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.monikit.core.LogNotifier;
+import com.monikit.core.notifier.LogNotifier;
 import com.monikit.core.TraceIdProvider;
 import com.monikit.slf4j.Slf4jLogger;
 

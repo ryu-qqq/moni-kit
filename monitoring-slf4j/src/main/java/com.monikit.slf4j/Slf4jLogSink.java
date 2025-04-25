@@ -3,8 +3,8 @@ package com.monikit.slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.monikit.core.LogEntry;
-import com.monikit.core.LogSink;
+import com.monikit.core.model.LogEntry;
+import com.monikit.core.notifier.LogSink;
 import com.monikit.core.LogType;
 
 

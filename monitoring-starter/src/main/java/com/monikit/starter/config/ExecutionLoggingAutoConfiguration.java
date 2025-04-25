@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.monikit.config.MoniKitLoggingProperties;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.ExecutionLoggingAspect;
 
@@ -26,7 +26,6 @@ import com.monikit.starter.ExecutionLoggingAspect;
 @Configuration
 @ConditionalOnProperty(name = "monikit.logging.logging-enabled", havingValue = "true", matchIfMissing = false)
 public class ExecutionLoggingAutoConfiguration {
-
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
 

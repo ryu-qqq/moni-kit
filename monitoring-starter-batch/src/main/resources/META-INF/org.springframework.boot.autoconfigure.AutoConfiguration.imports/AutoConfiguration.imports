@@ -1,1 +1,3 @@
 com.monikit.starter.batch.config.BatchListenerAutoConfiguration
+com.monikit.starter.batch.config.BatchCollectorAutoConfiguration
+com.monikit.starter.batch.config.BatchMeterBinderAutoConfiguration

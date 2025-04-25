@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.monikit.core.LogEntryContextManager;
-import com.monikit.core.ThreadContextHandler;
+import com.monikit.core.context.LogEntryContextManager;
+import com.monikit.core.concurrent.ThreadContextHandler;
 import com.monikit.starter.MDCThreadContextHandler;
 
 

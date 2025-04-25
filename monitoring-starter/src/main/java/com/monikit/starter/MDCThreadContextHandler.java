@@ -5,13 +5,13 @@ import java.util.concurrent.Callable;
 
 import org.slf4j.MDC;
 
-import com.monikit.core.DefaultThreadContextHandler;
+import com.monikit.core.concurrent.DefaultThreadContextHandler;
 import com.monikit.core.LogContextScope;
-import com.monikit.core.LogEntryContextManager;
-
+import com.monikit.core.context.LogEntryContextManager;
+import com.monikit.core.concurrent.ThreadContextHandler;
 
 /**
- * SLF4J MDC 기반의 {@link com.monikit.core.ThreadContextHandler} 구현체.
+ * SLF4J MDC 기반의 {@link ThreadContextHandler} 구현체.
  * <p>
  * - {@link LogEntryContextManager}의 컨텍스트와 함께, {@link MDC} 값을 자식 스레드로 안전하게 전파합니다.
  * - 멀티스레드 환경에서도 traceId, 로그 버퍼를 유지하며 로그 추적을 가능하게 합니다.

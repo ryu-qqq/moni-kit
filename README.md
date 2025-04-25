@@ -45,9 +45,9 @@ root/
 │── monitoring-config/                  # 로깅에 필요한 설정 파일
 │── monitoring-core/                    # 로깅에 필요한 필수 순수 자바 코드     
 │── monitoring-metric/                  # 로깅에서 수집한 매트릭   
-│── monitoring-slf4j/                  # slf4j 로거  
+│── monitoring-slf4j/                   # slf4j 로거  
+│── monitoring-jdbc/                    # jdbc 관련 로깅 
 │── monitoring-starter/                 # 기본 모니터링 스타터 팩
-│── monitoring-starter-jdbc/            # jdbc 관련 로깅 
 │── monitoring-starter-web/             # web 관련 로깅
 │── monitoring-starter-batch/           # batch 관련 로깅
 
@@ -58,8 +58,8 @@ root/
 2. [monitoring-core](monitoring-core/README.md)  패키지 상세 설명
 3. [monitoring-metric](monitoring-metric/README.md)  패키지 상세 설명
 4. [monitoring-slf4j](monitoring-slf4j/README.md)  패키지 상세 설명
-5. [monitoring-starter](monitoring-starter/README.md)  패키지 상세 설명
-6. [monitoring-starter-jdbc](monitoring-starter-jdbc/README.md)  패키지 상세 설명
+5. [monitoring-jdbc](monitoring-jdbc/README.md)  패키지 상세 설명
+6. [monitoring-starter](monitoring-starter/README.md)  패키지 상세 설명
 7. [monitoring-starter-web](monitoring-starter-web/README.md) 패키지 상세 설명
 8. [monitoring-starter-batch](monitoring-starter-batch/README.md) 패키지 상세 설명
 

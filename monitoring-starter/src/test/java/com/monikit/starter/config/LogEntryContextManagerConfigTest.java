@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.monikit.core.DefaultLogEntryContextManager;
-import com.monikit.core.LogAddHook;
-import com.monikit.core.LogEntry;
-import com.monikit.core.LogEntryContextManager;
-import com.monikit.core.LogFlushHook;
-import com.monikit.core.LogNotifier;
+import com.monikit.core.context.DefaultLogEntryContextManager;
+import com.monikit.core.hook.LogAddHook;
+import com.monikit.core.model.LogEntry;
+import com.monikit.core.context.LogEntryContextManager;
+import com.monikit.core.hook.LogFlushHook;
+import com.monikit.core.notifier.LogNotifier;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;

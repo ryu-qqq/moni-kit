@@ -21,7 +21,6 @@ public class HttpResponseCountMetricsBinder implements MeterBinder {
 
     }
 
-
     /**
      * 동적으로 Counter를 기록하는 메서드
      */

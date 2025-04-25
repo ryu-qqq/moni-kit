@@ -13,10 +13,6 @@ import java.util.UUID;
  * @author ryu-qqq
  * @since 1.1.0
  */
-/**
- * @deprecated SLF4J MDC 기반의 {@link MDCTraceIdProvider} 사용 권장
- */
-@Deprecated
 public class DefaultTraceIdProvider implements TraceIdProvider {
 
     private static final ThreadLocal<String> TRACE_ID_HOLDER = new ThreadLocal<>();

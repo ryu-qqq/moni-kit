@@ -12,9 +12,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import com.monikit.core.HttpInboundRequestLog;
-import com.monikit.core.HttpInboundResponseLog;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.model.HttpInboundRequestLog;
+import com.monikit.core.model.HttpInboundResponseLog;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
 
 import static org.junit.jupiter.api.Assertions.*;

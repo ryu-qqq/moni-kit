@@ -1,12 +1,14 @@
 package com.monikit.starter.web.filter;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import com.monikit.core.LogContextScope;
-import com.monikit.core.LogEntryContextManager;
+import com.monikit.core.context.LogEntryContextManager;
+import com.monikit.starter.web.MoniKitWebProperties;
 
 import static com.monikit.starter.web.ExcludePathConstant.EXCLUDED_PATHS;
 
@@ -30,11 +32,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * 사용 예시:
  * <pre>{@code
  * // 필터가 실행되면 요청을 래핑하고, 응답 본문도 캡처하여 로그를 남길 수 있음
- * </pre>
+ * }</pre>
  * </p>
  *
  * @author ryu-qqq
- * @since 1.1.0
+ * @since 1.1.2
  * @see LogContextScope
  * @see com.monikit.starter.web.filter.RequestWrapper
  * @see org.springframework.web.util.ContentCachingResponseWrapper
@@ -43,14 +45,17 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LogContextScopeFilter extends OncePerRequestFilter {
 
     private final LogEntryContextManager logEntryContextManager;
+    private final List<String> excludedPaths;
 
     /**
      * 새로운 {@link LogContextScopeFilter} 인스턴스를 생성한다.
      *
      * @param logEntryContextManager {@link LogEntryContextManager} 인스턴스
+     * @param webProperties {@link MoniKitWebProperties} 인스턴스
      */
-    public LogContextScopeFilter(LogEntryContextManager logEntryContextManager) {
+    public LogContextScopeFilter(LogEntryContextManager logEntryContextManager, MoniKitWebProperties webProperties) {
         this.logEntryContextManager = logEntryContextManager;
+        this.excludedPaths = webProperties.getExcludedPaths();
     }
 
     /**
@@ -74,7 +79,7 @@ public class LogContextScopeFilter extends OncePerRequestFilter {
 
         String requestUri = request.getRequestURI();
 
-        if (EXCLUDED_PATHS.contains(requestUri)) {
+        if (excludedPaths.contains(requestUri)) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -3,10 +3,7 @@ package com.monikit.metric.config;
 
 import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.config.MoniKitMetricsProperties;
-import com.monikit.core.LogEntryContextManager;
-import com.monikit.metric.DatabaseQueryMetricCollector;
-import com.monikit.metric.HttpInboundResponseMetricCollector;
-import com.monikit.metric.HttpOutboundResponseMetricCollector;
+import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.metric.HttpResponseCountMetricsBinder;
 import com.monikit.metric.HttpResponseDurationMetricsBinder;
 import com.monikit.metric.HttpResponseMetricsRecorder;
