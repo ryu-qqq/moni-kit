@@ -108,10 +108,20 @@ public Connection getConnection() {
 ## 📄 관련 설정 (application.yml)
 
 ```yaml
-monikit:
-  logging:
-    log-enabled: true
-    datasource-logging-enabled: true
+monikit.logging:
+  log-enabled: true
+  datasource-logging-enabled: true
+  slow-query-threshold-ms: 1000
+  critical-query-threshold-ms: 5000
+  allowed-packages:
+    - "com.ryuqq"
+    - "com.monikit"
+  dynamic-matching:
+    - classNamePattern: "^External.*Client"
+      methodNamePattern: ".*"
+      when: "#executionTime > 1000"
+      thresholdMillis: 1000
+      tag: "external-api"
 
 ```
 

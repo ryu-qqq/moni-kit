@@ -74,17 +74,20 @@ monikit-starter-web
 ## 🔧 설정 예시 (application.yml)
 
 ```yaml
-monikit:
-  logging:
-    log-enabled: true
-    datasource-logging-enabled: true
-    dynamic-matching:
-      - classNamePattern: ".*Service"
-        methodNamePattern: ".*Create"
-        when: "#executionTime > 300"
-        thresholdMillis: 300
-        tag: "slow-service"
-
+monikit.logging:
+  log-enabled: true
+  datasource-logging-enabled: true
+  slow-query-threshold-ms: 1000
+  critical-query-threshold-ms: 5000
+  allowed-packages:
+    - "com.ryuqq"
+    - "com.monikit"
+  dynamic-matching:
+    - classNamePattern: "^External.*Client"
+      methodNamePattern: ".*"
+      when: "#executionTime > 1000"
+      thresholdMillis: 1000
+      tag: "external-api"
 
   web:
     excluded-paths:
