@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.core.context.LogEntryContextManager;
@@ -23,13 +24,14 @@ import com.monikit.starter.ExecutionLoggingAspect;
  * @author ryu-qqq
  * @since 1.1.0
  */
-
+@Lazy
 @Configuration
 @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = false)
 public class ExecutionLoggingAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
 
+    @Lazy
     @Bean
     @ConditionalOnMissingBean
     public ExecutionLoggingAspect executionLoggingAspect(LogEntryContextManager logEntryContextManager,
@@ -38,7 +40,7 @@ public class ExecutionLoggingAutoConfiguration {
         return new ExecutionLoggingAspect(logEntryContextManager, traceIdProvider, dynamicMatcher);
     }
 
-
+    @Lazy
     @Bean
     @ConditionalOnMissingBean
     public DynamicMatcher dynamicMatcher(MoniKitLoggingProperties loggingProperties) {

@@ -45,7 +45,7 @@ public class ExecutionLoggingAspect {
         this.matcher = matcher;
     }
 
-    @Pointcut("execution(* *(..))")
+    @Pointcut("execution(* *(..)) && !within(com.monikit..*)")
     public void allMethods() {}
 
     @Around("allMethods()")
