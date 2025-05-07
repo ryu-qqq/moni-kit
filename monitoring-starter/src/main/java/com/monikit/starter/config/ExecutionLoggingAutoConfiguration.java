@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
+import com.monikit.starter.DynamicMatcher;
 import com.monikit.starter.ExecutionLoggingAspect;
 
 /**
@@ -24,7 +25,7 @@ import com.monikit.starter.ExecutionLoggingAspect;
  */
 
 @Configuration
-@ConditionalOnProperty(name = "monikit.logging.logging-enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = false)
 public class ExecutionLoggingAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
@@ -32,10 +33,21 @@ public class ExecutionLoggingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ExecutionLoggingAspect executionLoggingAspect(LogEntryContextManager logEntryContextManager,
-                                                         MoniKitLoggingProperties loggingProperties,
-                                                         TraceIdProvider traceIdProvider) {
+                                                         TraceIdProvider traceIdProvider, DynamicMatcher dynamicMatcher) {
         logger.info("[MoniKit] ExecutionLoggingAspect Registered");
-        return new ExecutionLoggingAspect(logEntryContextManager, loggingProperties, traceIdProvider);
+        return new ExecutionLoggingAspect(logEntryContextManager, traceIdProvider, dynamicMatcher);
     }
+
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DynamicMatcher dynamicMatcher(MoniKitLoggingProperties loggingProperties) {
+        logger.info("[MoniKit] DynamicMatcher Registered");
+        return new DynamicMatcher(
+            loggingProperties.getDynamicMatching(),
+            loggingProperties.getAllowedPackages()
+        );
+    }
+
 
 }

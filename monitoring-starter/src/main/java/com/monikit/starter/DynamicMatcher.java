@@ -22,7 +22,6 @@ import com.monikit.config.DynamicLogRule;
  * @since 1.1.2
  */
 public class DynamicMatcher {
-
     private final List<DynamicLogRule> rules;
     private final List<String> allowedPackages;
     private final ExpressionParser parser = new SpelExpressionParser();

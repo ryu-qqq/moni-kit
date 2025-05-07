@@ -1,8 +1,11 @@
 package com.monikit.starter.web.config;
 
+import java.util.List;
+
 import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
+import com.monikit.starter.web.MoniKitWebProperties;
 import com.monikit.starter.web.filter.LogContextScopeFilter;
 import com.monikit.starter.web.filter.TraceIdFilter;
 import org.junit.jupiter.api.DisplayName;
@@ -25,8 +28,14 @@ class FilterAutoConfigurationTest {
             props.setLogEnabled(true);
             return props;
         })
+        .withBean(MoniKitWebProperties.class, () -> {
+            MoniKitWebProperties props = new MoniKitWebProperties();
+            props.setExcludedPaths(List.of("/actuator/health"));
+            return props;
+        })
         .withBean(TraceIdProvider.class, () -> mock(TraceIdProvider.class))
         .withBean(LogEntryContextManager.class, () -> mock(LogEntryContextManager.class));
+
 
     @Nested
     @DisplayName("TraceIdFilter 관련 빈 등록 테스트")

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import com.monikit.core.context.LogEntryContextManager;
+import com.monikit.starter.web.MoniKitWebProperties;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +34,10 @@ class LogContextScopeFilterTest {
     @BeforeEach
     void setUp() {
         LogEntryContextManager logEntryContextManager = mock(LogEntryContextManager.class);
-        logContextScopeFilter = new LogContextScopeFilter(logEntryContextManager);
+        MoniKitWebProperties mockProperties = mock(MoniKitWebProperties.class);
+        when(mockProperties.getExcludedPaths()).thenReturn(List.of("/actuator/health"));
+
+        logContextScopeFilter = new LogContextScopeFilter(logEntryContextManager, mockProperties);
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         filterChain = mock(FilterChain.class);

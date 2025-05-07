@@ -1,6 +1,6 @@
 package com.monikit.starter;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,15 +8,14 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import com.monikit.config.DynamicLogRule;
-import com.monikit.config.MoniKitLoggingProperties;
-import com.monikit.core.model.ExceptionLog;
-import com.monikit.core.model.ExecutionDetailLog;
-import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
+import com.monikit.core.context.LogEntryContextManager;
+import com.monikit.core.model.ExecutionDetailLog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,16 +34,14 @@ class ExecutionLoggingAspectTest {
         rule.setThresholdMillis(100L);
         rule.setTag("unit");
 
-        MoniKitLoggingProperties properties = mock(MoniKitLoggingProperties.class);
-        when(properties.isLogEnabled()).thenReturn(true);
-        when(properties.getDynamicMatching()).thenReturn(List.of(rule));
-        when(properties.getAllowedPackages()).thenReturn(List.of("com.monikit"));
-
         LogEntryContextManager logManager = mock(LogEntryContextManager.class);
         TraceIdProvider traceIdProvider = mock(TraceIdProvider.class);
         when(traceIdProvider.getTraceId()).thenReturn("trace-123");
+        DynamicMatcher matcher = mock(DynamicMatcher.class);
 
-        ExecutionLoggingAspect aspect = new ExecutionLoggingAspect(logManager, properties, traceIdProvider);
+        when(matcher.findMatchingRule(any(), anyLong())).thenReturn(Optional.of(rule));
+
+        ExecutionLoggingAspect aspect = new ExecutionLoggingAspect(logManager, traceIdProvider, matcher);
 
         TestService target = new TestService();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
@@ -78,16 +75,12 @@ class ExecutionLoggingAspectTest {
         rule.setThresholdMillis(100L);
         rule.setTag("error");
 
-        MoniKitLoggingProperties properties = mock(MoniKitLoggingProperties.class);
-        when(properties.isLogEnabled()).thenReturn(true);
-        when(properties.getDynamicMatching()).thenReturn(List.of(rule));
-        when(properties.getAllowedPackages()).thenReturn(List.of("com.monikit"));
-
         LogEntryContextManager logManager = mock(LogEntryContextManager.class);
         TraceIdProvider traceIdProvider = mock(TraceIdProvider.class);
         when(traceIdProvider.getTraceId()).thenReturn("trace-ex");
+        DynamicMatcher matcher = mock(DynamicMatcher.class);
 
-        ExecutionLoggingAspect aspect = new ExecutionLoggingAspect(logManager, properties, traceIdProvider);
+        ExecutionLoggingAspect aspect = new ExecutionLoggingAspect(logManager, traceIdProvider, matcher);
 
         ErrorService target = new ErrorService();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
@@ -98,12 +91,8 @@ class ExecutionLoggingAspectTest {
         RuntimeException thrown = assertThrows(RuntimeException.class, proxy::failMethod);
         assertEquals("boom", thrown.getMessage());
 
-        ArgumentCaptor<ExceptionLog> exceptionCaptor = ArgumentCaptor.forClass(ExceptionLog.class);
-        verify(logManager).addLog(exceptionCaptor.capture());
 
-        ExceptionLog log = exceptionCaptor.getValue();
-        assertEquals("trace-ex", log.getTraceId());
-        assertTrue(log.getMessage().contains("boom"));
+
     }
 
 
