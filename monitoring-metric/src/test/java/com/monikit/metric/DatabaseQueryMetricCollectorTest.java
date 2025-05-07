@@ -19,9 +19,6 @@ import static org.mockito.Mockito.*;
 class DatabaseQueryMetricCollectorTest {
 
     @Mock
-    private MoniKitMetricsProperties metricsProperties;
-
-    @Mock
     private QueryMetricsRecorder queryMetricsRecorder;
 
     private DatabaseQueryMetricCollector collector;
@@ -29,7 +26,7 @@ class DatabaseQueryMetricCollectorTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        collector = new DatabaseQueryMetricCollector(metricsProperties, queryMetricsRecorder);
+        collector = new DatabaseQueryMetricCollector(queryMetricsRecorder);
     }
 
     @Test
@@ -46,9 +43,6 @@ class DatabaseQueryMetricCollectorTest {
         @Test
         @DisplayName("shouldNotRecordMetricsWhenMetricsAreDisabled")
         void shouldNotRecordMetricsWhenMetricsAreDisabled() {
-            // Given
-            when(metricsProperties.isMetricsEnabled()).thenReturn(false);
-            when(metricsProperties.isQueryMetricsEnabled()).thenReturn(false);
             DatabaseQueryLog logEntry = TestLogEntryProvider.databaseQueryLog();
 
             // When
@@ -60,9 +54,6 @@ class DatabaseQueryMetricCollectorTest {
         @Test
         @DisplayName("shouldRecordMetricsWhenMetricsAreEnabled")
         void shouldRecordMetricsWhenMetricsAreEnabled() {
-            // Given
-            when(metricsProperties.isMetricsEnabled()).thenReturn(true);
-            when(metricsProperties.isQueryMetricsEnabled()).thenReturn(true);
 
             DatabaseQueryLog logEntry = TestLogEntryProvider.databaseQueryLog();
 

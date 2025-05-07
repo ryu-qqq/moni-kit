@@ -70,10 +70,9 @@ public class MetricCollectorAutoConfiguration {
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.queryMetricsEnabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnBean(QueryMetricsRecorder.class)
-    public MetricCollector<?> databaseQueryMetricCollector(MoniKitMetricsProperties metricsProperties,
-                                                           QueryMetricsRecorder queryMetricsRecorder) {
+    public MetricCollector<?> databaseQueryMetricCollector(QueryMetricsRecorder queryMetricsRecorder) {
         logger.info("[MoniKit] Registered MetricCollector: DatabaseQueryMetricCollector");
-        return new DatabaseQueryMetricCollector(metricsProperties, queryMetricsRecorder);
+        return new DatabaseQueryMetricCollector(queryMetricsRecorder);
     }
 
     @Bean

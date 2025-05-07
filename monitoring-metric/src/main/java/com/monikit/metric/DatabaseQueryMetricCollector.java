@@ -1,9 +1,8 @@
 package com.monikit.metric;
 
-import com.monikit.config.MoniKitMetricsProperties;
-import com.monikit.core.model.DatabaseQueryLog;
 import com.monikit.core.LogType;
 import com.monikit.core.hook.MetricCollector;
+import com.monikit.core.model.DatabaseQueryLog;
 
 /**
  * 기본 SQL 쿼리 실행 메트릭을 수집하는 구현체.
@@ -19,12 +18,10 @@ import com.monikit.core.hook.MetricCollector;
 
 public class DatabaseQueryMetricCollector implements MetricCollector<DatabaseQueryLog> {
 
-    private final MoniKitMetricsProperties metricsProperties;
     private final QueryMetricsRecorder queryMetricsRecorder;
 
-    public DatabaseQueryMetricCollector(MoniKitMetricsProperties metricsProperties,
+    public DatabaseQueryMetricCollector(
                                         QueryMetricsRecorder queryMetricsRecorder) {
-        this.metricsProperties = metricsProperties;
         this.queryMetricsRecorder = queryMetricsRecorder;
     }
 
@@ -35,9 +32,7 @@ public class DatabaseQueryMetricCollector implements MetricCollector<DatabaseQue
 
     @Override
     public void record(DatabaseQueryLog logEntry) {
-        if (!metricsProperties.isMetricsEnabled() || !metricsProperties.isQueryMetricsEnabled()) {
-            return;
-        }
+
 
         String sql = QueryMetricUtils.categorizeQuery(logEntry.getQuery());
         String dataSource = logEntry.getDataSource();
