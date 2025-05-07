@@ -33,17 +33,16 @@ import com.monikit.core.TraceIdProvider;
 public class ExecutionLoggingAspect {
 
     private final LogEntryContextManager logEntryContextManager;
-    private final MoniKitLoggingProperties loggingProperties;
     private final TraceIdProvider traceIdProvider;
     private final DynamicMatcher matcher;
 
     public ExecutionLoggingAspect(LogEntryContextManager logEntryContextManager,
-                                  MoniKitLoggingProperties loggingProperties,
-                                  TraceIdProvider traceIdProvider) {
+                                  TraceIdProvider traceIdProvider,
+                                  DynamicMatcher matcher
+                                  ) {
         this.logEntryContextManager = logEntryContextManager;
-        this.loggingProperties = loggingProperties;
         this.traceIdProvider = traceIdProvider;
-        this.matcher = new DynamicMatcher(loggingProperties.getDynamicMatching(), loggingProperties.getAllowedPackages());
+        this.matcher = matcher;
     }
 
     @Pointcut("execution(* *(..))")
@@ -51,10 +50,6 @@ public class ExecutionLoggingAspect {
 
     @Around("allMethods()")
     public Object logExecutionTimeIfMatched(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (!loggingProperties.isLogEnabled()) {
-            return joinPoint.proceed();
-        }
-
         long start = System.currentTimeMillis();
         Object result = null;
         Throwable error = null;

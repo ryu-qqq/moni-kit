@@ -4,6 +4,9 @@ package com.monikit.metric.config;
 import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.config.MoniKitMetricsProperties;
 import com.monikit.core.context.LogEntryContextManager;
+import com.monikit.metric.ExecutionDetailCountMetricsBinder;
+import com.monikit.metric.ExecutionDetailDurationMetricsBinder;
+import com.monikit.metric.ExecutionMetricRecorder;
 import com.monikit.metric.HttpResponseCountMetricsBinder;
 import com.monikit.metric.HttpResponseDurationMetricsBinder;
 import com.monikit.metric.HttpResponseMetricsRecorder;
@@ -83,6 +86,21 @@ public class MetricMockBeanConfig {
         return new QueryMetricsRecorder(sqlQueryCountMetricsBinder(), sqlQueryDurationMetricsBinder());
     }
 
+    @Bean
+    public ExecutionDetailCountMetricsBinder executionDetailCountMetricsBinder() {
+        return new ExecutionDetailCountMetricsBinder();
+    }
+
+    @Bean
+    public ExecutionDetailDurationMetricsBinder executionDetailDurationMetricsBinder() {
+        return new ExecutionDetailDurationMetricsBinder();
+    }
+
+
+    @Bean
+    public ExecutionMetricRecorder executionMetricRecorder(){
+        return new ExecutionMetricRecorder(executionDetailCountMetricsBinder(), executionDetailDurationMetricsBinder());
+    }
 
 
 }

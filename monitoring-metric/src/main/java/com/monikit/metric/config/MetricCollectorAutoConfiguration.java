@@ -89,7 +89,7 @@ public class MetricCollectorAutoConfiguration {
     @Bean
     @ConditionalOnClass(ExecutionMetricRecorder.class)
     @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean(HttpResponseMetricsRecorder.class)
+    @ConditionalOnMissingBean(ExecutionMetricRecorder.class)
     public ExecutionMetricRecorder executionMetricRecorder(ExecutionDetailCountMetricsBinder executionDetailCountMetricsBinder,
                                                            ExecutionDetailDurationMetricsBinder executionDetailDurationMetricsBinder) {
         logger.info("[MoniKit] Registered ExecutionMetricRecorder");
@@ -118,8 +118,8 @@ public class MetricCollectorAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "monikit.metrics.metricsEnabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnBean(HttpResponseMetricsRecorder.class)
-    public MetricCollector<?> httpOutboundResponseMetricCollector(MoniKitMetricsProperties metricsProperties,
+    @ConditionalOnBean(ExecutionMetricRecorder.class)
+    public MetricCollector<?> executionDetailMetricCollector(MoniKitMetricsProperties metricsProperties,
                                                                   ExecutionMetricRecorder executionMetricRecorder) {
         logger.info("[MoniKit] Registered MetricCollector: ExecutionDetailMetricCollector");
         return new ExecutionDetailMetricCollector(metricsProperties, executionMetricRecorder);

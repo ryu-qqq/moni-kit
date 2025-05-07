@@ -12,6 +12,7 @@ import com.monikit.config.MoniKitLoggingProperties;
 import com.monikit.core.model.LogEntry;
 import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
+import com.monikit.starter.DynamicMatcher;
 import com.monikit.starter.ExecutionLoggingAspect;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,7 +32,7 @@ class ExecutionLoggingAutoConfigurationTest {
     @DisplayName("shouldRegisterExecutionLoggingAspectWhenDetailedLoggingIsEnabled")
     void shouldRegisterExecutionLoggingAspectWhenDetailedLoggingIsEnabled() {
         contextRunner
-            .withPropertyValues("monikit.logging.logging-enabled=true")
+            .withPropertyValues("monikit.logging.log-enabled=true")
             .run(context -> {
                 assertTrue(context.containsBean("executionLoggingAspect"));
                 assertNotNull(context.getBean(ExecutionLoggingAspect.class));
@@ -56,7 +57,7 @@ class ExecutionLoggingAutoConfigurationTest {
     @DisplayName("shouldNotRegisterExecutionLoggingAspectWhenCustomBeanIsProvided")
     void shouldNotRegisterExecutionLoggingAspectWhenCustomBeanIsProvided() {
         contextRunner
-            .withPropertyValues("monikit.logging.logging-enabled=true")
+            .withPropertyValues("monikit.logging.log-enabled=true")
             .withUserConfiguration(CustomExecutionLoggingAspectConfig.class)
             .run(context -> {
                 ExecutionLoggingAspect aspect = context.getBean(ExecutionLoggingAspect.class);
@@ -109,9 +110,9 @@ class ExecutionLoggingAutoConfigurationTest {
 
         @Bean
         public ExecutionLoggingAspect executionLoggingAspect(LogEntryContextManager manager,
-                                                             MoniKitLoggingProperties properties,
-                                                             TraceIdProvider traceIdProvider) {
-            return new ExecutionLoggingAspect(manager, properties, traceIdProvider) {
+                                                             TraceIdProvider traceIdProvider,
+                                                             DynamicMatcher matcher) {
+            return new ExecutionLoggingAspect(manager, traceIdProvider, matcher) {
                 @Override public String toString() {
                     return "custom";
                 }
