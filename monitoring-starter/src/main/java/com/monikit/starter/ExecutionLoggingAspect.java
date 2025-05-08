@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.context.annotation.Lazy;
 
 import com.monikit.config.DynamicLogRule;
 import com.monikit.config.MoniKitLoggingProperties;
@@ -30,6 +31,7 @@ import com.monikit.core.TraceIdProvider;
  * @since 1.1.2
  */
 @Aspect
+@Lazy
 public class ExecutionLoggingAspect {
 
     private final LogEntryContextManager logEntryContextManager;
