@@ -24,14 +24,14 @@ import com.monikit.starter.ExecutionLoggingAspect;
  * @author ryu-qqq
  * @since 1.1.0
  */
-@Lazy
+
 @Configuration
 @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = false)
 public class ExecutionLoggingAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
 
-    @Lazy
+
     @Bean
     @ConditionalOnMissingBean
     public ExecutionLoggingAspect executionLoggingAspect(LogEntryContextManager logEntryContextManager,
@@ -40,7 +40,7 @@ public class ExecutionLoggingAutoConfiguration {
         return new ExecutionLoggingAspect(logEntryContextManager, traceIdProvider, dynamicMatcher);
     }
 
-    @Lazy
+
     @Bean
     @ConditionalOnMissingBean
     public DynamicMatcher dynamicMatcher(MoniKitLoggingProperties loggingProperties) {

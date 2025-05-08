@@ -45,10 +45,15 @@ public class ExecutionLoggingAspect {
         this.matcher = matcher;
     }
 
-    @Pointcut("execution(* *(..)) && !within(com.monikit..*)")
-    public void allMethods() {}
+    @Pointcut("@within(org.springframework.stereotype.Service) || " +
+        "@within(org.springframework.stereotype.Repository) || " +
+        "@within(org.springframework.stereotype.Controller) || " +
+        "@within(org.springframework.stereotype.Component) || " +
+        "@within(com.monikit.core.LogExecutionTime) || " +
+        "@annotation(com.monikit.core.LogExecutionTime)")
+    public void applicationBeansOrAnnotated() {}
 
-    @Around("allMethods()")
+    @Around("applicationBeansOrAnnotated()")
     public Object logExecutionTimeIfMatched(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = null;
