@@ -35,7 +35,7 @@ public class ExecutionLoggingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ExecutionLoggingAspect executionLoggingAspect(LogEntryContextManager logEntryContextManager,
-                                                         TraceIdProvider traceIdProvider, DynamicMatcher dynamicMatcher) {
+                                                         TraceIdProvider traceIdProvider, @Lazy DynamicMatcher dynamicMatcher) {
         logger.info("[MoniKit] ExecutionLoggingAspect Registered");
         return new ExecutionLoggingAspect(logEntryContextManager, traceIdProvider, dynamicMatcher);
     }
