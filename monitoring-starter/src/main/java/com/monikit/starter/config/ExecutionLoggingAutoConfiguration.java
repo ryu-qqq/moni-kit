@@ -8,13 +8,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 
 import com.monikit.config.MoniKitLoggingProperties;
-import com.monikit.core.context.LogEntryContextManager;
-import com.monikit.core.TraceIdProvider;
 import com.monikit.starter.DynamicMatcher;
-import com.monikit.starter.ExecutionLoggingAspect;
 
 /**
  * 메서드 실행 시간 및 상세 로깅을 위한 AOP 자동 구성 클래스.
@@ -30,7 +26,7 @@ import com.monikit.starter.ExecutionLoggingAspect;
 @Configuration
 @EnableConfigurationProperties(MoniKitLoggingProperties.class)
 @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = false)
-@Import(MoniKitAspectConfiguration.class) // ✅ Aspect는 따로 등록!
+@Import(MoniKitAspectConfiguration.class)
 public class ExecutionLoggingAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
