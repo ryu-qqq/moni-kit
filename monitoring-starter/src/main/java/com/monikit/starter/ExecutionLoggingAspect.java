@@ -31,7 +31,6 @@ import com.monikit.core.TraceIdProvider;
  * @since 1.1.2
  */
 @Aspect
-@Lazy
 public class ExecutionLoggingAspect {
 
     private final LogEntryContextManager logEntryContextManager;
@@ -50,7 +49,6 @@ public class ExecutionLoggingAspect {
     @Pointcut("(@within(org.springframework.stereotype.Service) || " +
         "@within(org.springframework.stereotype.Repository) || " +
         "@within(org.springframework.stereotype.Controller) || " +
-        "@within(org.springframework.stereotype.Component) || " +
         "@within(com.monikit.core.LogExecutionTime) || " +
         "@annotation(com.monikit.core.LogExecutionTime)) " +
         "&& !within(com.monikit..*)")
