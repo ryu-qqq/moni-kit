@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -27,8 +28,9 @@ import com.monikit.starter.ExecutionLoggingAspect;
  */
 
 @Configuration
-@Import(MoniKitAspectConfiguration.class) // 요걸로 분리 등록
+@EnableConfigurationProperties(MoniKitLoggingProperties.class)
 @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = false)
+@Import(MoniKitAspectConfiguration.class) // ✅ Aspect는 따로 등록!
 public class ExecutionLoggingAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
