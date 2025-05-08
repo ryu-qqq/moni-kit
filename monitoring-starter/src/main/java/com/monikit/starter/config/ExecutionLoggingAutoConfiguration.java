@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
 import com.monikit.config.MoniKitLoggingProperties;
@@ -26,19 +27,11 @@ import com.monikit.starter.ExecutionLoggingAspect;
  */
 
 @Configuration
+@Import(MoniKitAspectConfiguration.class) // 요걸로 분리 등록
 @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = false)
 public class ExecutionLoggingAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ExecutionLoggingAutoConfiguration.class);
-
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ExecutionLoggingAspect executionLoggingAspect(LogEntryContextManager logEntryContextManager,
-                                                         TraceIdProvider traceIdProvider, @Lazy DynamicMatcher dynamicMatcher) {
-        logger.info("[MoniKit] ExecutionLoggingAspect Registered");
-        return new ExecutionLoggingAspect(logEntryContextManager, traceIdProvider, dynamicMatcher);
-    }
 
 
     @Bean
