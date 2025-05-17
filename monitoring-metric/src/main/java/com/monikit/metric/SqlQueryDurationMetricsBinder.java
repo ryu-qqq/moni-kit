@@ -21,6 +21,7 @@ import io.micrometer.core.instrument.binder.MeterBinder;
 
 public class SqlQueryDurationMetricsBinder implements MeterBinder {
 
+    private static final int MAX_TIMER_COUNT = 100;
     private final ConcurrentMap<String, Timer> timerMap = new ConcurrentHashMap<>();
     private MeterRegistry meterRegistry;
 
@@ -39,8 +40,11 @@ public class SqlQueryDurationMetricsBinder implements MeterBinder {
 
     public void record(String sql, String dataSource, long executionTime) {
         if (meterRegistry == null) return;
-
         String key = sql + "|" + dataSource;
+
+        if (timerMap.size() >= MAX_TIMER_COUNT && !timerMap.containsKey(key)) {
+            return;
+        }
 
         Timer timer = timerMap.computeIfAbsent(key, k ->
             Timer.builder("sql_query_duration")
