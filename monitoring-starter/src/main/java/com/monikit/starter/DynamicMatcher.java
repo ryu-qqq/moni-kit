@@ -43,6 +43,7 @@ public class DynamicMatcher {
         for (DynamicLogRule rule : rules) {
             if (!className.matches(rule.getClassNamePattern())) continue;
             if (!methodName.matches(rule.getMethodNamePattern())) continue;
+            if (executionTime < rule.getThresholdMillis()) continue;
 
             if (rule.getWhen() == null || rule.getWhen().isBlank()) return Optional.of(rule);
 

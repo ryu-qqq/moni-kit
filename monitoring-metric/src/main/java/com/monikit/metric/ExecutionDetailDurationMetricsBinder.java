@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ExecutionDetailDurationMetricsBinder implements MeterBinder {
 
+    private static final int MAX_TIMER_COUNT = 100;
     private final ConcurrentMap<String, Timer> timerCache = new ConcurrentHashMap<>();
     private MeterRegistry meterRegistry;
 
@@ -29,6 +30,10 @@ public class ExecutionDetailDurationMetricsBinder implements MeterBinder {
      */
     public void record(String className, String methodName, long durationMs, String tag) {
         String key = className + "." + methodName + "." + tag;
+
+        if (timerCache.size() >= MAX_TIMER_COUNT && !timerCache.containsKey(key)) {
+            return;
+        }
 
         Timer timer = timerCache.computeIfAbsent(key, k -> Timer.builder("execution_duration")
             .description("Method execution time in ms")

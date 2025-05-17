@@ -14,6 +14,7 @@ import io.micrometer.core.instrument.binder.MeterBinder;
 
 public class HttpResponseDurationMetricsBinder implements MeterBinder {
 
+    private static final int MAX_TIMER_COUNT = 100;
     private final ConcurrentMap<String, Timer> timerCache = new ConcurrentHashMap<>();
     private MeterRegistry meterRegistry;
 
@@ -26,12 +27,17 @@ public class HttpResponseDurationMetricsBinder implements MeterBinder {
      * 동적으로 Timer를 기록하는 메서드
      */
     public void record(String path, int statusCode, long responseTime) {
-        String timerKey = "http_response_duration|" + path + "|" + statusCode;
+        String normalizedPath = normalizePath(path);
+        String key = normalizedPath + "|" + statusCode;
 
-        Timer timer = timerCache.computeIfAbsent(timerKey, key ->
+        if (timerCache.size() >= MAX_TIMER_COUNT && !timerCache.containsKey(key)) {
+            return;
+        }
+
+        Timer timer = timerCache.computeIfAbsent(key, k ->
             Timer.builder("http_response_duration")
                 .description("Time taken for HTTP responses")
-                .tag("path", path)
+                .tag("path", normalizedPath)
                 .tag("status", String.valueOf(statusCode))
                 .publishPercentiles(0.5, 0.95, 0.99)
                 .register(meterRegistry)
@@ -39,4 +45,10 @@ public class HttpResponseDurationMetricsBinder implements MeterBinder {
 
         timer.record(responseTime, TimeUnit.MILLISECONDS);
     }
+
+    private String normalizePath(String path) {
+        if (path == null) return "unknown";
+        return path.replaceAll("\\d+", "{id}"); // 정수 치환
+    }
+
 }
