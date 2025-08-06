@@ -12,11 +12,17 @@ pluginManagement {
 
 
 rootProject.name = 'moni-kit'
+
+// 핵심 모듈 (유지)
 include ':monitoring-core'
-include ':monitoring-jdbc'
-include ':monitoring-metric'
 include ':monitoring-config'
-include ':monitoring-slf4j'
 include ':monitoring-starter'
-include ':monitoring-starter-batch'
 include ':monitoring-starter-web'
+include ':monitoring-metric'
+include ':monitoring-otel'
+
+// 제거된 모듈들:
+// - monitoring-starter-otel (빈 모듈)
+// - monitoring-starter-batch (Spring Batch 전용, 사용 빈도 낮음)
+// - monitoring-jdbc (OpenTelemetry JDBC Instrumentation으로 대체)
+// - monitoring-slf4j (OpenTelemetry Logs로 대체)

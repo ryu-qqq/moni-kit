@@ -12,7 +12,10 @@ import java.util.UUID;
  *
  * @author ryu-qqq
  * @since 1.1.0
+ * @deprecated 2.0.0부터 {@link com.monikit.otel.trace.OtelTraceIdProvider}를 사용하세요.
+ *             OpenTelemetry 표준을 준수하며 AWS X-Ray와 완전히 호환됩니다.
  */
+@Deprecated(since = "2.0.0", forRemoval = true)
 public class DefaultTraceIdProvider implements TraceIdProvider {
 
     private static final ThreadLocal<String> TRACE_ID_HOLDER = new ThreadLocal<>();

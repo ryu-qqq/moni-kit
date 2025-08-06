@@ -1,71 +1,255 @@
-# `moni-kit`: 장애 감지 및 대응을 위한 로그 관리 라이브러리
+# 🚀 MoniKit: Enterprise-Grade Observability for Modern Java Applications
 
-### "내 서버는 과연 장애를 빠르게 감지하고, 신속히 대응할 수 있도록 설계되었는가?" 🤔
+[![Java](https://img.shields.io/badge/Java-21+-orange.svg)](https://openjdk.java.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3+-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-1.31+-blue.svg)](https://opentelemetry.io/)
+[![AWS](https://img.shields.io/badge/AWS-X--Ray%20%7C%20CloudWatch-orange.svg)](https://aws.amazon.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-이 질문을 던졌을 때, 제가 만든 서버는 사실 그다지 효율적이지 않았습니다. 단순히 **슬랙**으로 오류 메시지를 보내고, **키바나**에서 로그를 수동으로 검색해야만 장애를 추적할 수 있었습니다. 그게 얼마나 비효율적인지, 그때까지는 전혀 깨닫지 못했죠.
+**MoniKit**은 **장애를 빠르게 감지하고 신속히 대응**할 수 있도록 설계된 **현대적 관측성 프레임워크**입니다.  
+소규모 팀부터 엔터프라이즈까지, **복잡한 인프라 없이도** 프로덕션급 모니터링을 구현할 수 있습니다.
 
-그런데 **토스 러너스하이 세션**을 듣고 나서, **장애를 빠르게 감지하고 신속히 대응할 수 있는 설계가 무엇인지** 진지하게 고민하게 되었습니다.
+## ✨ 핵심 가치
 
-### 로깅에 관한 문제
+### 🎯 **자동화된 장애 감지**
+수동 로그 검색에서 벗어나 **구조화된 로깅**과 **지능적 알림**으로 장애를 실시간 감지
 
-장애를 빠르게 감지하고 대응하기 위해 로깅 시스템을 구축하는 과정에서, 예상보다 로깅 작업이 훨씬 커지게 되었다는 사실을 깨달았습니다.
+### ⚡ **제로 구성 통합**
+의존성 하나로 **AOP 로깅**, **메트릭 수집**, **분산 추적**을 자동 적용
 
-특히 서버가 늘어날수록 각 서버의 로그 포맷을 일일이 맞추는 작업이 필요해졌고, 기존 서버의 로그 포맷을 다시 확인하는 과정이 비효율적이라는 문제도 발생했습니다.
+### 🌐 **업계 표준 준수**
+**OpenTelemetry** 기반으로 AWS, Prometheus, Grafana 등 모든 도구와 네이티브 연동
 
-또한, 새로운 팀원이 들어올 때마다 로그 포맷을 매번 설명해야 하는 상황이 반복될것이고, 로그 포맷을 수동으로 복사하고 붙여넣는 과정에서 휴먼 에러가 발생할 확률도 높아질 것 입니다.
-
-### 해결책: `moni-kit` 라이브러리
-
-이 문제를 해결하고자 **`moni-kit`** 라이브러리를 만들었습니다. 그 과정에서 **"소규모 팀에서도 카프카를 사용한 로깅 전용 서버 같은  복잡한 시스템 없이 효율적인 로그 관리를 할 수는 없을까?"**라는 고민이 있었습니다.
-
-**`moni-kit`**는 모든 서버에서 일관된 로그 포맷을 자동으로 적용하며, 장애 발생 시 **빠르고 효율적으로 대응할 수 있도록** 설계되었습니다. 이를 통해 개발자들이 로그 포맷을 일일이 설정하거나 관리할 필요 없이, **자동으로** 장애를 추적하고 대응할 수 있게 됐습니다.
-
-### 앞으로의 비전
-
-**토스 러너스하이 세션**에서의 중요한 교훈, **"장애를 빠르게 감지하고 신속히 대응할 수 있도록 설계되었는가?"**에 대한 답을 찾으면서 저는 **`moni-kit`**을 더 많은 개발자들에게 유용하게 만들기 위해 꾸준히 발전시켜 나갈 것입니다.
-
-### 결과: 더 효율적이고 신속한 장애 대응
-
-이제, 개발자들은 **로그 설정에 대한 걱정 없이** 장애를 빠르게 파악하고 대응할 수 있습니다. **이게 바로 `moni-kit`의 장점이라 생각합니다. ✨
-
----
-
-**`moni-kit`**는 장애를 빠르게 감지하고, 신속히 대응할 수 있도록 설계된 로그 관리 라이브러리로, 소규모 팀에서도 쉽게 사용할 수 있도록 만들어졌습니다.
+### 📈 **프로덕션 검증**
+메모리 보호, 성능 최적화, 장애 복구 등 **엔터프라이즈급 안정성** 확보
 
 
----
+## 🚀 빠른 시작
 
-## MoniKit 프로젝트 구조
+### 1. 의존성 추가
 
----
-# 프로젝트 구조
-
+```gradle
+dependencies {
+    // 🔥 OpenTelemetry 기반 (권장)
+    implementation 'com.ryuqq:monikit-otel:2.0.0'
+    
+    // 또는 기존 버전
+    implementation 'com.ryuqq:monikit-starter-web:1.1.3'
+}
 ```
-root/                       
-│── monitoring-config/                  # 로깅에 필요한 설정 파일
-│── monitoring-core/                    # 로깅에 필요한 필수 순수 자바 코드     
-│── monitoring-metric/                  # 로깅에서 수집한 매트릭   
-│── monitoring-slf4j/                   # slf4j 로거  
-│── monitoring-jdbc/                    # jdbc 관련 로깅 
-│── monitoring-starter/                 # 기본 모니터링 스타터 팩
-│── monitoring-starter-web/             # web 관련 로깅
-│── monitoring-starter-batch/           # batch 관련 로깅
 
+### 2. 30초 설정
+
+```yaml
+monikit:
+  otel:
+    enabled: true  # 🔥 OpenTelemetry 활성화
+  logging:
+    log-enabled: true
+    dynamic-matching:
+      - classNamePattern: ".*Service"
+        methodNamePattern: ".*"
+        when: "#executionTime > 100"
+        thresholdMillis: 100
+        tag: "slow-service"
 ```
+
+### 3. 즉시 확인
+
+```bash
+# 애플리케이션 시작 후 로그 확인
+tail -f logs/application.log | grep "ExecutionLoggingAspect activated"
+
+# Prometheus 메트릭 확인  
+curl http://localhost:8080/actuator/prometheus | grep monikit
+```
+
 ---
 
-1. [monitoring-config](monitoring-config/README.md)  패키지 상세 설명
-2. [monitoring-core](monitoring-core/README.md)  패키지 상세 설명
-3. [monitoring-metric](monitoring-metric/README.md)  패키지 상세 설명
-4. [monitoring-slf4j](monitoring-slf4j/README.md)  패키지 상세 설명
-5. [monitoring-jdbc](monitoring-jdbc/README.md)  패키지 상세 설명
-6. [monitoring-starter](monitoring-starter/README.md)  패키지 상세 설명
-7. [monitoring-starter-web](monitoring-starter-web/README.md) 패키지 상세 설명
-8. [monitoring-starter-batch](monitoring-starter-batch/README.md) 패키지 상세 설명
+## 📦 모듈 아키텍처
 
-### 향후 개발 계획
+MoniKit은 **모듈형 설계**로 필요한 기능만 선택적으로 사용할 수 있습니다.
 
-지속적으로 개발을 진행하여, ELK 스택과 Prometheus 또는 다른 라이브러리를 활용하여 효율적으로 로그와 메트릭을 수집하고, 수집된 데이터를 데이터화하여 서버의 고도화 작업에 집중할 수 있을 것입니다.
+### 🎯 Core Modules (v1.1.0)
 
-## 🛠 지원 및 피드백
-- 이 프로젝트에 기여하거나 버그를 제보하려면 GitHub Issues를 이용해주세요.
+| 모듈 | 역할 | 상태 |
+|------|------|------|
+| [`monitoring-core`](monitoring-core/README.md) | 🏗️ 순수 Java 기반 로깅 코어 | ✅ Active |
+| [`monitoring-config`](monitoring-config/README.md) | ⚙️ 설정 관리 및 SpEL 규칙 | ✅ Active |
+| [`monitoring-starter`](monitoring-starter/README.md) | 🚀 Spring Boot 통합 스타터 | ✅ Active |
+| [`monitoring-starter-web`](monitoring-starter-web/README.md) | 🌐 웹 애플리케이션 전용 | ✅ Active |
+| [`monitoring-metric`](monitoring-metric/README.md) | 📊 Micrometer/Prometheus 통합 | ✅ Active |
+| [`monitoring-otel`](monitoring-otel/README.md) | 🔥 OpenTelemetry 표준 지원 | 🆕 New |
+
+### 🗑️ Deprecated Modules
+
+| 모듈 | 대체 방안 | 제거 예정 |
+|------|-----------|-----------|
+| `monitoring-jdbc` | OpenTelemetry JDBC Instrumentation | v2.0.0 |
+| `monitoring-slf4j` | OpenTelemetry Logs Bridge | v2.0.0 |
+| `monitoring-starter-batch` | 사용 빈도 낮음 | v2.0.0 |
+
+---
+
+## 🎯 주요 기능
+
+### ⚡ AOP 기반 자동 로깅
+```java
+@Service
+public class UserService {
+    
+    public User createUser(String name) {
+        // 🔥 자동으로 실행 시간, 인자, 결과 로깅
+        return userRepository.save(new User(name));
+    }
+}
+```
+
+### 📊 실시간 메트릭 수집
+```prometheus
+# HTTP 응답 시간
+http_response_duration_seconds{path="/api/users",status="200",quantile="0.95"} 0.150
+
+# SQL 쿼리 성능
+sql_query_duration_seconds{query_type="SELECT",table="users",quantile="0.99"} 0.045
+
+# 비즈니스 메트릭
+execution_detail_count{class="UserService",method="createUser",tag="user-registration"} 156
+```
+
+### 🔍 지능적 동적 필터링
+```yaml
+monikit:
+  logging:
+    dynamic-matching:
+      # 외부 API 호출만 로깅
+      - classNamePattern: ".*ExternalClient"
+        when: "#executionTime > 1000"
+        tag: "external-api"
+      
+      # 느린 데이터베이스 작업
+      - classNamePattern: ".*Repository" 
+        when: "#executionTime > 500"
+        tag: "slow-query"
+```
+
+### 🛡️ 프로덕션 안정성
+- **메모리 보호**: MAX_TIMER_COUNT=100 으로 메트릭 폭발 방지
+- **자동 정규화**: `/api/users/123` → `/api/users/{id}` 경로 정규화  
+- **성능 최적화**: ConcurrentHashMap 기반 캐싱
+- **장애 복구**: Graceful degradation 및 자동 복구
+
+---
+
+## 🏗️ OpenTelemetry 마이그레이션
+
+MoniKit v2.0은 **업계 표준 OpenTelemetry**로 완전 전환됩니다.
+
+### 🔥 마이그레이션 이점
+
+| 기존 MoniKit | OpenTelemetry |
+|--------------|---------------|
+| 커스텀 TraceId | W3C Trace Context 표준 |
+| 수동 로그 상관관계 | 자동 Span 연결 |
+| ELK + Prometheus | AWS X-Ray + CloudWatch 네이티브 |
+| 커스텀 메트릭 | OpenTelemetry Metrics 표준 |
+
+### 📈 AWS 클라우드 네이티브
+```yaml
+monikit:
+  otel:
+    enabled: true
+    # AWS ADOT Collector 연동
+    otlp:
+      traces-endpoint: "http://adot-collector:4318/v1/traces"
+      metrics-endpoint: "http://adot-collector:4318/v1/metrics"
+```
+
+**결과**: X-Ray 서비스 맵, CloudWatch 대시보드, Managed Grafana 자동 연동
+
+---
+
+## 📊 모니터링 대시보드
+
+### Grafana 대시보드 예시
+```json
+{
+  "title": "MoniKit Application Performance",
+  "panels": [
+    {
+      "title": "Response Time P95",
+      "expr": "histogram_quantile(0.95, rate(http_response_duration_seconds_bucket[5m]))"
+    },
+    {
+      "title": "Error Rate", 
+      "expr": "rate(http_response_count{status=~\"5..\"}[5m]) / rate(http_response_count[5m])"
+    }
+  ]
+}
+```
+
+### AWS X-Ray 서비스 맵
+```text
+[Web App] → [User Service] → [Database]
+     ↓
+[External API] → [Payment Service]
+```
+
+---
+
+## 🔧 고급 설정
+
+### 성능 튜닝
+```yaml
+monikit:
+  logging:
+    # 패키지 필터링
+    allowed-packages:
+      - "com.company.core"
+      - "com.company.service"
+    
+    # 샘플링 (10% 로깅)
+    sampling-rate: 0.1
+  
+  metrics:
+    # 메트릭 수집 최적화
+    max-timer-count: 50
+    batch-size: 1000
+```
+
+### 커스텀 Hook 확장
+```java
+@Component
+public class SlackNotificationHook implements LogAddHook {
+    
+    @Override
+    public void onAdd(LogEntry logEntry) {
+        if (logEntry.getLogLevel() == LogLevel.ERROR) {
+            slackClient.sendAlert(logEntry.toString());
+        }
+    }
+}
+```
+
+---
+
+## 📚 완전한 가이드
+
+- **[마이그레이션 가이드](MIGRATION_GUIDE.md)**: OpenTelemetry 전환 방법
+- **[빠른 시작](QUICK_START.md)**: 30초 설정 가이드
+- **[패키지별 상세 문서](#-모듈-아키텍처)**: 각 모듈 심화 가이드
+
+---
+
+## 🤝 커뮤니티 & 지원
+
+- **🐛 버그 신고**: [GitHub Issues](https://github.com/ryu-qqq/moni-kit/issues)
+- **💡 기능 요청**: [GitHub Discussions](https://github.com/ryu-qqq/moni-kit/discussions)  
+- **📖 문서**: 각 패키지 README.md 참조
+- **⭐ 별점**: 프로젝트가 도움되셨다면 별점을 눌러주세요!
+
+---
+
+*"장애를 빠르게 감지하고 신속히 대응할 수 있도록 설계되었는가?" - 이 질문에 대한 MoniKit의 답입니다.*
+
+© 2024 Ryu-qqq. MoniKit Project.

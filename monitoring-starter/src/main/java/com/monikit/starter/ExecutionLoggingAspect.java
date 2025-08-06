@@ -14,6 +14,7 @@ import com.monikit.core.model.ExceptionLog;
 import com.monikit.core.model.ExecutionDetailLog;
 import com.monikit.core.context.LogEntryContextManager;
 import com.monikit.core.TraceIdProvider;
+
 /**
  * 동적 로깅 규칙(DynamicLogRule)에 기반한 실행 시간 측정 AOP.
  * <p>
@@ -29,7 +30,10 @@ import com.monikit.core.TraceIdProvider;
  *
  * @author ryu-qqq
  * @since 1.1.2
+ * @deprecated 2.0.0부터 {@link com.monikit.otel.aspect.OtelExecutionLoggingAspect}를 사용하세요.
+ *             OpenTelemetry Span 기반으로 AWS X-Ray와 완전히 통합됩니다.
  */
+@Deprecated(since = "2.0.0", forRemoval = true)
 @Aspect
 public class ExecutionLoggingAspect {
 
