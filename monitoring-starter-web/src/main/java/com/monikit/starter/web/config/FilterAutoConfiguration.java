@@ -36,7 +36,8 @@ public class FilterAutoConfiguration {
     @Bean
     @ConditionalOnProperty(name = "monikit.logging.log-enabled", havingValue = "true", matchIfMissing = true)
     public TraceIdFilter traceIdFilter(TraceIdProvider traceIdProvider) {
-        logger.info("[MoniKit] Initializing TraceIdFilter with traceEnabled={}", loggingProperties.isLogEnabled());
+        logger.info("[MoniKit] Initializing legacy TraceIdFilter with traceEnabled={}", loggingProperties.isLogEnabled());
+        logger.info("Consider upgrading to OpenTelemetry by setting 'monikit.otel.enabled=true'");
         return new TraceIdFilter(traceIdProvider);
     }
 
@@ -48,7 +49,7 @@ public class FilterAutoConfiguration {
         registrationBean.setOrder(1);
         registrationBean.addUrlPatterns("/*");
         registrationBean.setEnabled(loggingProperties.isLogEnabled());
-        logger.info("[MoniKit] TraceIdFilter active: {}", loggingProperties.isLogEnabled());
+        logger.info("[MoniKit] Legacy TraceIdFilter active: {}", loggingProperties.isLogEnabled());
         return registrationBean;
     }
 

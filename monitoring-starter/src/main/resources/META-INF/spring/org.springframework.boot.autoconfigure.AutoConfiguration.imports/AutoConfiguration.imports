@@ -1,8 +1,6 @@
 com.monikit.starter.config.ExecutionLoggingAutoConfiguration
 com.monikit.starter.config.LogEntryContextManagerConfig
-com.monikit.starter.config.Slf4jLoggerAutoConfiguration
 com.monikit.starter.config.MetricCollectorHookAutoConfiguration
 com.monikit.starter.config.MoniKitLoggingPropertiesAutoConfiguration
 com.monikit.starter.config.MoniKitMetricsPropertiesAutoConfiguration
 com.monikit.starter.config.TraceIdProviderAutoConfiguration
-

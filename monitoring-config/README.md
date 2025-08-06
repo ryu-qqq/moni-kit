@@ -1,4 +1,4 @@
-# 📦 MoniKit Config (v1.1.2)
+# ⚙️ MoniKit Configuration (v1.1.0)
 
 `monikit-config`는 **MoniKit의 핵심 설정값**을 정의하는 **순수 Java 기반 모듈**입니다.  
 Spring Boot 외부 환경에 의존하지 않으며, Starter 모듈에서 바인딩하여 사용됩니다.

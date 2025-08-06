@@ -1,4 +1,4 @@
-# MoniKit Starter WEB (v1.1.3)
+# 🌐 MoniKit Starter Web (v2.0.0)
 
 ## 📌 개요
 
@@ -6,7 +6,8 @@
 **로그 및 메트릭 수집**, **Trace ID 기반 요청 흐름 추적**, **예외 자동 로깅**을 지원하는 경량 로깅 모듈입니다.
 
 > ✅ 이 모듈은 `monikit-starter`를 내부적으로 포함하고 있어,  
-> ✅ 의존성 하나만 추가하면 JDBC 감시, 메트릭 수집, 로깅 설정까지 전부 자동으로 적용됩니다.
+> ✅ 의존성 하나만 추가하면 메트릭 수집, 로깅 설정까지 전부 자동으로 적용됩니다.  
+> 🔥 **v2.0.0 New**: OpenTelemetry 통합 시 자동으로 W3C Trace Context 표준을 따르는 TraceId 동기화를 지원합니다.
 
 ---
 
@@ -18,7 +19,7 @@
 - Micrometer 기반 응답 시간/횟수 메트릭 수집
 - MDC 기반 컨텍스트 전파 및 범위 관리
 - AOP 기반 메서드 실행 시간 로깅 (Core 포함)
-- JDBC 쿼리 감시 자동 적용 (조건부)
+- 🔥 **OpenTelemetry TraceId 동기화** (v2.0+)
 
 ---
 
@@ -31,30 +32,60 @@ monikit-starter-web
 ├── monitoring-starter
 │   ├── monitoring-core
 │   ├── monitoring-config
-│   ├── monitoring-metric
-│   ├── monitoring-jdbc
-│   └── monitoring-slf4j
+│   └── monitoring-metric
 └── web-specific filter/interceptor 설정
+```
+
+### 🚀 OpenTelemetry 확장 (선택사항)
+
+```
+monikit-starter-web + monitoring-otel
+├── monitoring-starter
+│   ├── monitoring-core
+│   ├── monitoring-config
+│   ├── monitoring-metric
+│   └── monitoring-otel    # 🔥 OpenTelemetry 통합
+└── web-specific 설정
+    ├── TraceIdFilter      # 기존 방식
+    └── OtelTraceIdFilter  # 🔥 OpenTelemetry 방식 (우선)
 ```
 
 ---
 
 ## 🧩 요청 처리 흐름
 
+### 기존 방식 (v1.x)
 ```text
 [클라이언트 요청]
     |
     ▼
-[TraceIdFilter] → Trace ID 설정 및 응답 헤더 포함
+[TraceIdFilter] → ThreadLocal TraceId 설정 및 응답 헤더 포함
     |
     ▼
-[LogContextScopeFilter] → 요청 범위 MDC 생성 및 종료
+[LogContextScopeFilter] → MDC 컨텍스트 범위 관리
     |
     ▼
-[HttpLoggingInterceptor] → 요청/응답 로깅
+[컨트롤러 실행] → AOP 기반 실행 시간 로깅
     |
     ▼
-[LogEntryContextManager] → 로그 수집 처리
+[응답 반환] → 구조화된 로그 수집 및 메트릭 기록
+```
+
+### 🔥 OpenTelemetry 방식 (v2.0+)
+```text
+[클라이언트 요청]
+    |
+    ▼
+[OtelTraceIdFilter] → OpenTelemetry Span에서 TraceId 추출 및 동기화
+    |
+    ▼
+[LogContextScopeFilter] → MDC + OpenTelemetry Context 연동
+    |
+    ▼
+[컨트롤러 실행] → OtelExecutionLoggingAspect (Span 기반)
+    |
+    ▼
+[응답 반환] → OpenTelemetry Span 완료 + AWS X-Ray 전송
 ```
 
 ---
@@ -66,8 +97,7 @@ monikit-starter-web
 | `FilterAutoConfiguration` | TraceId, Scope 필터 자동 등록 |
 | `HttpLoggingInterceptorConfiguration` | Interceptor Bean 등록 |
 | `InterceptorAutoConfiguration` | Spring WebMvc에 인터셉터 적용 |
-| (포함) `DataSourceLoggingConfig` | JDBC 감시 자동 적용 (`log-enabled`, `datasource-logging-enabled` 조건) |
-| (포함) `MoniKitMeterBinderAutoConfiguration` | Micrometer 연동 메트릭 자동 등록 |
+| `MoniKitMeterBinderAutoConfiguration` | Micrometer 연동 메트릭 자동 등록 |
 
 ---
 
@@ -76,7 +106,6 @@ monikit-starter-web
 ```yaml
 monikit.logging:
   log-enabled: true
-  datasource-logging-enabled: true
   slow-query-threshold-ms: 1000
   critical-query-threshold-ms: 5000
   allowed-packages:
