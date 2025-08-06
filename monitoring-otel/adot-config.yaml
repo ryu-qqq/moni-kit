@@ -1,0 +1,71 @@
+# AWS Distro for OpenTelemetry (ADOT) Collector 설정
+# 이 파일은 MoniKit에서 전송한 OTLP 데이터를 AWS 서비스로 전달합니다.
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317  # MoniKit이 연결할 포트
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  
+  # 🔥 Sampling 처리 (애플리케이션 레벨에서 이미 처리되므로 선택사항)
+  probabilistic_sampler:
+    sampling_percentage: 10  # 10% 샘플링 (애플리케이션 설정과 중복 가능)
+
+exporters:
+  # AWS X-Ray로 트레이스 전송
+  awsxray:
+    region: ap-northeast-2
+    no_verify_ssl: false
+    
+  # CloudWatch Logs로 로그 전송
+  awscloudwatchlogs:
+    region: ap-northeast-2
+    log_group_name: "/aws/application/monikit"
+    log_stream_name: "application-logs"
+    
+  # CloudWatch Metrics로 메트릭 전송
+  awscloudwatchmetrics:
+    region: ap-northeast-2
+    namespace: "MoniKit/Application"
+    dimension_rollup_option: "NoDimensionRollup"
+    
+  # 🔧 개발용: Jaeger로 트레이스 전송 (선택사항)
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+      
+  # 📊 개발용: Prometheus로 메트릭 전송 (선택사항)
+  prometheus:
+    endpoint: "0.0.0.0:8888"
+
+service:
+  pipelines:
+    # 트레이스 파이프라인
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [awsxray]  # 운영: AWS X-Ray만 사용
+      # exporters: [awsxray, jaeger]  # 개발: 둘 다 사용
+      
+    # 로그 파이프라인  
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [awscloudwatchlogs]
+      
+    # 메트릭 파이프라인
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [awscloudwatchmetrics]
+      # exporters: [awscloudwatchmetrics, prometheus]  # 개발: 둘 다 사용
+
+  extensions: [health_check, pprof, zpages]

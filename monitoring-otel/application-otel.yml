@@ -1,0 +1,49 @@
+# MoniKit OpenTelemetry 설정 예시
+# 이 파일을 application.yml에 복사하거나 별도 프로파일로 사용하세요.
+
+monikit:
+  # 🔥 OpenTelemetry 활성화 (핵심!)
+  otel:
+    enabled: true
+    
+    # OTLP 엔드포인트 설정 (ADOT Collector 주소)
+    traces:
+      endpoint: "http://localhost:4317"  # gRPC
+      # endpoint: "http://localhost:4318/v1/traces"  # HTTP
+    logs:
+      endpoint: "http://localhost:4317"
+    metrics:
+      endpoint: "http://localhost:4317"
+      
+    # 🎯 Sampling 설정 (중요!)
+    sampling:
+      ratio: 0.1  # 10% 샘플링 (운영 환경 권장)
+      # ratio: 1.0  # 100% 샘플링 (개발 환경)
+      
+  # 기존 설정은 그대로 유지 (호환성)
+  logging:
+    log-enabled: true  # 병렬 실행 시에만 true
+    dynamic-matching:
+      - classNamePattern: ".*Service"
+        methodNamePattern: ".*"
+        when: "#executionTime > 100"
+        thresholdMillis: 100
+        tag: "slow-service"
+      - classNamePattern: ".*Controller"
+        methodNamePattern: ".*"
+        when: "#executionTime > 200"
+        thresholdMillis: 200
+        tag: "slow-controller"
+
+# Spring Boot 설정
+spring:
+  application:
+    name: "monikit-demo-app"  # 🔥 서비스 이름 (중요!)
+
+# 로깅 설정 (OpenTelemetry 로그와 연동)
+logging:
+  level:
+    com.monikit: INFO
+    io.opentelemetry: DEBUG  # OpenTelemetry 디버깅용
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId},%X{spanId}] %logger{36} - %msg%n"

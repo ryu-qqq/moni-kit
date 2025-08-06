@@ -3,8 +3,6 @@ package com.monikit.otel.config;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
-import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
@@ -16,18 +14,21 @@ import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
+
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Duration;
-
 /**
  * OpenTelemetry 설정.
  * <p>
- * - Traces: OTLP로 전송
+ * - Traces: OTLP로 전송 (Sampling 포함)
  * - Logs: OTLP로 전송
  * - Metrics: OTLP로 전송
+ * - Collector: ADOT Collector 또는 OTLP 수신기 필요
  * </p>
  *
  * @author ryu-qqq
@@ -43,14 +44,18 @@ public class OtelExporterConfig {
     @Value("${spring.application.name:monikit-app}")
     private String serviceName;
 
-    @Value("${monikit.otel.traces.endpoint:}")
+    @Value("${monikit.otel.traces.endpoint:http://localhost:4317}")
     private String tracesEndpoint;
 
-    @Value("${monikit.otel.logs.endpoint:}")
+    @Value("${monikit.otel.logs.endpoint:http://localhost:4317}")
     private String logsEndpoint;
 
-    @Value("${monikit.otel.metrics.endpoint:}")
+    @Value("${monikit.otel.metrics.endpoint:http://localhost:4317}")
     private String metricsEndpoint;
+
+    // 🔥 Sampling Rate 설정 추가
+    @Value("${monikit.otel.sampling.ratio:0.1}")
+    private double samplingRatio;
 
     @Bean
     public OpenTelemetry openTelemetry() {
@@ -61,9 +66,13 @@ public class OtelExporterConfig {
                     SERVICE_VERSION, "2.0.0"
                 )));
 
+        // 🔥 Sampler 설정 (중요!)
+        Sampler sampler = Sampler.traceIdRatioBased(samplingRatio);
+
         // Trace Provider 설정
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
             .addSpanProcessor(BatchSpanProcessor.builder(createTraceExporter()).build())
+            .setSampler(sampler)  // 🔥 Sampler 적용
             .setResource(resource)
             .build();
 

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # 🔥 ADOT Collector (필수!)
+  adot-collector:
+    image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+    command: ["--config=/etc/otel-agent-config.yaml"]
+    environment:
+      - AWS_REGION=ap-northeast-2
+      # AWS 자격 증명 (실제 환경에서는 IAM Role 사용 권장)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ./adot-config.yaml:/etc/otel-agent-config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver (MoniKit이 연결할 포트)
+      - "4318:4318"   # OTLP HTTP receiver
+      - "8888:8888"   # Prometheus metrics endpoint
+    restart: unless-stopped
+
+  # 🔧 개발용 Jaeger (선택사항)
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    restart: unless-stopped
+
+  # 📊 개발용 Prometheus (선택사항)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: unless-stopped
