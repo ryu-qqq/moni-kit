@@ -1,25 +1,23 @@
-# 🏗️ MoniKit Core (v1.1.0)
+# MoniKit Core
 
-## 📌 개요
-MoniKit은 서버의 다양한 이벤트와 성능을 효과적으로 기록할 수 있도록 설계된 **경량 구조화 로깅 프레임워크**입니다.
+## 개요
 
-모든 로그는 `LogEntry` 인터페이스를 구현하는 구조화 객체로 표현되며,
-이는 **ELK (Elasticsearch, Logstash, Kibana)** 및 **Prometheus**와 자연스럽게 연동될 수 있도록 설계되었습니다.
+`monikit-core` 는 구조화 로그 (`LogEntry`), 컨텍스트 전파 (ThreadLocal), Hook, MetricCollector 추상화를 담는 모듈.
+Spring 같은 외부 프레임워크 의존성 없는 순수 Java 코드만 들어 있어서 어디서든 import 해 쓸 수 있다.
 
-이 문서는 `monikit-core` 패키지의 아키텍처와 구성 요소, 그리고 도메인 계층 설계 철학을 설명합니다.
-
----
-
-## 🚧 설계 철학
-
-- `monikit-core`는 **어떠한 외부 프레임워크에도 의존하지 않는 순수 자바 코드로만 구성**되어 있습니다.
-- 스프링이나 마이크로서비스 환경에서 사용할 경우, 별도의 `starter-*` 모듈을 통해 확장됩니다.
-- **컨텍스트 전파, 로그 수집, 메트릭 기록, 전송 전략**을 모두 도메인 단위로 나누어 응집도 높은 설계를 따릅니다.
-- 모든 클래스는 **어디서든 임포트해서 사용할 수 있어야 하며**, 실행 주체(Runnable)는 core에 포함되지 않습니다.
+Spring 환경에서는 `monitoring-starter` 가 이걸 가져다 자동 구성한다.
 
 ---
 
-## ✅ 디렉토리 구성 및 책임
+## 설계 원칙
+
+- 외부 프레임워크 의존성 0 (순수 Java)
+- 컨텍스트 전파 / 로그 수집 / 메트릭 기록 / 전송 전략을 도메인 단위로 분리
+- 실행 주체 (Runnable, Thread 등) 는 core 에 포함하지 않음 — starter 모듈이 담당
+
+---
+
+## 디렉토리 구성
 
 | 패키지 | 책임 |
 |--------|------|
@@ -109,12 +107,8 @@ try (LogContextScope scope = new LogContextScope(logEntryContextManager)) {
 
 ---
 
-## 모듈 연계 안내
+## 모듈 연계
 
-- `monitoring-starter-web` → Web 환경에서 AOP + 필터 기반 적용
-- `monitoring-starter-batch` → Spring Batch와 통합
-- `monitoring-metric` → Prometheus 기반 메트릭 바인딩
-
----
-
-(c) 2024 Ryu-qqq. MoniKit 프로젝트
+- `monitoring-starter` → Spring Boot 자동 구성 + AOP
+- `monitoring-starter-web` → Web 환경 필터/인터셉터
+- `monitoring-metric` → Micrometer/Prometheus 메트릭 바인딩

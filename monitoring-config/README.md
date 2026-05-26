@@ -1,7 +1,7 @@
-# ⚙️ MoniKit Configuration (v1.1.0)
+# MoniKit Configuration
 
-`monikit-config`는 **MoniKit의 핵심 설정값**을 정의하는 **순수 Java 기반 모듈**입니다.  
-Spring Boot 외부 환경에 의존하지 않으며, Starter 모듈에서 바인딩하여 사용됩니다.
+`monikit-config`는 MoniKit 의 설정 객체와 SpEL 규칙 모델을 정의하는 순수 Java 기반 모듈.
+Spring Boot 외부 환경에 의존하지 않으며, Starter 모듈에서 바인딩하여 사용된다.
 
 ---
 
@@ -88,6 +88,8 @@ monikit.metrics:
 
 ---
 
-## 💡 참고
-- 이 모듈은 설정 객체만 포함되며, **빈 등록은 하지 않습니다.**
-- `monikit-starter-*` 모듈에서 설정 클래스를 가져와 사용합니다.
+## 참고
+
+- 이 모듈은 설정 객체만 포함되며, 빈 등록은 하지 않는다.
+- `monikit-starter-*` 모듈에서 설정 클래스를 가져와 사용한다.
+- `thresholdMillis` 가 SpEL 평가 전 사전 필터 역할을 하는 이유는 [ADR-0005](../docs/adr/0005-spel-evaluation-cost-incident.md) 참고.

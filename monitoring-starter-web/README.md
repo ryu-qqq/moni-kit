@@ -1,17 +1,15 @@
-# 🌐 MoniKit Starter Web (v2.0.0)
+# MoniKit Starter Web
 
-## 📌 개요
+## 개요
 
-`monikit-starter-web`은 Spring 웹 애플리케이션에서 **HTTP 요청/응답을 자동 추적하고**,  
-**로그 및 메트릭 수집**, **Trace ID 기반 요청 흐름 추적**, **예외 자동 로깅**을 지원하는 경량 로깅 모듈입니다.
+`monikit-starter-web`은 Spring 웹 애플리케이션에서 HTTP 요청/응답을 자동 추적하고,
+로그 및 메트릭 수집, Trace ID 기반 요청 흐름 추적, 예외 자동 로깅을 지원하는 모듈입니다.
 
-> ✅ 이 모듈은 `monikit-starter`를 내부적으로 포함하고 있어,  
-> ✅ 의존성 하나만 추가하면 메트릭 수집, 로깅 설정까지 전부 자동으로 적용됩니다.  
-> 🔥 **v2.0.0 New**: OpenTelemetry 통합 시 자동으로 W3C Trace Context 표준을 따르는 TraceId 동기화를 지원합니다.
+이 모듈은 `monikit-starter`를 내부적으로 포함하고 있어, 의존성 하나만 추가하면 메트릭 수집, 로깅 설정까지 자동으로 적용됩니다.
 
 ---
 
-## ⚙️ 포함 기능
+## 포함 기능
 
 - Trace ID 기반 요청 흐름 추적 (`X-Trace-Id`)
 - 슬로우 응답 감지 및 구조화 로그 수집
@@ -19,11 +17,10 @@
 - Micrometer 기반 응답 시간/횟수 메트릭 수집
 - MDC 기반 컨텍스트 전파 및 범위 관리
 - AOP 기반 메서드 실행 시간 로깅 (Core 포함)
-- 🔥 **OpenTelemetry TraceId 동기화** (v2.0+)
 
 ---
 
-## ✅ 자동 포함 구성
+## 자동 포함 구성
 
 의존성 하나로 아래 모듈이 자동으로 포함됩니다:
 
@@ -36,25 +33,10 @@ monikit-starter-web
 └── web-specific filter/interceptor 설정
 ```
 
-### 🚀 OpenTelemetry 확장 (선택사항)
-
-```
-monikit-starter-web + monitoring-otel
-├── monitoring-starter
-│   ├── monitoring-core
-│   ├── monitoring-config
-│   ├── monitoring-metric
-│   └── monitoring-otel    # 🔥 OpenTelemetry 통합
-└── web-specific 설정
-    ├── TraceIdFilter      # 기존 방식
-    └── OtelTraceIdFilter  # 🔥 OpenTelemetry 방식 (우선)
-```
-
 ---
 
-## 🧩 요청 처리 흐름
+## 요청 처리 흐름
 
-### 기존 방식 (v1.x)
 ```text
 [클라이언트 요청]
     |
@@ -69,23 +51,6 @@ monikit-starter-web + monitoring-otel
     |
     ▼
 [응답 반환] → 구조화된 로그 수집 및 메트릭 기록
-```
-
-### 🔥 OpenTelemetry 방식 (v2.0+)
-```text
-[클라이언트 요청]
-    |
-    ▼
-[OtelTraceIdFilter] → OpenTelemetry Span에서 TraceId 추출 및 동기화
-    |
-    ▼
-[LogContextScopeFilter] → MDC + OpenTelemetry Context 연동
-    |
-    ▼
-[컨트롤러 실행] → OtelExecutionLoggingAspect (Span 기반)
-    |
-    ▼
-[응답 반환] → OpenTelemetry Span 완료 + AWS X-Ray 전송
 ```
 
 ---

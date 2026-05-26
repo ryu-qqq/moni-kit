@@ -30,10 +30,7 @@ import com.monikit.core.TraceIdProvider;
  *
  * @author ryu-qqq
  * @since 1.1.2
- * @deprecated 2.0.0부터 {@link com.monikit.otel.aspect.OtelExecutionLoggingAspect}를 사용하세요.
- *             OpenTelemetry Span 기반으로 AWS X-Ray와 완전히 통합됩니다.
  */
-@Deprecated(since = "2.0.0", forRemoval = true)
 @Aspect
 public class ExecutionLoggingAspect {
 

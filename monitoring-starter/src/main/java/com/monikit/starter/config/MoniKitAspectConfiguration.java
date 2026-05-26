@@ -3,7 +3,6 @@ package com.monikit.starter.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -20,7 +19,6 @@ public class MoniKitAspectConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "monikit.otel.enabled", havingValue = "false", matchIfMissing = true)
     @Lazy
     public ExecutionLoggingAspect executionLoggingAspect(
         LogEntryContextManager logEntryContextManager,
@@ -28,8 +26,6 @@ public class MoniKitAspectConfiguration {
         DynamicMatcher dynamicMatcher
     ) {
         logger.info("[MoniKit] ExecutionLoggingAspect Registered");
-        logger.info("[MoniKit] Consider upgrading to OpenTelemetry by setting 'monikit.otel.enabled=true'");
-
         return new ExecutionLoggingAspect(logEntryContextManager, traceIdProvider, dynamicMatcher);
     }
 }

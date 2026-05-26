@@ -1,127 +1,101 @@
-# 📊 MoniKit Metrics (v1.1.0)
+# MoniKit Metrics
 
-## 📌 개요
+Micrometer 기반 `MeterBinder` 와 `MetricCollector` 묶음.
+MoniKit 의 구조화 로그 (`LogEntry`) 를 Prometheus 가 스크랩할 수 있는 메트릭으로 변환한다.
 
-`monitoring-metric`은 **Micrometer를 기반으로 한 메트릭 수집 및 Prometheus 통합 모듈**입니다.  
-MoniKit의 구조화된 로그 엔트리(`LogEntry`)를 자동으로 메트릭으로 변환하여 **Prometheus**, **Grafana** 등의 모니터링 도구와 완벽하게 연동됩니다.
-
-> ✅ 이 모듈은 **순수 Java + Micrometer**로만 구성되어 있으며,  
-> ✅ Spring Boot 프로젝트에서는 `monikit-starter`에 자동 포함됩니다.
+Spring Boot 환경에서는 `monitoring-starter` 가 자동으로 포함한다.
 
 ---
 
-## ⚡ 핵심 기능
-
-### 🎯 자동 메트릭 수집
-- **HTTP 응답 시간**: 경로, 상태 코드별 히스토그램
-- **SQL 쿼리 성능**: 쿼리 타입, 실행 시간 분포
-- **메서드 실행 시간**: 클래스, 메서드별 성능 지표
-- **에러율 추적**: 예외 발생률, 타입별 분류
-
-### 🛡️ 메모리 보호 메커니즘
-- **MAX_TIMER_COUNT = 100**: 동적 메트릭 폭발 방지
-- **자동 정규화**: URL 파라미터 → `{id}` 패턴 변환
-- **캐시 최적화**: ConcurrentHashMap 기반 Timer 재사용
-
----
-
-## 🏗️ 아키텍처 설계
-
-### 핵심 구성요소
+## 핵심 구성요소
 
 | 컴포넌트 | 역할 |
-|----------|------|
-| `MetricCollector<T>` | 로그 엔트리별 메트릭 수집 인터페이스 |
-| `*MetricsBinder` | Micrometer MeterRegistry 연동 |
-| `*MetricsRecorder` | 비즈니스 로직 기반 메트릭 기록 |
-| `*MetricUtils` | 공통 메트릭 처리 유틸리티 |
+|---|---|
+| `MetricCollector<T>` | `LogEntry` 타입별 메트릭 수집 인터페이스 |
+| `*MetricsBinder` | Micrometer `MeterRegistry` 연동 — `Timer` / `Counter` 등록 |
+| `*MetricsRecorder` | 비즈니스 로직 기반 메트릭 기록 helper |
+| `*MetricUtils` | 공통 처리 (path 정규화, 쿼리 정규화 등) |
 
-### 메트릭 수집 플로우
+---
+
+## 메트릭 수집 흐름
 
 ```text
-[LogEntry 생성] 
+[LogEntry 생성]
     ↓
 [MetricCollector.supports() 확인]
     ↓
 [MetricCollector.record() 호출]
     ↓
-[MetricsBinder를 통해 Micrometer 연동]
+[MetricsBinder 가 MeterRegistry 에 Timer/Counter 등록]
     ↓
-[Prometheus /metrics 엔드포인트 노출]
+[Prometheus /actuator/prometheus 엔드포인트로 노출]
 ```
 
 ---
 
-## 📈 지원 메트릭 타입
+## 등록되는 메트릭
 
-### 1. HTTP 응답 메트릭
+| 이름 | 타입 | 태그 |
+|---|---|---|
+| `http_response_count` | Counter | `path`, `status` |
+| `http_response_duration` | Timer | `path`, `status` |
+| `sql_query_count` | Counter | `query_type`, `table` |
+| `sql_query_duration` | Timer | `query`, `dataSource` |
+| `execution_detail_count` | Counter | `class`, `method`, `tag` |
+| `execution_duration` | Timer | `class`, `method`, `tag` |
 
-**Counter**: `http_response_count`
-```prometheus
-http_response_count{path="/api/users",status="200"} 1250
-http_response_count{path="/api/users/{id}",status="404"} 23
-```
-
-**Timer**: `http_response_duration`
-```prometheus
-http_response_duration_seconds{path="/api/users",status="200",quantile="0.5"} 0.025
-http_response_duration_seconds{path="/api/users",status="200",quantile="0.95"} 0.150
-```
-
-### 2. SQL 쿼리 메트릭
-
-**Counter**: `sql_query_count`
-```prometheus
-sql_query_count{query_type="SELECT",table="users"} 8450
-sql_query_count{query_type="INSERT",table="orders"} 234
-```
-
-**Timer**: `sql_query_duration`
-```prometheus
-sql_query_duration_seconds{query_type="SELECT",table="users",quantile="0.99"} 0.045
-```
-
-### 3. 메서드 실행 메트릭
-
-**Counter**: `execution_detail_count`
-```prometheus
-execution_detail_count{class="UserService",method="createUser",tag="user-registration"} 156
-```
-
-**Timer**: `execution_detail_duration`
-```prometheus
-execution_detail_duration_seconds{class="UserService",method="createUser",quantile="0.95"} 0.085
-```
+Timer 는 모두 `publishPercentiles(0.5, 0.95, 0.99)` 설정.
 
 ---
 
-## 🔧 설정 및 사용법
+## 가드 (장애 1/2 의 시스템 방어 위치)
 
-### 1. 기본 활성화 설정
+3개 Binder 모두 다음 가드를 동일 패턴으로 구현하고 있다:
+
+- `MAX_TIMER_COUNT = 100` — `ConcurrentHashMap` 캡. 새 키는 거부, 기존 키는 record 계속 → [ADR-0003](../docs/adr/0003-timer-explosion-incident.md)
+- `normalizePath` — HTTP path `\d+` → `{id}` 치환 (`HttpResponseDurationMetricsBinder` 만) → [ADR-0004](../docs/adr/0004-path-cardinality-incident.md)
+
+가드를 두게 된 운영 장애 맥락은 메인 [README](../README.md#-개발-후-운영하며-겪은-장애-3건) 와 위 ADR 에 자세히.
+
+---
+
+## 설정
 
 ```yaml
 monikit:
   metrics:
-    metrics-enabled: true        # 전체 메트릭 수집 활성화
-    query-metrics-enabled: true  # SQL 메트릭 수집
-    http-metrics-enabled: true   # HTTP 메트릭 수집
+    metrics-enabled: true          # 전체 메트릭 수집
+    query-metrics-enabled: true    # SQL 메트릭
+    http-metrics-enabled: true     # HTTP 메트릭
 ```
 
-### 2. 커스텀 메트릭 수집기
+Spring Boot Actuator 의 Prometheus 엔드포인트 노출 설정도 필요:
+
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, metrics
+```
+
+---
+
+## 커스텀 MetricCollector 추가
 
 ```java
 @Component
-public class CustomMetricCollector implements MetricCollector<ExecutionDetailLog> {
-    
+public class MyExecutionMetricCollector implements MetricCollector<ExecutionDetailLog> {
+
     @Override
     public boolean supports(LogType logType) {
         return logType == LogType.EXECUTION_DETAIL;
     }
-    
+
     @Override
     public void record(ExecutionDetailLog logEntry) {
-        // 커스텀 메트릭 로직
-        Counter.builder("custom_execution_count")
+        Counter.builder("my_custom_count")
             .tag("service", logEntry.getClassName())
             .register(meterRegistry)
             .increment();
@@ -129,189 +103,20 @@ public class CustomMetricCollector implements MetricCollector<ExecutionDetailLog
 }
 ```
 
-### 3. 메트릭 노출 확인
+`@ConditionalOnMissingBean` 으로 등록된 기본 구현체를 사용자가 직접 오버라이드 가능.
+
+---
+
+## 노출 확인
 
 ```bash
-# Prometheus 메트릭 엔드포인트
-curl http://localhost:8080/actuator/prometheus | grep monikit
-
-# 특정 메트릭 확인
-curl http://localhost:8080/actuator/metrics/http_response_duration
+curl http://localhost:8080/actuator/prometheus | grep -E '(http_response|sql_query|execution_)'
 ```
 
 ---
 
-## 🎯 성능 최적화
+## 미구현 / 한계
 
-### 메트릭 폭발 방지
-
-```java
-// HttpResponseDurationMetricsBinder.java
-private static final int MAX_TIMER_COUNT = 100;
-
-public void record(String path, int statusCode, long responseTime) {
-    String normalizedPath = normalizePath(path); // /api/users/123 → /api/users/{id}
-    String key = normalizedPath + "|" + statusCode;
-    
-    // 🛡️ 메모리 보호: 100개 제한
-    if (timerCache.size() >= MAX_TIMER_COUNT && !timerCache.containsKey(key)) {
-        return; // 새로운 Timer 생성 차단
-    }
-    
-    // 기존 Timer 재사용 또는 새로 생성
-    Timer timer = timerCache.computeIfAbsent(key, this::createTimer);
-    timer.record(responseTime, TimeUnit.MILLISECONDS);
-}
-```
-
-### 경로 정규화
-
-```java
-private String normalizePath(String path) {
-    if (path == null) return "unknown";
-    return path.replaceAll("\\d+", "{id}")        // 숫자 → {id}
-               .replaceAll("[a-f0-9-]{36}", "{uuid}"); // UUID → {uuid}
-}
-```
-
----
-
-## 📊 Grafana 대시보드 예시
-
-### 1. HTTP 성능 대시보드
-
-```json
-{
-  "title": "HTTP Response Performance",
-  "panels": [
-    {
-      "title": "Response Time by Endpoint",
-      "type": "graph",
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, rate(http_response_duration_seconds_bucket[5m]))",
-          "legendFormat": "95th percentile - {{path}}"
-        }
-      ]
-    },
-    {
-      "title": "Request Rate",
-      "type": "stat",
-      "targets": [
-        {
-          "expr": "rate(http_response_count[5m])",
-          "legendFormat": "{{path}} - {{status}}"
-        }
-      ]
-    }
-  ]
-}
-```
-
-### 2. 비즈니스 메트릭 대시보드
-
-```json
-{
-  "title": "Business Metrics",
-  "panels": [
-    {
-      "title": "User Registration Rate",
-      "type": "graph",
-      "targets": [
-        {
-          "expr": "rate(execution_detail_count{tag=\"user-registration\"}[5m])",
-          "legendFormat": "Registrations/sec"
-        }
-      ]
-    }
-  ]
-}
-```
-
----
-
-## 🔍 트러블슈팅
-
-### 1. 메트릭이 노출되지 않는 경우
-
-```yaml
-# 설정 확인
-monikit.metrics.metrics-enabled: true
-
-# Actuator 엔드포인트 활성화
-management:
-  endpoints:
-    web:
-      exposure:
-        include: prometheus,metrics
-```
-
-### 2. 메트릭 수가 급격히 증가하는 경우
-
-```bash
-# 현재 메트릭 수 확인
-curl -s http://localhost:8080/actuator/prometheus | wc -l
-
-# Timer 개수 확인 (로그에서)
-grep "Timer cache size" application.log
-```
-
-**해결책**:
-- `normalizePath()` 로직 개선
-- `excluded-paths` 설정으로 불필요한 경로 제외
-
-### 3. 성능 영향 최소화
-
-```java
-// 샘플링 기반 메트릭 수집
-@ConditionalOnProperty(name = "monikit.metrics.sampling-rate", havingValue = "0.1")
-public MetricCollector samplingMetricCollector() {
-    return new SamplingMetricCollector(0.1); // 10% 샘플링
-}
-```
-
----
-
-## 🔗 연동 모듈
-
-| 모듈 | 연동 방식 |
-|------|----------|
-| `monitoring-core` | LogEntry → MetricCollector 자동 변환 |
-| `monitoring-starter` | Spring Boot AutoConfiguration |
-| `monitoring-starter-web` | HTTP 메트릭 자동 수집 |
-| **Micrometer** | MeterRegistry 기반 메트릭 등록 |
-| **Prometheus** | `/actuator/prometheus` 엔드포인트 |
-
----
-
-## 📝 모범 사례
-
-### 1. 메트릭 명명 규칙
-```java
-// ✅ 좋은 예
-Counter.builder("user_registration_count")
-    .tag("source", "web")
-    .tag("status", "success")
-    .register(meterRegistry);
-
-// ❌ 나쁜 예
-Counter.builder("count")  // 너무 일반적
-    .tag("user_id", userId)  // 고유값은 태그로 사용 금지
-    .register(meterRegistry);
-```
-
-### 2. 태그 사용법
-```java
-// ✅ 카디널리티가 낮은 태그 사용
-.tag("http_method", "GET")      // 7개 정도
-.tag("status_class", "2xx")     // 5개 정도
-.tag("service", "user-service") // 서비스 수
-
-// ❌ 카디널리티가 높은 태그 사용 금지
-.tag("user_id", userId)         // 수백만 개
-.tag("timestamp", timestamp)    // 무한대
-```
-
----
-
-(c) 2024 Ryu-qqq. MoniKit 프로젝트
+- `MAX_TIMER_COUNT` 도달을 알리는 사전 차단 지표 (`monikit_timer_cache_size` 같은 게이지) 가 아직 없음. 자세한 TODO 는 [ADR-0003](../docs/adr/0003-timer-explosion-incident.md#사전-차단-지표-todo).
+- `normalizePath` 가 UUID/slug 는 처리 못 함. 자세한 한계는 [ADR-0004](../docs/adr/0004-path-cardinality-incident.md#consequences).
+- 운영 환경에서는 이 모듈보다 [Micrometer `MeterFilter.maximumAllowableTags(...)`](https://micrometer.io/docs/concepts#_meter_filters) 같은 빌트인 API 가 더 안전한 선택.
